@@ -4,7 +4,7 @@ metadata:
   name: nfs-stringer-novaseq6k
 spec:
   capacity:
-    storage: 70Ti
+    storage: 200Ti
   accessModes:
     - ReadOnlyMany
   storageClassName: nfs-stringer-hdd
