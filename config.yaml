@@ -10,6 +10,13 @@
 #
 
 singleuser:
+  # limits and guarantees
+  memory:
+    limit: 512G
+    guarantee: 64G
+  cpu:
+    limit: 128
+    guarantee: 32
   # Defines the default image
   image:
     name: brineylab/jupyterhub-datascience
@@ -31,6 +38,8 @@ singleuser:
       description: "extends the data science environment to include GPU-enabled torch and transformers libraries, as well as some deep learning-specific JuypyterLab extensions"
       kubespawner_override:
         image: brineylab/jupyterhub-deeplearning:v0.0.7
+        extra_resource_limits:
+          nvidia.com/gpu: "8"
         lifecycle_hooks:
           postStart:
             exec:
@@ -55,9 +64,9 @@ singleuser:
           claimName: nfs-stringer-nextseq2k
     extraVolumeMounts:
       - name: nfs-stringer-novaseq6k
-        mountPath: /home/joyvan/sequencing_runs/novaseq
+        mountPath: /home/jovyan/sequencing_runs/novaseq
       - name: nfs-stringer-nextseq2k
-        mountPath: /home/joyvan/sequencing_runs/nextseq
+        mountPath: /home/jovyan/sequencing_runs/nextseq
   extraEnv:
     GRANT_SUDO: "yes"
   uid: 0
