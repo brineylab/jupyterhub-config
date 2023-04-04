@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: nfs-stringer-nextseq2k
+  namespace: jupyterhub
+spec:
+  accessModes:
+    - ReadOnlyMany
+  storageClassName: nfs-stringer-hdd
+  volumeName: nfs-stringer-nextseq2k
+  resources:
+    requests:
+      storage: 100Ti

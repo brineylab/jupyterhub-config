@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  labels:
+    kubernetes.io/metadata.name: jupyterhub
+  name: jupyterhub
+spec:
+  finalizers:
+    - kubernetes
+status:
+  phase: Active

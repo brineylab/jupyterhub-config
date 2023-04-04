@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: nfs-brineyseq-novaseq6k
+spec:
+  capacity:
+    storage: 70Ti
+  accessModes:
+    - ReadOnlyMany
+  storageClassName: nfs-brineyseq-hdd
+  nfs:
+    server: brineyseq.scripps.edu
+    path: "/volume1/A01255/runs/run_data"

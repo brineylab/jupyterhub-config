@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: nfs-stringer-novaseq6k
+  namespace: jupyterhub
+spec:
+  accessModes:
+    - ReadOnlyMany
+  storageClassName: nfs-stringer-hdd
+  volumeName: nfs-stringer-novaseq6k
+  resources:
+    requests:
+      storage: 100Ti
