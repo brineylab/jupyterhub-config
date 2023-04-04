@@ -13,7 +13,7 @@ singleuser:
   # Defines the default image
   image:
     name: brineylab/jupyterhub-datascience
-    tag: v0.0.6
+    tag: v0.0.7
   profileList:
     - display_name: "data science"
       description: "default brineylab data analysis environment, including interpreters for Python, R, and Julia"
@@ -30,7 +30,7 @@ singleuser:
     - display_name: "deep learning"
       description: "extends the data science environment to include GPU-enabled torch and transformers libraries, as well as some deep learning-specific JuypyterLab extensions"
       kubespawner_override:
-        image: brineylab/jupyterhub-deeplearning:v0.0.6
+        image: brineylab/jupyterhub-deeplearning:v0.0.7
         lifecycle_hooks:
           postStart:
             exec:
