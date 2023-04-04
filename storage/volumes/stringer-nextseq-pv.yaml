@@ -9,5 +9,5 @@ spec:
     - ReadOnlyMany
   storageClassName: nfs-stringer-hdd
   nfs:
-    server: brineyseq.scripps.edu
+    server: stringer.scripps.edu
     path: "/volume1/VH00124/runs/run_data"
