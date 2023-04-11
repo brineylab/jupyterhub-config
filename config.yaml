@@ -13,10 +13,10 @@ singleuser:
   # limits and guarantees
   memory:
     limit: 512G
-    guarantee: 64G
+    guarantee: 32G
   cpu:
     limit: 128
-    guarantee: 32
+    guarantee: 16
   # Defines the default image
   image:
     name: brineylab/jupyterhub-datascience
@@ -33,13 +33,13 @@ singleuser:
                 - "sh"
                 - "-c"
                 - >
-                  mkdir ${HOME}/codeserver;
+                  mkdir -p ${HOME}/codeserver;
     - display_name: "deep learning"
       description: "extends the data science environment to include GPU-enabled torch and transformers libraries, as well as some deep learning-specific JuypyterLab extensions"
       kubespawner_override:
         image: brineylab/jupyterhub-deeplearning:v0.0.7
         extra_resource_limits:
-          nvidia.com/gpu: "8"
+          nvidia.com/gpu: "1"
         lifecycle_hooks:
           postStart:
             exec:
@@ -47,11 +47,11 @@ singleuser:
                 - "sh"
                 - "-c"
                 - >
-                  mkdir ${HOME}/codeserver;
+                  mkdir -p ${HOME}/codeserver;
   storage:
     # this defines the storageclass used for dynamic notebook PVCs
-    dynamic:
-      storageClass: nfs-marlo-ssd
+    # dynamic:
+    #   storageClass: nfs-marlo-ssd
 
     # this defines the default capacity of the PVC for each notebook server
     # capacity: 50Gi
