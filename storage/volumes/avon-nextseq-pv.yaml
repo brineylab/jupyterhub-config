@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: nfs-avon-nextseq2k
+spec:
+  capacity:
+    storage: 200Ti
+  accessModes:
+    - ReadOnlyMany
+  storageClassName: nfs-avon-hdd
+  nfs:
+    server: avon.scripps.edu
+    path: "/volume1/VH00124/runs/run_data"

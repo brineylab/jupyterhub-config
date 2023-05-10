@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: nfs-avon-novaseq6k
+  namespace: jupyterhub
+spec:
+  accessModes:
+    - ReadOnlyMany
+  storageClassName: nfs-avon-hdd
+  volumeName: nfs-avon-novaseq6k
+  resources:
+    requests:
+      storage: 100Ti
