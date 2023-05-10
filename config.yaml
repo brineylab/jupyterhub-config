@@ -62,6 +62,9 @@ singleuser:
       - name: nfs-avon-nextseq2k
         persistentVolumeClaim:
           claimName: nfs-avon-nextseq2k
+      - name: nfs-stringer-shared
+        persistentVolumeClaim:
+          claimName: nfs-stringer-shared
     extraVolumeMounts:
       - name: nfs-avon-novaseq6k
         mountPath: /home/jovyan/sequencing_runs/novaseq
