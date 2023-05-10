@@ -13,10 +13,10 @@ singleuser:
   # limits and guarantees
   memory:
     limit: 512G
-    guarantee: 8G
+    guarantee: 1G
   cpu:
     limit: 128
-    guarantee: 2
+    guarantee: 1
   # Defines the default image
   image:
     name: brineylab/jupyterhub-datascience
@@ -51,7 +51,7 @@ singleuser:
   storage:
     # this defines the storageclass used for dynamic notebook PVCs
     # dynamic:
-    #   storageClass: nfs-marlo-ssd
+    storageClass: nfs-marlo-ssd
 
     # this defines the default capacity of the PVC for each notebook server
     # capacity: 50Gi
