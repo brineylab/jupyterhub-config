@@ -54,7 +54,7 @@ singleuser:
     # storageClass: nfs-marlo-ssd
 
     # this defines the default capacity of the PVC for each notebook server
-    # capacity: 50Gi
+    capacity: 250Gi
     extraVolumes:
       - name: nfs-avon-novaseq6k
         persistentVolumeClaim:
