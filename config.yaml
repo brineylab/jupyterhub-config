@@ -50,18 +50,25 @@ singleuser:
                   mkdir -p ${HOME}/codeserver;
   storage:
     # this defines the storageclass used for dynamic notebook PVCs
-    # dynamic:
-    # storageClass: nfs-marlo-ssd
+    dynamic:
+      # prod cluster
+      # storageClass: nfs-marlo-ssd
+      # capacity: 2000Gi
 
-    # this defines the default capacity of the PVC for each notebook server
-    capacity: 250Gi
+      # dev cluster
+      storageClass: nfs-wallace-ssd
+      capacity: 50Gi
+
     extraVolumes:
+      # sequencing data: NovaSeq
       - name: nfs-avon-novaseq6k
         persistentVolumeClaim:
           claimName: nfs-avon-novaseq6k
+      # sequencing data: NextSeq
       - name: nfs-avon-nextseq2k
         persistentVolumeClaim:
           claimName: nfs-avon-nextseq2k
+      # shared data
       - name: nfs-stringer-shared
         persistentVolumeClaim:
           claimName: nfs-stringer-shared
