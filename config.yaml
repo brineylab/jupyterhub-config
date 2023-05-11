@@ -49,15 +49,11 @@ singleuser:
                 - >
                   mkdir -p ${HOME}/codeserver;
   storage:
-    # this defines the storageclass used for dynamic notebook PVCs
     dynamic:
-      # prod cluster
       # storageClass: nfs-marlo-ssd
-      # capacity: 2000Gi
-
-      # dev cluster
       storageClass: nfs-wallace-ssd
-      capacity: 50Gi
+    capacity: 50Gi
+    # capacity: 2000Gi
 
     extraVolumes:
       # sequencing data: NovaSeq
