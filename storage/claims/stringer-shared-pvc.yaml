@@ -5,9 +5,9 @@ metadata:
   namespace: jupyterhub
 spec:
   accessModes:
-    - ReadOnlyMany
+    - ReadWriteMany
   storageClassName: nfs-stringer-hdd
   volumeName: nfs-stringer-shared
   resources:
     requests:
-      storage: 100Ti
+      storage: 200Ti

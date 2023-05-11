@@ -1,10 +1,25 @@
+# marlo-sc.yaml
+---
 apiVersion: storage.k8s.io/v1
 kind: StorageClass
 metadata:
   name: nfs-marlo-ssd
+provisioner: nfs.csi.k8s.io
 parameters:
-  archiveOnDelete: "true"
-provisioner: cluster.local/nfs-subdir-external-provisioner
+  server: marlo.scripps.edu
+  share: /volume1/jupyterhub
 reclaimPolicy: Delete
 volumeBindingMode: Immediate
-allowVolumeExpansion: true
+mountOptions:
+  - hard
+  - nfsvers=4.1
+# apiVersion: storage.k8s.io/v1
+# kind: StorageClass
+# metadata:
+#   name: nfs-marlo-ssd
+# parameters:
+#   archiveOnDelete: "true"
+# provisioner: cluster.local/nfs-subdir-external-provisioner
+# reclaimPolicy: Delete
+# volumeBindingMode: Immediate
+# allowVolumeExpansion: true
