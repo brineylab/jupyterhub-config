@@ -50,10 +50,10 @@ singleuser:
                   mkdir -p ${HOME}/codeserver;
   storage:
     dynamic:
-      # storageClass: nfs-marlo-ssd
-      storageClass: nfs-wallace-ssd
-    capacity: 50Gi
-    # capacity: 2000Gi
+      storageClass: nfs-marlo-ssd
+      # storageClass: nfs-wallace-ssd
+    # capacity: 50Gi
+    capacity: 2000Gi
 
     extraVolumes:
       # sequencing data: NovaSeq
@@ -92,7 +92,7 @@ hub:
         - sarah
         - alina
         - benjamin
-      admin_access: true
+      # admin_access: true
     JupyterHub:
       authenticator_class: "nativeauthenticator.NativeAuthenticator"
       allow_named_servers: true
