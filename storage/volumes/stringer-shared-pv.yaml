@@ -6,7 +6,7 @@ spec:
   capacity:
     storage: 200Ti
   accessModes:
-    - ReadOnlyMany
+    - ReadWriteMany
   storageClassName: nfs-stringer-hdd
   nfs:
     server: stringer.scripps.edu
