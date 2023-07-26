@@ -170,14 +170,14 @@ hub:
                   "morgan",
                   "pragati",
                 ],
-              "bryan" : [ "bryan" ],
-              "jonathan" : [ "jonathan", "bryan"],
-              "benjamin" : [ "benjamin", "bryan"],
-              "terrence" : [ "terrence", "bryan"],
-              "sarah" : [ "sarah", "bryan"],
-              "sean" : [ "sean", "bryan"],
-              "morgan" : [ "morgan", "bryan"],
-              "pragati" : [ "pragati", "bryan"],
+              # "bryan" : [ "bryan" ],
+              # "jonathan" : [ "jonathan", "bryan"],
+              # "benjamin" : [ "benjamin", "bryan"],
+              # "terrence" : [ "terrence", "bryan"],
+              # "sarah" : [ "sarah", "bryan"],
+              # "sean" : [ "sean", "bryan"],
+              # "morgan" : [ "morgan", "bryan"],
+              # "pragati" : [ "pragati", "bryan"],
             }
 
           try:
@@ -203,51 +203,53 @@ hub:
               pass
       c.KubeSpawner.pre_spawn_hook = user_pvcs
 
-      # from kubernetes import client
-      # from kubespawner.utils import get_k8s_model
-      # from kubernetes.client.models import ( V1Volume, V1VolumeMount )
-      # import json
-      # def modify_pod_hook(spawner, pod):
-      #     shared_vols = {
-      #         "shared" : [
-      #             "bryan",
-      #             "jonathan",
-      #             "benjamin",
-      #             "terrence",
-      #             "sarah",
-      #             "sean",
-      #             "morgan",
-      #             "pragati",
-      #           ],
-      #         "bryan" : [ "bryan" ],
-      #         "jonathan" : [ "jonathan", "bryan"],
-      #         "benjamin" : [ "benjamin", "bryan"],
-      #         "terrence" : [ "terrence", "bryan"],
-      #         "sarah" : [ "sarah", "bryan"],
-      #         "sean" : [ "sean", "bryan"],
-      #         "morgan" : [ "morgan", "bryan"],
-      #         "pragati" : [ "pragati", "bryan"],
-      #       }
-      #     try:
-      #         user=spawner.user.name
-      #         for mnt in shared_vols:
-      #             if user in shared_vols[mnt]:
-      #               spawner.log.info("Adding volume for user " + user + " and mount " + mnt)
-      #               claim_name = "nfs-propjoe-shared" if mnt == "shared" else "brineylab-personal-pvc-"" + mnt
-      #               pod.spec.volumes.append(
-      #                 get_k8s_model(V1Volume,
-      #                 { "name" : mnt,
-      #                   "persistentVolumeClaim": { "claimName" : claim_name }
-      #                 }
-      #                 )
-      #               )
-      #               # Note implicitly only 1 container...
-      #               pod.spec.containers[0].volume_mounts.append(
-      #                 get_k8s_model(V1VolumeMount,
-      #                     { "name" : mnt, "mountPath" : "/home/jovyan/" + mnt } )
-      #               )
-      #     except Exception as e:
-      #         spawner.log.info("Exception in brineylab-mounts" + str(e))
-      #         pass
-      #     return pod
-      # c.KubeSpawner.modify_pod_hook = modify_pod_hook
+    # # OLD AND UNUSED
+    # # --------------
+    # from kubernetes import client
+    # from kubespawner.utils import get_k8s_model
+    # from kubernetes.client.models import ( V1Volume, V1VolumeMount )
+    # import json
+    # def modify_pod_hook(spawner, pod):
+    #     shared_vols = {
+    #         "shared" : [
+    #             "bryan",
+    #             "jonathan",
+    #             "benjamin",
+    #             "terrence",
+    #             "sarah",
+    #             "sean",
+    #             "morgan",
+    #             "pragati",
+    #           ],
+    #         "bryan" : [ "bryan" ],
+    #         "jonathan" : [ "jonathan", "bryan"],
+    #         "benjamin" : [ "benjamin", "bryan"],
+    #         "terrence" : [ "terrence", "bryan"],
+    #         "sarah" : [ "sarah", "bryan"],
+    #         "sean" : [ "sean", "bryan"],
+    #         "morgan" : [ "morgan", "bryan"],
+    #         "pragati" : [ "pragati", "bryan"],
+    #       }
+    #     try:
+    #         user=spawner.user.name
+    #         for mnt in shared_vols:
+    #             if user in shared_vols[mnt]:
+    #               spawner.log.info("Adding volume for user " + user + " and mount " + mnt)
+    #               claim_name = "nfs-propjoe-shared" if mnt == "shared" else "brineylab-personal-pvc-"" + mnt
+    #               pod.spec.volumes.append(
+    #                 get_k8s_model(V1Volume,
+    #                 { "name" : mnt,
+    #                   "persistentVolumeClaim": { "claimName" : claim_name }
+    #                 }
+    #                 )
+    #               )
+    #               # Note implicitly only 1 container...
+    #               pod.spec.containers[0].volume_mounts.append(
+    #                 get_k8s_model(V1VolumeMount,
+    #                     { "name" : mnt, "mountPath" : "/home/jovyan/" + mnt } )
+    #               )
+    #     except Exception as e:
+    #         spawner.log.info("Exception in brineylab-mounts" + str(e))
+    #         pass
+    #     return pod
+    # c.KubeSpawner.modify_pod_hook = modify_pod_hook
