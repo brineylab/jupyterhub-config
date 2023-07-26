@@ -33,7 +33,7 @@ singleuser:
   # default image
   image:
     name: brineylab/jupyterhub-datascience
-    tag: v0.1.4
+    tag: v0.1.6
   # alternate profiles (images)
   profileList:
     - display_name: "data science"
@@ -170,6 +170,8 @@ hub:
                   "morgan",
                   "pragati",
                 ],
+
+              # # PERSONAL VOLUMES (not currently used)
               # "bryan" : [ "bryan" ],
               # "jonathan" : [ "jonathan", "bryan"],
               # "benjamin" : [ "benjamin", "bryan"],
