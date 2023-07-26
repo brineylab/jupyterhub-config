@@ -1,0 +1,111 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: brineylab-personal-pvc-bryan
+  namespace: jupyterhub
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: nfs-propjoe-hdd
+  volumeName: nfs-propjoe-bryan
+  resources:
+    requests:
+      storage: 900Ti
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: brineylab-personal-pvc-jonathan
+  namespace: jupyterhub
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: nfs-propjoe-hdd
+  volumeName: nfs-propjoe-jonathan
+  resources:
+    requests:
+      storage: 900Ti
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: brineylab-personal-pvc-pragati
+  namespace: jupyterhub
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: nfs-propjoe-hdd
+  volumeName: nfs-propjoe-pragati
+  resources:
+    requests:
+      storage: 900Ti
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: brineylab-personal-pvc-terrence
+  namespace: jupyterhub
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: nfs-propjoe-hdd
+  volumeName: nfs-propjoe-terrence
+  resources:
+    requests:
+      storage: 900Ti
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: brineylab-personal-pvc-sarah
+  namespace: jupyterhub
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: nfs-propjoe-hdd
+  volumeName: nfs-propjoe-sarah
+  resources:
+    requests:
+      storage: 900Ti
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: brineylab-personal-pvc-sean
+  namespace: jupyterhub
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: nfs-propjoe-hdd
+  volumeName: nfs-propjoe-sean
+  resources:
+    requests:
+      storage: 900Ti
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: brineylab-personal-pvc-morgan
+  namespace: jupyterhub
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: nfs-propjoe-hdd
+  volumeName: nfs-propjoe-morgan
+  resources:
+    requests:
+      storage: 900Ti
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: brineylab-personal-pvc-benjamin
+  namespace: jupyterhub
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: nfs-propjoe-hdd
+  volumeName: nfs-propjoe-benjamin
+  resources:
+    requests:
+      storage: 900Ti
