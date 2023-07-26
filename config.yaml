@@ -25,6 +25,11 @@ singleuser:
   cpu:
     limit: 128
     guarantee: 1
+  # grant sudo and set user/group ID
+  extraEnv:
+    GRANT_SUDO: "yes"
+  uid: 0
+  fsGid: 0
   # default image
   image:
     name: brineylab/jupyterhub-datascience
@@ -91,10 +96,6 @@ singleuser:
         mountPath: /home/jovyan/shared
       # - name: nfs-stringer-shared
       #   mountPath: /home/jovyan/shared
-  extraEnv:
-    GRANT_SUDO: "yes"
-  uid: 0
-  fsGid: 0
 
 hub:
   containerSecurityContext:
@@ -109,7 +110,8 @@ hub:
         - pragati
         - terrence
         - sarah
-        - alina
+        - sean
+        - morgan
         - benjamin
       # admin_access: true
     JupyterHub:
@@ -124,7 +126,8 @@ hub:
               "pragati",
               "terrence",
               "sarah",
-              "alina",
+              "sean",
+              "morgan",
               "benjamin",
             ],
           "external": ["bryan"],
