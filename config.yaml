@@ -185,7 +185,7 @@ hub:
               for mnt in shared_vols:
                   if user in shared_vols[mnt]:
                       spawner.log.info("Adding volume for user " + user + " and mount " + mnt)
-                      claim_name = "nfs-propjoe-shared" if mnt == "shared" else "brineylab-personal-pvc-"" + mnt
+                      claim_name = "nfs-propjoe-shared" if mnt == "shared" else "brineylab-personal-pvc-" + mnt
                       spawner.volumes.extend([
                           {
                               "name": mnt,
