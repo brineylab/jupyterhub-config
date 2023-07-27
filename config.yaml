@@ -14,6 +14,7 @@ cull:
   enabled: false
 
 singleuser:
+  defaultUrl: "/lab"
   # networking
   # for some reason, notebook server spawning fails if networkPolicy is set to true
   networkPolicy:
