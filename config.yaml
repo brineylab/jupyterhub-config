@@ -36,7 +36,7 @@ singleuser:
   # default image
   image:
     name: brineylab/jupyterhub-datascience
-    tag: v0.1.8
+    tag: v0.1.10
   # alternate profiles (images)
   profileList:
     - display_name: "data science"
