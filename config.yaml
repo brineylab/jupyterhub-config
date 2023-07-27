@@ -156,7 +156,7 @@ hub:
       c.KubeSpawner.args = ["--allow-root", "--collaborative=True"]
       import os, nativeauthenticator
       c.JupyterHub.template_paths = [f"{os.path.dirname(nativeauthenticator.__file__)}/templates/"]
-      c.Spawner.default_url = "/lab"
+      c.KubeSpawner.default_url = "/user/{username}/lab"
 
     # 01-mount-user-volumes: |
     #   def user_pvcs(spawner):
