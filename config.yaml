@@ -14,6 +14,7 @@ cull:
   enabled: false
 
 singleuser:
+  cmd: null
   defaultUrl: "/lab"
   # networking
   # for some reason, notebook server spawning fails if networkPolicy is set to true
@@ -26,7 +27,7 @@ singleuser:
   cpu:
     limit: 128
     guarantee: 1
-  # grant sudo and set user/group ID
+  # set extra environmental vars
   extraEnv:
     GRANT_SUDO: "yes"
     JUPYTERHUB_SINGLEUSER_APP: "jupyter_server.serverapp.ServerApp"
