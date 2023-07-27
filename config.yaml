@@ -66,10 +66,7 @@ singleuser:
   storage:
     dynamic:
       storageClass: nfs-marlo-ssd
-    capacity:
-      250Gi
-      # storageClass: nfs-wallace-ssd
-    # capacity: 50Gi
+    capacity: 250Gi
 
     extraVolumes:
       # sequencing data: NovaSeq
@@ -81,9 +78,9 @@ singleuser:
         persistentVolumeClaim:
           claimName: nfs-avon-nextseq2k
       # shared data
-      # - name: nfs-propjoe-shared
-      #   persistentVolumeClaim:
-      #     claimName: nfs-propjoe-shared
+      - name: nfs-propjoe-shared
+        persistentVolumeClaim:
+          claimName: nfs-propjoe-shared
       # - name: nfs-stringer-shared
       #   persistentVolumeClaim:
       #     claimName: nfs-stringer-shared
@@ -92,8 +89,8 @@ singleuser:
         mountPath: /home/jovyan/sequencing_runs/novaseq
       - name: nfs-avon-nextseq2k
         mountPath: /home/jovyan/sequencing_runs/nextseq
-      # - name: nfs-propjoe-shared
-      #   mountPath: /home/jovyan/shared
+      - name: nfs-propjoe-shared
+        mountPath: /home/jovyan/shared
       # - name: nfs-stringer-shared
       #   mountPath: /home/jovyan/shared
 
@@ -157,53 +154,53 @@ hub:
       import os, nativeauthenticator
       c.JupyterHub.template_paths = [f"{os.path.dirname(nativeauthenticator.__file__)}/templates/"]
 
-    01-mount-user-volumes: |
-      def user_pvcs(spawner):
-          shared_vols = {
-              "shared" : [
-                  "bryan",
-                  "jonathan",
-                  "benjamin",
-                  "terrence",
-                  "sarah",
-                  "sean",
-                  "morgan",
-                  "pragati",
-                ],
+    # 01-mount-user-volumes: |
+    #   def user_pvcs(spawner):
+    #       shared_vols = {
+    #           "shared" : [
+    #               "bryan",
+    #               "jonathan",
+    #               "benjamin",
+    #               "terrence",
+    #               "sarah",
+    #               "sean",
+    #               "morgan",
+    #               "pragati",
+    #             ],
 
-              # # PERSONAL VOLUMES (not currently used)
-              # "bryan" : [ "bryan" ],
-              # "jonathan" : [ "jonathan", "bryan"],
-              # "benjamin" : [ "benjamin", "bryan"],
-              # "terrence" : [ "terrence", "bryan"],
-              # "sarah" : [ "sarah", "bryan"],
-              # "sean" : [ "sean", "bryan"],
-              # "morgan" : [ "morgan", "bryan"],
-              # "pragati" : [ "pragati", "bryan"],
-            }
+    #           # # PERSONAL VOLUMES (not currently used)
+    #           # "bryan" : [ "bryan" ],
+    #           # "jonathan" : [ "jonathan", "bryan"],
+    #           # "benjamin" : [ "benjamin", "bryan"],
+    #           # "terrence" : [ "terrence", "bryan"],
+    #           # "sarah" : [ "sarah", "bryan"],
+    #           # "sean" : [ "sean", "bryan"],
+    #           # "morgan" : [ "morgan", "bryan"],
+    #           # "pragati" : [ "pragati", "bryan"],
+    #         }
 
-          try:
-              user=spawner.user.name
-              for mnt in shared_vols:
-                  if user in shared_vols[mnt]:
-                      spawner.log.info("Adding volume for user " + user + " and mount " + mnt)
-                      claim_name = "nfs-propjoe-shared" if mnt == "shared" else "brineylab-personal-pvc-" + mnt
-                      spawner.volumes.extend([
-                          {
-                              "name": mnt,
-                              "persistentVolumeClaim": {"claimName": claim_name},
-                          }
-                      ])
-                      spawner.volume_mounts.extend([
-                          {
-                              "mountPath": "/home/jovyan/" + mnt,
-                              "name": mnt,
-                          }
-                      ])
-          except Exception as e:
-              spawner.log.info("Exception in brineylab-mounts" + str(e))
-              pass
-      c.KubeSpawner.pre_spawn_hook = user_pvcs
+    #       try:
+    #           user=spawner.user.name
+    #           for mnt in shared_vols:
+    #               if user in shared_vols[mnt]:
+    #                   spawner.log.info("Adding volume for user " + user + " and mount " + mnt)
+    #                   claim_name = "nfs-propjoe-shared" if mnt == "shared" else "brineylab-personal-pvc-" + mnt
+    #                   spawner.volumes.extend([
+    #                       {
+    #                           "name": mnt,
+    #                           "persistentVolumeClaim": {"claimName": claim_name},
+    #                       }
+    #                   ])
+    #                   spawner.volume_mounts.extend([
+    #                       {
+    #                           "mountPath": "/home/jovyan/" + mnt,
+    #                           "name": mnt,
+    #                       }
+    #                   ])
+    #       except Exception as e:
+    #           spawner.log.info("Exception in brineylab-mounts" + str(e))
+    #           pass
+    #   c.KubeSpawner.pre_spawn_hook = user_pvcs
 
     # # OLD AND UNUSED
     # # --------------
