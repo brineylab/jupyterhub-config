@@ -30,7 +30,8 @@ singleuser:
   # set extra environmental vars
   extraEnv:
     GRANT_SUDO: "yes"
-    JUPYTERHUB_SINGLEUSER_APP: "jupyter_server.serverapp.ServerApp"
+    DOCKER_STACKS_JUPYTER_CMD: "lab"
+    # JUPYTERHUB_SINGLEUSER_APP: "jupyter_server.serverapp.ServerApp"
   uid: 0
   fsGid: 0
   # default image
