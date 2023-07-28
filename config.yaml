@@ -81,9 +81,9 @@ singleuser:
         persistentVolumeClaim:
           claimName: nfs-avon-nextseq2k
       # shared data
-      - name: nfs-propjoe-shared
-        persistentVolumeClaim:
-          claimName: nfs-propjoe-shared
+      # - name: nfs-propjoe-shared
+      #   persistentVolumeClaim:
+      #     claimName: nfs-propjoe-shared
       # - name: nfs-stringer-shared
       #   persistentVolumeClaim:
       #     claimName: nfs-stringer-shared
@@ -92,8 +92,8 @@ singleuser:
         mountPath: /home/jovyan/sequencing_runs/novaseq
       - name: nfs-avon-nextseq2k
         mountPath: /home/jovyan/sequencing_runs/nextseq
-      - name: nfs-propjoe-shared
-        mountPath: /home/jovyan/shared
+      # - name: nfs-propjoe-shared
+      #   mountPath: /home/jovyan/shared
       # - name: nfs-stringer-shared
       #   mountPath: /home/jovyan/shared
 
