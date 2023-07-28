@@ -30,7 +30,7 @@ singleuser:
   # set extra environmental vars
   extraEnv:
     GRANT_SUDO: "yes"
-    DOCKER_STACKS_JUPYTER_CMD: "lab"
+    DOCKER_STACKS_JUPYTER_CMD: lab
     # JUPYTERHUB_SINGLEUSER_APP: "jupyter_server.serverapp.ServerApp"
   uid: 0
   fsGid: 0
@@ -154,7 +154,8 @@ hub:
   extraConfig:
     00-first-config: |
       c.KubeSpawner.allow_privilege_escalation = True
-      c.KubeSpawner.args = ["--allow-root", "--collaborative=True"]
+      # c.KubeSpawner.args = ["--allow-root", "--collaborative=True"]
+      c.KubeSpawner.args = ["--collaborative"]
       import os, nativeauthenticator
       c.JupyterHub.template_paths = [f"{os.path.dirname(nativeauthenticator.__file__)}/templates/"]
 
