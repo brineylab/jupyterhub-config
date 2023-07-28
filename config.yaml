@@ -15,7 +15,7 @@ cull:
 
 singleuser:
   # cmd: null
-  # defaultUrl: "/lab"
+  defaultUrl: /lab
   # networking
   # for some reason, notebook server spawning fails if networkPolicy is set to true
   networkPolicy:
@@ -156,55 +156,54 @@ hub:
       c.KubeSpawner.args = ["--allow-root", "--collaborative=True"]
       import os, nativeauthenticator
       c.JupyterHub.template_paths = [f"{os.path.dirname(nativeauthenticator.__file__)}/templates/"]
-      c.KubeSpawner.default_url = "/user/{username}/lab"
 
-    # 01-mount-user-volumes: |
-    #   def user_pvcs(spawner):
-    #       shared_vols = {
-    #           "shared" : [
-    #               "bryan",
-    #               "jonathan",
-    #               "benjamin",
-    #               "terrence",
-    #               "sarah",
-    #               "sean",
-    #               "morgan",
-    #               "pragati",
-    #             ],
+    01-mount-user-volumes: |
+      def user_pvcs(spawner):
+          shared_vols = {
+              "shared" : [
+                  "bryan",
+                  "jonathan",
+                  "benjamin",
+                  "terrence",
+                  "sarah",
+                  "sean",
+                  "morgan",
+                  "pragati",
+                ],
 
-    #           # # PERSONAL VOLUMES (not currently used)
-    #           # "bryan" : [ "bryan" ],
-    #           # "jonathan" : [ "jonathan", "bryan"],
-    #           # "benjamin" : [ "benjamin", "bryan"],
-    #           # "terrence" : [ "terrence", "bryan"],
-    #           # "sarah" : [ "sarah", "bryan"],
-    #           # "sean" : [ "sean", "bryan"],
-    #           # "morgan" : [ "morgan", "bryan"],
-    #           # "pragati" : [ "pragati", "bryan"],
-    #         }
+              # # PERSONAL VOLUMES (not currently used)
+              # "bryan" : [ "bryan" ],
+              # "jonathan" : [ "jonathan", "bryan"],
+              # "benjamin" : [ "benjamin", "bryan"],
+              # "terrence" : [ "terrence", "bryan"],
+              # "sarah" : [ "sarah", "bryan"],
+              # "sean" : [ "sean", "bryan"],
+              # "morgan" : [ "morgan", "bryan"],
+              # "pragati" : [ "pragati", "bryan"],
+            }
 
-    #       try:
-    #           user=spawner.user.name
-    #           for mnt in shared_vols:
-    #               if user in shared_vols[mnt]:
-    #                   spawner.log.info("Adding volume for user " + user + " and mount " + mnt)
-    #                   claim_name = "nfs-propjoe-shared" if mnt == "shared" else "brineylab-personal-pvc-" + mnt
-    #                   spawner.volumes.extend([
-    #                       {
-    #                           "name": mnt,
-    #                           "persistentVolumeClaim": {"claimName": claim_name},
-    #                       }
-    #                   ])
-    #                   spawner.volume_mounts.extend([
-    #                       {
-    #                           "mountPath": "/home/jovyan/" + mnt,
-    #                           "name": mnt,
-    #                       }
-    #                   ])
-    #       except Exception as e:
-    #           spawner.log.info("Exception in brineylab-mounts" + str(e))
-    #           pass
-    #   c.KubeSpawner.pre_spawn_hook = user_pvcs
+          try:
+              user=spawner.user.name
+              for mnt in shared_vols:
+                  if user in shared_vols[mnt]:
+                      spawner.log.info("Adding volume for user " + user + " and mount " + mnt)
+                      claim_name = "nfs-propjoe-shared" if mnt == "shared" else "brineylab-personal-pvc-" + mnt
+                      spawner.volumes.extend([
+                          {
+                              "name": mnt,
+                              "persistentVolumeClaim": {"claimName": claim_name},
+                          }
+                      ])
+                      spawner.volume_mounts.extend([
+                          {
+                              "mountPath": "/home/jovyan/" + mnt,
+                              "name": mnt,
+                          }
+                      ])
+          except Exception as e:
+              spawner.log.info("Exception in brineylab-mounts" + str(e))
+              pass
+      c.KubeSpawner.pre_spawn_hook = user_pvcs
 
     # # OLD AND UNUSED
     # # --------------
