@@ -169,8 +169,7 @@ hub:
 
       # old format for usergroups (JupyterHub < 3.2)
       {
-        "brineylab":
-          [
+        "brineylab": [
             "bryan",
             "jonathan",
             "pragati",
