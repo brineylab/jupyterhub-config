@@ -14,8 +14,8 @@ cull:
   enabled: false
 
 singleuser:
-  cmd: null
-  defaultUrl: /lab
+  # cmd: null
+  # defaultUrl: /lab
   # networking
   # for some reason, notebook server spawning fails if networkPolicy is set to true
   networkPolicy:
@@ -166,7 +166,12 @@ hub:
   extraConfig:
     00-first-config: |
       c.KubeSpawner.allow_privilege_escalation = True
-      c.KubeSpawner.args = ["--allow-root", "--collaborative=True"]
+      # c.Spawner.notebook_dir = ".."
+      # c.Spawner.default_url = "/lab"
+      # c.KubeSpawner.default_url = "/lab"
+      # c.KubeSpawner.working_dir = ".."
+      c.KubeSpawner.args = ["--SingleUserNotebookApp.default_url=/lab" "--allow-root"]
+      # c.KubeSpawner.args = ["--allow-root", "--collaborative=True"]
       # c.KubeSpawner.args = ["--collaborative"]
       import os, nativeauthenticator
       c.JupyterHub.template_paths = [f"{os.path.dirname(nativeauthenticator.__file__)}/templates/"]
