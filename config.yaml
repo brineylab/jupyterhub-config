@@ -15,7 +15,7 @@ cull:
 
 singleuser:
   # cmd: null
-  defaultUrl: /lab
+  # defaultUrl: /lab
   # networking
   # for some reason, notebook server spawning fails if networkPolicy is set to true
   networkPolicy:
@@ -30,7 +30,7 @@ singleuser:
   # set extra environmental vars
   extraEnv:
     GRANT_SUDO: "yes"
-    DOCKER_STACKS_JUPYTER_CMD: lab
+    # DOCKER_STACKS_JUPYTER_CMD: lab
     # JUPYTERHUB_SINGLEUSER_APP: "jupyter_server.serverapp.ServerApp"
   uid: 0
   fsGid: 0
@@ -56,16 +56,16 @@ singleuser:
       description: "extends the data science environment to include GPU-enabled torch and 🤗 libraries, as well as some deep learning-specific JupyterLab extensions"
       kubespawner_override:
         image: brineylab/jupyterhub-deeplearning:v0.1.8
-        # extra_resource_limits:
-        #   nvidia.com/gpu: "1"
-        # lifecycle_hooks:
-        #   postStart:
-        #     exec:
-        #       command:
-        #         - "sh"
-        #         - "-c"
-        #         - >
-        #           mkdir -p ${HOME}/codeserver;
+        extra_resource_limits:
+          nvidia.com/gpu: "1"
+        lifecycle_hooks:
+          postStart:
+            exec:
+              command:
+                - "sh"
+                - "-c"
+                - >
+                  mkdir -p ${HOME}/codeserver;
     - display_name: "vanilla Jupyter datascience notebook"
       description: "Jupyter notebook server (from Jupyter stacks)"
       kubespawner_override:
@@ -166,7 +166,7 @@ hub:
   extraConfig:
     00-first-config: |
       c.KubeSpawner.allow_privilege_escalation = True
-      # c.KubeSpawner.args = ["--allow-root", "--collaborative=True"]
+      c.KubeSpawner.args = ["--allow-root", "--collaborative=True"]
       # c.KubeSpawner.args = ["--collaborative"]
       import os, nativeauthenticator
       c.JupyterHub.template_paths = [f"{os.path.dirname(nativeauthenticator.__file__)}/templates/"]
