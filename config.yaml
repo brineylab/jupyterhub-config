@@ -149,39 +149,39 @@ hub:
       authenticator_class: "nativeauthenticator.NativeAuthenticator"
       # allow_named_servers: true
       load_groups:
-        # {
-        #   "brineylab":
-        #     {
-        #       "users":
-        #         [
-        #           "bryan",
-        #           "jonathan",
-        #           "pragati",
-        #           "terrence",
-        #           "sarah",
-        #           "sean",
-        #           "morgan",
-        #           "benjamin",
-        #         ],
-        #     },
-        #   "external": { "users": ["bryan"] },
-        # }
+        {
+          "brineylab":
+            {
+              "users":
+                [
+                  "bryan",
+                  "jonathan",
+                  "pragati",
+                  "terrence",
+                  "sarah",
+                  "sean",
+                  "morgan",
+                  "benjamin",
+                ],
+            },
+          "external": { "users": ["bryan"] },
+        }
 
       # old format for usergroups (JupyterHub < 3.2)
-      {
-        "brineylab":
-          [
-            "bryan",
-            "jonathan",
-            "pragati",
-            "terrence",
-            "sarah",
-            "sean",
-            "morgan",
-            "benjamin",
-          ],
-        "external": ["bryan"],
-      }
+      # {
+      #   "brineylab":
+      #     [
+      #       "bryan",
+      #       "jonathan",
+      #       "pragati",
+      #       "terrence",
+      #       "sarah",
+      #       "sean",
+      #       "morgan",
+      #       "benjamin",
+      #     ],
+      #   "external": ["bryan"],
+      # }
       # load_roles: [
       # {
       #   "name": "brineylab-role",
