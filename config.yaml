@@ -14,8 +14,8 @@ cull:
   enabled: false
 
 singleuser:
-  # cmd: null
-  # defaultUrl: /lab
+  cmd: null
+  defaultUrl: /lab
   # networking
   # for some reason, notebook server spawning fails if networkPolicy is set to true
   networkPolicy:
