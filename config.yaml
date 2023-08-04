@@ -14,7 +14,7 @@ cull:
   enabled: false
 
 singleuser:
-  cmd: null
+  cmd: jupyterhub-singleuser
   defaultUrl: lab
 
   # networking
