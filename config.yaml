@@ -170,6 +170,7 @@ hub:
       # c.Spawner.default_url = "/lab"
       # c.KubeSpawner.default_url = "/lab"
       # c.KubeSpawner.working_dir = ".."
+      c.KubeSpawner.cmd = "jupyterhub-singleuser"
       c.KubeSpawner.args = ["--allow-root"]
       # c.KubeSpawner.args = ["--default_url=/lab" "--allow-root"]
       # c.KubeSpawner.args = ["--allow-root", "--collaborative=True"]
