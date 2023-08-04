@@ -34,7 +34,7 @@ singleuser:
   extraEnv:
     GRANT_SUDO: "yes"
     # DOCKER_STACKS_JUPYTER_CMD: lab
-    JUPYTERHUB_SINGLEUSER_APP: "..."
+    # JUPYTERHUB_SINGLEUSER_APP: "..."
   uid: 0
   fsGid: 0
 
