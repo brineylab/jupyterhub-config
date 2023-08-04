@@ -71,10 +71,22 @@ singleuser:
                 - "-c"
                 - >
                   mkdir -p ${HOME}/codeserver;
-    - display_name: "vanilla Jupyter datascience notebook"
+    - display_name: "vanilla Jupyter datascience notebook (v4.0.3)"
       description: "Jupyter notebook server (from Jupyter stacks)"
       kubespawner_override:
-        image: jupyter/datascience-notebook:hub-4.0.1
+        image: jupyter/datascience-notebook:hub-4.0.3
+        lifecycle_hooks:
+          postStart:
+            exec:
+              command:
+                - "sh"
+                - "-c"
+                - >
+                  mkdir -p ${HOME}/codeserver;
+    - display_name: "vanilla Jupyter datascience notebook (v3.6.3)"
+      description: "Jupyter notebook server (from Jupyter stacks)"
+      kubespawner_override:
+        image: jupyter/datascience-notebook:lab-3.6.3
         lifecycle_hooks:
           postStart:
             exec:
