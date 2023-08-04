@@ -170,7 +170,7 @@ hub:
       # c.Spawner.default_url = "/lab"
       # c.KubeSpawner.default_url = "/lab"
       # c.KubeSpawner.working_dir = ".."
-      c.KubeSpawner.args = ["--SingleUserNotebookApp.default_url=/lab" "--allow-root"]
+      c.KubeSpawner.args = ["--default_url=/lab" "--allow-root"]
       # c.KubeSpawner.args = ["--allow-root", "--collaborative=True"]
       # c.KubeSpawner.args = ["--collaborative"]
       import os, nativeauthenticator
