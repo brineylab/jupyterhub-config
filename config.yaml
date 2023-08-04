@@ -168,19 +168,20 @@ hub:
         # }
 
       # old format for usergroups (JupyterHub < 3.2)
-      "brineylab":
-        [
-          "bryan",
-          "jonathan",
-          "pragati",
-          "terrence",
-          "sarah",
-          "sean",
-          "morgan",
-          "benjamin",
-        ]
-      "external": ["bryan"]
-
+      {
+        "brineylab":
+          [
+            "bryan",
+            "jonathan",
+            "pragati",
+            "terrence",
+            "sarah",
+            "sean",
+            "morgan",
+            "benjamin",
+          ],
+        "external": ["bryan"],
+      }
       # load_roles: [
       # {
       #   "name": "brineylab-role",
