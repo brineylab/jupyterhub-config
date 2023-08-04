@@ -188,11 +188,11 @@ hub:
       c.KubeSpawner.allow_privilege_escalation = True
       # c.Spawner.notebook_dir = ".."
       # c.Spawner.default_url = "/lab"
-      # c.KubeSpawner.default_url = "/lab"
+      c.KubeSpawner.default_url = /user/{username}/lab
       # c.KubeSpawner.working_dir = ".."
       # c.KubeSpawner.cmd = "jupyterhub-singleuser --ip=0.0.0.0"
-      # c.KubeSpawner.args = ["--allow-root"]
-      c.KubeSpawner.args = ["--default-url=/lab" "--allow-root"]
+      c.KubeSpawner.args = ["--allow-root"]
+      # c.KubeSpawner.args = ["--default-url=/lab" "--allow-root"]
       # c.KubeSpawner.args = ["--allow-root", "--collaborative=True"]
       import os, nativeauthenticator
       c.JupyterHub.template_paths = [f"{os.path.dirname(nativeauthenticator.__file__)}/templates/"]
