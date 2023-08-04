@@ -61,8 +61,8 @@ singleuser:
       description: "extends the data science environment to include GPU-enabled torch and 🤗 libraries, as well as some deep learning-specific JupyterLab extensions"
       kubespawner_override:
         image: brineylab/jupyterhub-deeplearning:v0.1.8
-        extra_resource_limits:
-          nvidia.com/gpu: "1"
+        # extra_resource_limits:
+        #   nvidia.com/gpu: "1"
         lifecycle_hooks:
           postStart:
             exec:
