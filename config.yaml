@@ -133,18 +133,38 @@ hub:
       load_groups:
         {
           "brineylab":
-            [
-              "bryan",
-              "jonathan",
-              "pragati",
-              "terrence",
-              "sarah",
-              "sean",
-              "morgan",
-              "benjamin",
-            ],
-          "external": ["bryan"],
+            {
+              "users":
+                [
+                  "bryan",
+                  "jonathan",
+                  "pragati",
+                  "terrence",
+                  "sarah",
+                  "sean",
+                  "morgan",
+                  "benjamin",
+                ],
+            },
+          "external": { "users": ["bryan"] },
         }
+
+      # old format for usergroups (JupyterHub < 3.2)
+      # {
+      #   "brineylab":
+      #     [
+      #       "bryan",
+      #       "jonathan",
+      #       "pragati",
+      #       "terrence",
+      #       "sarah",
+      #       "sean",
+      #       "morgan",
+      #       "benjamin",
+      #     ],
+      #   "external": ["bryan"],
+      # }
+
       # load_roles: [
       # {
       #   "name": "brineylab-role",
@@ -170,7 +190,7 @@ hub:
       # c.Spawner.default_url = "/lab"
       # c.KubeSpawner.default_url = "/lab"
       # c.KubeSpawner.working_dir = ".."
-      c.KubeSpawner.cmd = "jupyterhub-singleuser"
+      c.KubeSpawner.cmd = "jupyterhub-singleuser --ip=0.0.0.0"
       # c.KubeSpawner.args = ["--allow-root"]
       # c.KubeSpawner.args = ["--default-url=/lab" "--allow-root"]
       # c.KubeSpawner.args = ["--allow-root", "--collaborative=True"]
