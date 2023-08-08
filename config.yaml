@@ -41,12 +41,12 @@ singleuser:
   # default image
   image:
     name: brineylab/jupyterhub-datascience
-    tag: v0.1.11
+    tag: v2023-08-08
 
   # alternate profiles (images)
   profileList:
     - display_name: "data science"
-      description: "default brineylab data analysis environment, including interpreters for Python, R, and Julia"
+      description: "default brineylab data analysis environment, including interpreters for Python, R, and Julia\njupyterlab: v3.6.5\n  - abstar: v0.6.0\n  - abutils: v0.4.2\n  - scab: v0.1.0"
       default: true
       kubespawner_override:
         lifecycle_hooks:
@@ -60,7 +60,7 @@ singleuser:
     - display_name: "deep learning"
       description: "extends the data science environment to include GPU-enabled torch and 🤗 libraries, as well as some deep learning-specific JupyterLab extensions"
       kubespawner_override:
-        image: brineylab/jupyterhub-deeplearning:v0.1.8
+        image: brineylab/jupyterhub-deeplearning:v2023-08-08
         # extra_resource_limits:
         #   nvidia.com/gpu: "1"
         lifecycle_hooks:
@@ -71,10 +71,10 @@ singleuser:
                 - "-c"
                 - >
                   mkdir -p ${HOME}/codeserver;
-    - display_name: "vanilla Jupyter datascience notebook (v4.0.3)"
-      description: "Jupyter notebook server (from Jupyter stacks)"
+    - display_name: "data science (jupyterlab 4.0.3)"
+      description: "default brineylab data analysis environment, including interpreters for Python, R, and Julia\njupyterlab: v4.0.4\n  - abstar: v0.6.0\n  - abutils: v0.4.2\n  - scab: v0.1.0"
       kubespawner_override:
-        image: jupyter/datascience-notebook:lab-4.0.3
+        image: brineylab/jupyterhub-deeplearning:v2023-08-08-jupyterlab4
         lifecycle_hooks:
           postStart:
             exec:
@@ -83,18 +83,30 @@ singleuser:
                 - "-c"
                 - >
                   mkdir -p ${HOME}/codeserver;
-    - display_name: "vanilla Jupyter datascience notebook (v3.6.3)"
-      description: "Jupyter notebook server (from Jupyter stacks)"
-      kubespawner_override:
-        image: jupyter/datascience-notebook:lab-3.6.3
-        lifecycle_hooks:
-          postStart:
-            exec:
-              command:
-                - "sh"
-                - "-c"
-                - >
-                  mkdir -p ${HOME}/codeserver;
+    # - display_name: "vanilla Jupyter datascience notebook (v4.0.3)"
+    #   description: "Jupyter notebook server (from Jupyter stacks)"
+    #   kubespawner_override:
+    #     image: jupyter/datascience-notebook:lab-4.0.3
+    #     lifecycle_hooks:
+    #       postStart:
+    #         exec:
+    #           command:
+    #             - "sh"
+    #             - "-c"
+    #             - >
+    #               mkdir -p ${HOME}/codeserver;
+    # - display_name: "vanilla Jupyter datascience notebook (v3.6.3)"
+    #   description: "Jupyter notebook server (from Jupyter stacks)"
+    #   kubespawner_override:
+    #     image: jupyter/datascience-notebook:lab-3.6.3
+    #     lifecycle_hooks:
+    #       postStart:
+    #         exec:
+    #           command:
+    #             - "sh"
+    #             - "-c"
+    #             - >
+    #               mkdir -p ${HOME}/codeserver;
 
   # storage
   storage:
@@ -148,24 +160,24 @@ hub:
     JupyterHub:
       authenticator_class: "nativeauthenticator.NativeAuthenticator"
       # allow_named_servers: true
-      load_groups:
-        {
-          "brineylab":
-            {
-              "users":
-                [
-                  "bryan",
-                  "jonathan",
-                  "pragati",
-                  "terrence",
-                  "sarah",
-                  "sean",
-                  "morgan",
-                  "benjamin",
-                ],
-            },
-          "external": { "users": ["bryan"] },
-        }
+      # load_groups:
+      #   {
+      #     "brineylab":
+      #       {
+      #         "users":
+      #           [
+      #             "bryan",
+      #             "jonathan",
+      #             "pragati",
+      #             "terrence",
+      #             "sarah",
+      #             "sean",
+      #             "morgan",
+      #             "benjamin",
+      #           ],
+      #       },
+      #     "external": { "users": ["bryan"] },
+      #   }
 
       # old format for usergroups (JupyterHub < 3.2)
       # {
