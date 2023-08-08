@@ -46,7 +46,7 @@ singleuser:
   # alternate profiles (images)
   profileList:
     - display_name: "data science"
-      description: "default brineylab data analysis environment, including interpreters for Python, R, and Julia\njupyterlab: v3.6.5\n  - abstar: v0.6.0\n  - abutils: v0.4.2\n  - scab: v0.1.0"
+      description: "default brineylab data analysis environment, including interpreters for Python, R, and Julia<br>  - jupyterlab: v3.6.5<br>  - abstar: v0.6.0<br>  - abutils: v0.4.2<br>  - scab: v0.1.0"
       default: true
       kubespawner_override:
         lifecycle_hooks:
