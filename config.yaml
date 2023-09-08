@@ -71,18 +71,18 @@ singleuser:
                 - "-c"
                 - >
                   mkdir -p ${HOME}/codeserver;
-    - display_name: "data science (jupyterlab 4.0.3)"
-      description: "default brineylab data analysis environment, including interpreters for Python, R, and Julia\njupyterlab: v4.0.4\n  - abstar: v0.6.0\n  - abutils: v0.4.2\n  - scab: v0.1.0"
-      kubespawner_override:
-        image: brineylab/jupyterhub-deeplearning:v2023-08-08-jupyterlab4
-        lifecycle_hooks:
-          postStart:
-            exec:
-              command:
-                - "sh"
-                - "-c"
-                - >
-                  mkdir -p ${HOME}/codeserver;
+    # - display_name: "data science (jupyterlab 4.0.3)"
+    #   description: "default brineylab data analysis environment, including interpreters for Python, R, and Julia\njupyterlab: v4.0.4\n  - abstar: v0.6.0\n  - abutils: v0.4.2\n  - scab: v0.1.0"
+    #   kubespawner_override:
+    #     image: brineylab/jupyterhub-deeplearning:v2023-08-08-jupyterlab4
+    #     lifecycle_hooks:
+    #       postStart:
+    #         exec:
+    #           command:
+    #             - "sh"
+    #             - "-c"
+    #             - >
+    #               mkdir -p ${HOME}/codeserver;
     # - display_name: "vanilla Jupyter datascience notebook (v4.0.3)"
     #   description: "Jupyter notebook server (from Jupyter stacks)"
     #   kubespawner_override:
