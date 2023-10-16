@@ -11,7 +11,12 @@
 
 # disable user and server culling
 cull:
-  enabled: false
+  # enabled: false
+  enabled: true
+  # users: false # --cull-users
+  # adminUsers: false # --cull-admin-users
+  removeNamedServers: false # --remove-named-servers
+  every: 86400 # --cull-every (seconds) -- 24 hours
 
 singleuser:
   cmd: jupyterhub-singleuser
@@ -162,7 +167,12 @@ hub:
         - sean
         - morgan
         - benjamin
+        - jyothi
         - nathan
+        - karenna
+        - daniella
+        - praneeth
+        - simone
       # admin_access: true
     JupyterHub:
       authenticator_class: "nativeauthenticator.NativeAuthenticator"
