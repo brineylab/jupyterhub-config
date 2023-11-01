@@ -11,12 +11,13 @@
 
 # disable user and server culling
 cull:
-  # enabled: false
-  enabled: true
-  # users: false # --cull-users
-  # adminUsers: false # --cull-admin-users
-  removeNamedServers: false # --remove-named-servers
-  every: 86400 # --cull-every (seconds) -- 24 hours
+  enabled: false
+  # enabled: true
+  # # users: false # --cull-users
+  # # adminUsers: false # --cull-admin-users
+  # removeNamedServers: false # --remove-named-servers
+  # # every: 86400 # --cull-every (seconds) -- 24 hours
+  # every: 604800 # --cull-every (seconds) -- 7 days
 
 singleuser:
   cmd: jupyterhub-singleuser
@@ -30,16 +31,14 @@ singleuser:
   # limits and guarantees
   memory:
     limit: 512G
-    guarantee: 1G
+    guarantee: 128G
   cpu:
     limit: 128
-    guarantee: 1
+    guarantee: 32
 
   # set extra environmental vars
   extraEnv:
     GRANT_SUDO: "yes"
-    # DOCKER_STACKS_JUPYTER_CMD: lab
-    # JUPYTERHUB_SINGLEUSER_APP: "..."
   uid: 0
   fsGid: 0
 
@@ -162,8 +161,10 @@ hub:
       allowed_users:
         - jonathan
         - pragati
+        - nitesh
         - terrence
         - sarah
+        - simone
         - sean
         - morgan
         - benjamin
@@ -172,7 +173,6 @@ hub:
         - karenna
         - daniella
         - praneeth
-        - simone
       # admin_access: true
     JupyterHub:
       authenticator_class: "nativeauthenticator.NativeAuthenticator"
@@ -186,11 +186,19 @@ hub:
       #             "bryan",
       #             "jonathan",
       #             "pragati",
+      #             "nitesh",
       #             "terrence",
       #             "sarah",
+      #             "simone",
       #             "sean",
       #             "morgan",
       #             "benjamin",
+      #             "jyothi",
+      #             "nathan",
+      #             "karenna",
+      #             "daniella",
+      #             "praneeth",
+
       #           ],
       #       },
       #     "external": { "users": ["bryan"] },
