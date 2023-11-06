@@ -9,6 +9,10 @@
 # Available chart versions: https://jupyterhub.github.io/helm-chart/
 #
 
+prePuller:
+  hook:
+    enabled: false
+
 # disable user and server culling
 cull:
   enabled: false
