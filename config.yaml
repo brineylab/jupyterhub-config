@@ -31,10 +31,19 @@ singleuser:
   # limits and guarantees
   memory:
     limit: 512G
-    guarantee: 128G
+    guarantee: 64G
+    # for dev cluster
+    # ---------------
+    # limit: 8G
+    # guarantee: 2G
+
   cpu:
     limit: 128
-    guarantee: 32
+    guarantee: 16
+    # for dev cluster
+    # ---------------
+    # limit: 4
+    # guarantee: 1
 
   # set extra environmental vars
   extraEnv:
@@ -75,42 +84,30 @@ singleuser:
                 - "-c"
                 - >
                   mkdir -p ${HOME}/codeserver;
-    # - display_name: "data science (jupyterlab 4.0.3)"
-    #   description: "default brineylab data analysis environment, including interpreters for Python, R, and Julia\njupyterlab: v4.0.4\n  - abstar: v0.6.0\n  - abutils: v0.4.2\n  - scab: v0.1.0"
-    #   kubespawner_override:
-    #     image: brineylab/jupyterhub-deeplearning:v2023-08-08-jupyterlab4
-    #     lifecycle_hooks:
-    #       postStart:
-    #         exec:
-    #           command:
-    #             - "sh"
-    #             - "-c"
-    #             - >
-    #               mkdir -p ${HOME}/codeserver;
-    # - display_name: "vanilla Jupyter datascience notebook (v4.0.3)"
-    #   description: "Jupyter notebook server (from Jupyter stacks)"
-    #   kubespawner_override:
-    #     image: jupyter/datascience-notebook:lab-4.0.3
-    #     lifecycle_hooks:
-    #       postStart:
-    #         exec:
-    #           command:
-    #             - "sh"
-    #             - "-c"
-    #             - >
-    #               mkdir -p ${HOME}/codeserver;
-    # - display_name: "vanilla Jupyter datascience notebook (v3.6.3)"
-    #   description: "Jupyter notebook server (from Jupyter stacks)"
-    #   kubespawner_override:
-    #     image: jupyter/datascience-notebook:lab-3.6.3
-    #     lifecycle_hooks:
-    #       postStart:
-    #         exec:
-    #           command:
-    #             - "sh"
-    #             - "-c"
-    #             - >
-    #               mkdir -p ${HOME}/codeserver;
+    - display_name: "BETA: data science"
+      description: "data science image (for testing purposes) <br> v2023-11-02"
+      kubespawner_override:
+        image: brineylab/jupyterhub-datascience:v2023-11-02
+        lifecycle_hooks:
+          postStart:
+            exec:
+              command:
+                - "sh"
+                - "-c"
+                - >
+                  mkdir -p ${HOME}/codeserver;
+    - display_name: "BETA: deep learning"
+      description: "deep learning image (for testing purposes) <br> v2023-11-02"
+      kubespawner_override:
+        image: brineylab/jupyterhub-deeplearning:v2023-11-02
+        lifecycle_hooks:
+          postStart:
+            exec:
+              command:
+                - "sh"
+                - "-c"
+                - >
+                  mkdir -p ${HOME}/codeserver;
 
   # storage
   storage:
