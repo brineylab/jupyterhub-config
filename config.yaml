@@ -148,6 +148,8 @@ singleuser:
       #   mountPath: /home/jovyan/shared
 
 hub:
+  networkPolicy:
+    enabled: false
   containerSecurityContext:
     runAsUser: 0
     runAsGroup: 0
