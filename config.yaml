@@ -77,7 +77,7 @@ singleuser:
     - display_name: "deep learning"
       description: "extends the data science environment to include GPU-enabled torch and 🤗 libraries, as well as some deep learning-specific JupyterLab extensions <br> v2023-11-02"
       kubespawner_override:
-        image: brineylab/jupyterhub-deeplearning:v2023-09-12
+        image: brineylab/jupyterhub-deeplearning:v2023-11-02
         # extra_resource_limits:
         #   nvidia.com/gpu: "1"
         lifecycle_hooks:
@@ -88,30 +88,30 @@ singleuser:
                 - "-c"
                 - >
                   mkdir -p ${HOME}/codeserver;
-    # - display_name: "BETA: data science"
-    #   description: "data science image (for testing purposes) <br> v2023-11-02"
-    #   kubespawner_override:
-    #     image: brineylab/jupyterhub-datascience:v2023-11-02
-    #     lifecycle_hooks:
-    #       postStart:
-    #         exec:
-    #           command:
-    #             - "sh"
-    #             - "-c"
-    #             - >
-    #               mkdir -p ${HOME}/codeserver;
-    # - display_name: "BETA: deep learning"
-    #   description: "deep learning image (for testing purposes) <br> v2023-11-02"
-    #   kubespawner_override:
-    #     image: brineylab/jupyterhub-deeplearning:v2023-11-02
-    #     lifecycle_hooks:
-    #       postStart:
-    #         exec:
-    #           command:
-    #             - "sh"
-    #             - "-c"
-    #             - >
-    #               mkdir -p ${HOME}/codeserver;
+    - display_name: "BETA: data science"
+      description: "data science image (for testing purposes) <br> v2023-11-06"
+      kubespawner_override:
+        image: brineylab/jupyterhub-datascience:v2023-11-06
+        lifecycle_hooks:
+          postStart:
+            exec:
+              command:
+                - "sh"
+                - "-c"
+                - >
+                  mkdir -p ${HOME}/codeserver;
+    - display_name: "BETA: deep learning"
+      description: "deep learning image (for testing purposes) <br> v2023-11-06"
+      kubespawner_override:
+        image: brineylab/jupyterhub-deeplearning:v2023-11-06
+        lifecycle_hooks:
+          postStart:
+            exec:
+              command:
+                - "sh"
+                - "-c"
+                - >
+                  mkdir -p ${HOME}/codeserver;
 
   # storage
   storage:
@@ -146,8 +146,8 @@ singleuser:
         mountPath: /home/jovyan/sequencing_runs/nextseq
       - name: nfs-propjoe-shared
         mountPath: /home/jovyan/shared
-      - name: nfs-propjoe-references
-        mountPath: /home/jovyan/references
+      # - name: nfs-propjoe-references
+      #   mountPath: /home/jovyan/references
       # - name: nfs-stringer-shared
       #   mountPath: /home/jovyan/shared
 
@@ -180,62 +180,7 @@ hub:
     JupyterHub:
       authenticator_class: "nativeauthenticator.NativeAuthenticator"
       # allow_named_servers: true
-      # load_groups:
-      #   {
-      #     "brineylab":
-      #       {
-      #         "users":
-      #           [
-      #             "bryan",
-      #             "jonathan",
-      #             "pragati",
-      #             "nitesh",
-      #             "terrence",
-      #             "sarah",
-      #             "simone",
-      #             "sean",
-      #             "morgan",
-      #             "benjamin",
-      #             "jyothi",
-      #             "nathan",
-      #             "karenna",
-      #             "daniella",
-      #             "praneeth",
 
-      #           ],
-      #       },
-      #     "external": { "users": ["bryan"] },
-      #   }
-
-      # old format for usergroups (JupyterHub < 3.2)
-      # {
-      #   "brineylab":
-      #     [
-      #       "bryan",
-      #       "jonathan",
-      #       "pragati",
-      #       "terrence",
-      #       "sarah",
-      #       "sean",
-      #       "morgan",
-      #       "benjamin",
-      #     ],
-      #   "external": ["bryan"],
-      # }
-      # load_roles: [
-      # {
-      #   "name": "brineylab-role",
-      #   "description": "can access other users servers in the brineylab group",
-      #   "scopes": ["access:servers!group=brineylab"],
-      #   "groups": ["brineylab"],
-      # },
-      # {
-      #   "name": "external-role",
-      #   "description": "can access other users servers in the external group",
-      #   "scopes": ["access:servers!group=external"],
-      #   "groups": ["brineylab"],
-      # },
-      # ]
     NativeAuthenticator:
       enable_signup: true
       # ask_email_on_signup: true
@@ -247,37 +192,35 @@ hub:
       import os, nativeauthenticator
       c.JupyterHub.template_paths = [f"{os.path.dirname(nativeauthenticator.__file__)}/templates/"]
 
-    # 01-mount-user-volumes: |
+    # 01-mount-shared-volume: |
     #   def user_pvcs(spawner):
-    #       shared_vols = {
-    #           "shared" : [
+    #        brineylab_members = [
     #               "bryan",
-    #               "jonathan",
-    #               "benjamin",
-    #               "terrence",
-    #               "sarah",
-    #               "sean",
-    #               "morgan",
-    #               "pragati",
+    #             "jonathan",
+    #             "pragati",
+    #             "nitesh",
+    #             "terrence",
+    #             "sarah",
+    #             "simone",
+    #             "sean",
+    #             "morgan",
+    #             "benjamin",
+    #             "jyothi",
+    #             "nathan",
+    #             "karenna",
+    #             "daniella",
+    #             "praneeth",
     #             ],
-
-    #           # # PERSONAL VOLUMES (not currently used)
-    #           # "bryan" : [ "bryan" ],
-    #           # "jonathan" : [ "jonathan", "bryan"],
-    #           # "benjamin" : [ "benjamin", "bryan"],
-    #           # "terrence" : [ "terrence", "bryan"],
-    #           # "sarah" : [ "sarah", "bryan"],
-    #           # "sean" : [ "sean", "bryan"],
-    #           # "morgan" : [ "morgan", "bryan"],
-    #           # "pragati" : [ "pragati", "bryan"],
-    #         }
-
+    #       shared_vols = {
+    #           "shared" : brineylab_members,
+    #       }
+    #       mnt_dirname = {}
     #       try:
     #           user=spawner.user.name
     #           for mnt in shared_vols:
     #               if user in shared_vols[mnt]:
     #                   spawner.log.info("Adding volume for user " + user + " and mount " + mnt)
-    #                   claim_name = "nfs-propjoe-shared" if mnt == "shared" else "brineylab-personal-pvc-" + mnt
+    #                   claim_name = "nfs-propjoe-shared"
     #                   spawner.volumes.extend([
     #                       {
     #                           "name": mnt,
@@ -286,7 +229,7 @@ hub:
     #                   ])
     #                   spawner.volume_mounts.extend([
     #                       {
-    #                           "mountPath": "/home/jovyan/" + mnt,
+    #                           "mountPath": "/home/jovyan/" + mnt_dirname.get(mnt, mnt)),
     #                           "name": mnt,
     #                       }
     #                   ])
