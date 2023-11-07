@@ -58,12 +58,12 @@ singleuser:
   # default image
   image:
     name: brineylab/jupyterhub-datascience
-    tag: v2023-11-02
+    tag: v2023-11-06
 
   # alternate profiles (images)
   profileList:
     - display_name: "data science"
-      description: "default brineylab data analysis environment, including interpreters for Python, R, and Julia <br> v2023-11-02"
+      description: "default brineylab data analysis environment, including interpreters for Python, R, and Julia <br> v2023-11-06"
       default: true
       kubespawner_override:
         lifecycle_hooks:
@@ -75,9 +75,9 @@ singleuser:
                 - >
                   mkdir -p ${HOME}/codeserver;
     - display_name: "deep learning"
-      description: "extends the data science environment to include GPU-enabled torch and 🤗 libraries, as well as some deep learning-specific JupyterLab extensions <br> v2023-11-02"
+      description: "extends the data science environment to include GPU-enabled torch and 🤗 libraries, as well as some deep learning-specific JupyterLab extensions <br> v2023-11-06"
       kubespawner_override:
-        image: brineylab/jupyterhub-deeplearning:v2023-11-02
+        image: brineylab/jupyterhub-deeplearning:v2023-11-06
         # extra_resource_limits:
         #   nvidia.com/gpu: "1"
         lifecycle_hooks:
@@ -88,30 +88,30 @@ singleuser:
                 - "-c"
                 - >
                   mkdir -p ${HOME}/codeserver;
-    - display_name: "BETA: data science"
-      description: "data science image (for testing purposes) <br> v2023-11-06"
-      kubespawner_override:
-        image: brineylab/jupyterhub-datascience:v2023-11-06
-        lifecycle_hooks:
-          postStart:
-            exec:
-              command:
-                - "sh"
-                - "-c"
-                - >
-                  mkdir -p ${HOME}/codeserver;
-    - display_name: "BETA: deep learning"
-      description: "deep learning image (for testing purposes) <br> v2023-11-06"
-      kubespawner_override:
-        image: brineylab/jupyterhub-deeplearning:v2023-11-06
-        lifecycle_hooks:
-          postStart:
-            exec:
-              command:
-                - "sh"
-                - "-c"
-                - >
-                  mkdir -p ${HOME}/codeserver;
+    # - display_name: "BETA: data science"
+    #   description: "data science image (for testing purposes) <br> v2023-11-06"
+    #   kubespawner_override:
+    #     image: brineylab/jupyterhub-datascience:v2023-11-06
+    #     lifecycle_hooks:
+    #       postStart:
+    #         exec:
+    #           command:
+    #             - "sh"
+    #             - "-c"
+    #             - >
+    #               mkdir -p ${HOME}/codeserver;
+    # - display_name: "BETA: deep learning"
+    #   description: "deep learning image (for testing purposes) <br> v2023-11-06"
+    #   kubespawner_override:
+    #     image: brineylab/jupyterhub-deeplearning:v2023-11-06
+    #     lifecycle_hooks:
+    #       postStart:
+    #         exec:
+    #           command:
+    #             - "sh"
+    #             - "-c"
+    #             - >
+    #               mkdir -p ${HOME}/codeserver;
 
   # storage
   storage:
