@@ -128,6 +128,9 @@ singleuser:
       - name: nfs-avon-nextseq2k
         persistentVolumeClaim:
           claimName: nfs-avon-nextseq2k
+      - name: nfs-stringer-ont
+        persistentVolumeClaim:
+          claimName: nfs-stringer-ont
       # references
       # - name: nfs-propjoe-references
       #   persistentVolumeClaim:
@@ -144,6 +147,8 @@ singleuser:
         mountPath: /home/jovyan/sequencing_runs/novaseq
       - name: nfs-avon-nextseq2k
         mountPath: /home/jovyan/sequencing_runs/nextseq
+      - name: nfs-stringer-ont
+        mountPath: /home/jovyan/sequencing_runs/ont
       - name: nfs-propjoe-shared
         mountPath: /home/jovyan/shared
       # - name: nfs-propjoe-references
