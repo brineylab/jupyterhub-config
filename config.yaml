@@ -129,9 +129,9 @@ singleuser:
         persistentVolumeClaim:
           claimName: nfs-avon-nextseq2k
       # references
-      - name: nfs-propjoe-references
-        persistentVolumeClaim:
-          claimName: nfs-propjoe-references
+      # - name: nfs-propjoe-references
+      #   persistentVolumeClaim:
+      #     claimName: nfs-propjoe-references
       # shared data
       - name: nfs-propjoe-shared
         persistentVolumeClaim:
