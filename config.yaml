@@ -88,30 +88,30 @@ singleuser:
                 - "-c"
                 - >
                   mkdir -p ${HOME}/codeserver;
-    # - display_name: "BETA: data science"
-    #   description: "data science image (for testing purposes) <br> v2023-11-07"
-    #   kubespawner_override:
-    #     image: brineylab/jupyterhub-datascience:v2023-11-07-beta1
-    #     lifecycle_hooks:
-    #       postStart:
-    #         exec:
-    #           command:
-    #             - "sh"
-    #             - "-c"
-    #             - >
-    #               mkdir -p ${HOME}/codeserver;
-    # - display_name: "BETA: deep learning"
-    #   description: "deep learning image (for testing purposes) <br> v2023-11-07"
-    #   kubespawner_override:
-    #     image: brineylab/jupyterhub-deeplearning:v2023-11-07-beta1
-    #     lifecycle_hooks:
-    #       postStart:
-    #         exec:
-    #           command:
-    #             - "sh"
-    #             - "-c"
-    #             - >
-    #               mkdir -p ${HOME}/codeserver;
+    - display_name: "BETA: data science"
+      description: "data science image (for testing purposes) <br> v2023-12-19"
+      kubespawner_override:
+        image: brineylab/jupyterhub-datascience:v2023-12-19
+        lifecycle_hooks:
+          postStart:
+            exec:
+              command:
+                - "sh"
+                - "-c"
+                - >
+                  mkdir -p ${HOME}/codeserver;
+    - display_name: "BETA: deep learning"
+      description: "deep learning image (for testing purposes) <br> v2023-12-19"
+      kubespawner_override:
+        image: brineylab/jupyterhub-deeplearning:v2023-12-19
+        lifecycle_hooks:
+          postStart:
+            exec:
+              command:
+                - "sh"
+                - "-c"
+                - >
+                  mkdir -p ${HOME}/codeserver;
 
   # storage
   storage:
