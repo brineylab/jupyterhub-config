@@ -63,7 +63,7 @@ singleuser:
   # alternate profiles (images)
   profileList:
     - display_name: "data science"
-      description: "default brineylab data analysis environment, including interpreters for Python and R. Also includes VS Code <br> v2023-12-19"
+      description: "default brineylab data analysis environment, including interpreters for Python and R as well as VS Code <br> v2023-12-19"
       default: true
       kubespawner_override:
         lifecycle_hooks:
