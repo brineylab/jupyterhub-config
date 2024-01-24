@@ -23,6 +23,20 @@ cull:
   # # every: 86400 # --cull-every (seconds) -- 24 hours
   # every: 604800 # --cull-every (seconds) -- 7 days
 
+# from https://z2jh.jupyter.org/en/stable/administrator/optimization.html
+scheduling:
+  userScheduler:
+    enabled: false
+  # podPriority:
+  #   enabled: true
+  # userPlaceholder:
+  #   enabled: true
+  #   replicas: 4
+  # userPods:
+  #   nodeAffinity:
+  #     matchNodePurpose: require
+
+
 singleuser:
   cmd: jupyterhub-singleuser
   defaultUrl: lab
