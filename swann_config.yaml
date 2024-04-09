@@ -93,7 +93,7 @@ singleuser:
       kubespawner_override:
         image: brineylab/jupyterhub-deeplearning:v2024-02-21
         extra_resource_limits:
-          nvidia.com/gpu: "2"
+          nvidia.com/gpu: 2
         lifecycle_hooks:
           postStart:
             exec:
