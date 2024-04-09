@@ -118,6 +118,12 @@ singleuser:
       - name: nfs-propjoe-shared
         mountPath: /home/jovyan/shared
 
+proxy:
+  service:
+    type: NodePort
+    nodePorts:
+      http: 32151
+
 hub:
   networkPolicy:
     enabled: false
