@@ -1,0 +1,162 @@
+# This file can update the JupyterHub Helm chart's default configuration values.
+#
+# For reference see the configuration reference and default values, but make
+# sure to refer to the Helm chart version of interest to you!
+#
+# Introduction to YAML:     https://www.youtube.com/watch?v=cdLNKUoMc6c
+# Chart config reference:   https://zero-to-jupyterhub.readthedocs.io/en/stable/resources/reference.html
+# Chart default values:     https://github.com/jupyterhub/zero-to-jupyterhub-k8s/blob/HEAD/jupyterhub/values.yaml
+# Available chart versions: https://jupyterhub.github.io/helm-chart/
+#
+
+# prePuller:
+#   hook:
+#     enabled: false
+
+# disable user and server culling
+cull:
+  enabled: false
+  # enabled: true
+  # # users: false # --cull-users
+  # # adminUsers: false # --cull-admin-users
+  # removeNamedServers: false # --remove-named-servers
+  # # every: 86400 # --cull-every (seconds) -- 24 hours
+  # every: 604800 # --cull-every (seconds) -- 7 days
+
+# from https://z2jh.jupyter.org/en/stable/administrator/optimization.html
+scheduling:
+  userScheduler:
+    enabled: false
+  # podPriority:
+  #   enabled: true
+  # userPlaceholder:
+  #   enabled: true
+  #   replicas: 4
+  # userPods:
+  #   nodeAffinity:
+  #     matchNodePurpose: require
+
+
+singleuser:
+  cmd: jupyterhub-singleuser
+  defaultUrl: lab
+
+  # networking
+  # for some reason, notebook server spawning fails if networkPolicy is set to true
+  networkPolicy:
+    enabled: false
+
+  # limits and guarantees
+  memory:
+    limit: 256G
+    guarantee: 64G
+    # for dev cluster
+    # ---------------
+    # limit: 8G
+    # guarantee: 2G
+
+  cpu:
+    limit: 128
+    guarantee: 16
+    # for dev cluster
+    # ---------------
+    # limit: 4
+    # guarantee: 1
+
+  # set extra environmental vars
+  extraEnv:
+    GRANT_SUDO: "yes"
+  uid: 0
+  fsGid: 0
+
+  # default image
+  image:
+    name: brineylab/jupyterhub-deeplearning
+    tag: v2024-02-21
+
+  # alternate profiles (images)
+  profileList:
+    - display_name: "data science"
+      description: "default brineylab data analysis environment, including interpreters for Python and R as well as VS Code <br> v2024-02-21"
+      default: true
+      kubespawner_override:
+        lifecycle_hooks:
+          postStart:
+            exec:
+              command:
+                - "sh"
+                - "-c"
+                - >
+                  mkdir -p ${HOME}/codeserver;
+    - display_name: "deep learning"
+      description: "extends the data science environment to include torch and 🤗 libraries, as well as some deep learning-specific JupyterLab extensions <br> v2024-02-21"
+      kubespawner_override:
+        image: brineylab/jupyterhub-deeplearning:v2024-02-21
+        extra_resource_limits:
+          nvidia.com/gpu: "2"
+        lifecycle_hooks:
+          postStart:
+            exec:
+              command:
+                - "sh"
+                - "-c"
+                - >
+                  mkdir -p ${HOME}/codeserver;
+ 
+  # storage
+  storage:
+    # dynamic:
+    #   storageClass: nfs-marlo-ssd
+    capacity: 250Gi
+
+    extraVolumes:
+      # shared data
+      - name: nfs-propjoe-shared
+        persistentVolumeClaim:
+          claimName: nfs-propjoe-shared
+    extraVolumeMounts:
+      - name: nfs-propjoe-shared
+        mountPath: /home/jovyan/shared
+
+hub:
+  networkPolicy:
+    enabled: false
+  containerSecurityContext:
+    runAsUser: 0
+    runAsGroup: 0
+  config:
+    Authenticator:
+      admin_users:
+        - bryan
+        - sarah
+      allowed_users:
+        - jonathan
+        - pragati
+        - nitesh
+        - terrence
+        - simone
+        - sean
+        - morgan
+        - benjamin
+        - jyothi
+        - nathan
+        - karenna
+        - daniella
+        - praneeth
+        - collin
+      # admin_access: true
+    JupyterHub:
+      authenticator_class: "nativeauthenticator.NativeAuthenticator"
+      # allow_named_servers: true
+
+    NativeAuthenticator:
+      enable_signup: true
+      # ask_email_on_signup: true
+
+  extraConfig:
+    00-first-config: |
+      c.KubeSpawner.allow_privilege_escalation = True
+      c.KubeSpawner.args = ["--allow-root"]
+      import os, nativeauthenticator
+      c.JupyterHub.template_paths = [f"{os.path.dirname(nativeauthenticator.__file__)}/templates/"]
+
