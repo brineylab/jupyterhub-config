@@ -9,33 +9,14 @@
 # Available chart versions: https://jupyterhub.github.io/helm-chart/
 #
 
-# prePuller:
-#   hook:
-#     enabled: false
-
 # disable user and server culling
 cull:
   enabled: false
-  # enabled: true
-  # # users: false # --cull-users
-  # # adminUsers: false # --cull-admin-users
-  # removeNamedServers: false # --remove-named-servers
-  # # every: 86400 # --cull-every (seconds) -- 24 hours
-  # every: 604800 # --cull-every (seconds) -- 7 days
 
 # from https://z2jh.jupyter.org/en/stable/administrator/optimization.html
 scheduling:
   userScheduler:
     enabled: false
-  # podPriority:
-  #   enabled: true
-  # userPlaceholder:
-  #   enabled: true
-  #   replicas: 4
-  # userPods:
-  #   nodeAffinity:
-  #     matchNodePurpose: require
-
 
 singleuser:
   cmd: jupyterhub-singleuser
@@ -50,19 +31,11 @@ singleuser:
   memory:
     limit: 256G
     guarantee: 64G
-    # for dev cluster
-    # ---------------
-    # limit: 8G
-    # guarantee: 2G
 
   cpu:
     limit: 128
     guarantee: 16
-    # for dev cluster
-    # ---------------
-    # limit: 4
-    # guarantee: 1
-
+  
   # set extra environmental vars
   extraEnv:
     GRANT_SUDO: "yes"
@@ -76,10 +49,11 @@ singleuser:
 
   # alternate profiles (images)
   profileList:
-    - display_name: "data science"
+    - display_name: "data science - no gpu"
       description: "default brineylab data analysis environment, including interpreters for Python and R as well as VS Code <br> v2024-02-21"
       default: true
       kubespawner_override:
+        image: brineylab/jupyterhub-datascience:v2024-02-21
         lifecycle_hooks:
           postStart:
             exec:
@@ -88,10 +62,9 @@ singleuser:
                 - "-c"
                 - >
                   mkdir -p ${HOME}/codeserver;
-    - display_name: "deep learning"
+    - display_name: "deep learning - 2 gpu"
       description: "extends the data science environment to include torch and 🤗 libraries, as well as some deep learning-specific JupyterLab extensions <br> v2024-02-21"
       kubespawner_override:
-        image: brineylab/jupyterhub-deeplearning:v2024-02-21
         extra_resource_limits:
           nvidia.com/gpu: 2
         lifecycle_hooks:
@@ -102,22 +75,39 @@ singleuser:
                 - "-c"
                 - >
                   mkdir -p ${HOME}/codeserver;
- 
+    - display_name: "deep learning - 4 gpu"
+      description: "extends the data science environment to include torch and 🤗 libraries, as well as some deep learning-specific JupyterLab extensions <br> v2024-02-21"
+      kubespawner_override:
+        extra_resource_limits:
+          nvidia.com/gpu: 4
+        lifecycle_hooks:
+          postStart:
+            exec:
+              command:
+                - "sh"
+                - "-c"
+                - >
+                  mkdir -p ${HOME}/codeserver;
+
   # storage
   storage:
+    # don't change default volume
     # dynamic:
     #   storageClass: nfs-marlo-ssd
     capacity: 250Gi
 
     extraVolumes:
-      # shared data
+      # shared volume
       - name: nfs-propjoe-shared
         persistentVolumeClaim:
           claimName: nfs-propjoe-shared
     extraVolumeMounts:
+      # shared volume
       - name: nfs-propjoe-shared
         mountPath: /home/jovyan/shared
 
+# required for setting up server (of one node)
+# when a load balancer is not being used
 proxy:
   service:
     type: NodePort
@@ -131,15 +121,21 @@ hub:
     runAsUser: 0
     runAsGroup: 0
   config:
+    # required to enable gpu
+    # https://discourse.jupyter.org/t/set-runtimeclassname-for-gpu-enabled-images/21617/5
+    KubeSpawner:
+      extra_pod_config:
+        runtimeClassName: nvidia
+    
     Authenticator:
       admin_users:
         - bryan
         - sarah
+        - terrence
       allowed_users:
         - jonathan
         - pragati
         - nitesh
-        - terrence
         - simone
         - sean
         - morgan
@@ -150,14 +146,12 @@ hub:
         - daniella
         - praneeth
         - collin
-      # admin_access: true
+    
     JupyterHub:
       authenticator_class: "nativeauthenticator.NativeAuthenticator"
-      # allow_named_servers: true
 
     NativeAuthenticator:
       enable_signup: true
-      # ask_email_on_signup: true
 
   extraConfig:
     00-first-config: |
