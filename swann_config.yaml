@@ -45,7 +45,7 @@ singleuser:
   # default image
   image:
     name: brineylab/jupyterhub-deeplearning
-    tag: v2024-02-21
+    tag: v2024-04-11
 
   # alternate profiles (images)
   profileList:
@@ -53,7 +53,7 @@ singleuser:
       description: "default brineylab data analysis environment, including interpreters for Python and R as well as VS Code <br> v2024-02-21"
       default: true
       kubespawner_override:
-        image: brineylab/jupyterhub-datascience:v2024-02-21
+        image: brineylab/jupyterhub-datascience:v2024-04-11
         lifecycle_hooks:
           postStart:
             exec:
@@ -88,6 +88,19 @@ singleuser:
                 - "-c"
                 - >
                   mkdir -p ${HOME}/codeserver;
+    - display_name: "deep learning - 8 gpu"
+      description: "extends the data science environment to include torch and 🤗 libraries, as well as some deep learning-specific JupyterLab extensions <br> v2024-02-21"
+      kubespawner_override:
+        extra_resource_limits:
+          nvidia.com/gpu: 8
+        lifecycle_hooks:
+          postStart:
+            exec:
+              command:
+                - "sh"
+                - "-c"
+                - >
+                  mkdir -p ${HOME}/codeserver;
 
   # storage
   storage:
@@ -101,10 +114,16 @@ singleuser:
       - name: nfs-propjoe-shared
         persistentVolumeClaim:
           claimName: nfs-propjoe-shared
+      - name: dshm
+        emptyDir:
+          medium: Memory
+          sizeLimit: "10Gi"
     extraVolumeMounts:
       # shared volume
       - name: nfs-propjoe-shared
         mountPath: /home/jovyan/shared
+      - name: dshm
+        mountPath: /dev/shm
 
 # required for setting up server (of one node)
 # when a load balancer is not being used
