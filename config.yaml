@@ -72,12 +72,12 @@ singleuser:
   # default image
   image:
     name: brineylab/jupyterhub-datascience
-    tag: v2024-02-21
+    tag: v2024-04-11
 
   # alternate profiles (images)
   profileList:
     - display_name: "data science"
-      description: "default brineylab data analysis environment, including interpreters for Python and R as well as VS Code <br> v2024-02-21"
+      description: "default brineylab data analysis environment, including interpreters for Python and R as well as VS Code <br> v2024-04-11"
       default: true
       kubespawner_override:
         lifecycle_hooks:
@@ -89,9 +89,9 @@ singleuser:
                 - >
                   mkdir -p ${HOME}/codeserver;
     - display_name: "deep learning"
-      description: "extends the data science environment to include torch and 🤗 libraries, as well as some deep learning-specific JupyterLab extensions <br> v2024-02-21"
+      description: "extends the data science environment to include torch and 🤗 libraries, as well as some deep learning-specific JupyterLab extensions <br> v2024-04-11"
       kubespawner_override:
-        image: brineylab/jupyterhub-deeplearning:v2024-02-21
+        image: brineylab/jupyterhub-deeplearning:v2024-04-11
         # extra_resource_limits:
         #   nvidia.com/gpu: "1"
         lifecycle_hooks:
@@ -180,12 +180,12 @@ hub:
     Authenticator:
       admin_users:
         - bryan
+        - terrence
+        - sarah
       allowed_users:
         - jonathan
         - pragati
         - nitesh
-        - terrence
-        - sarah
         - simone
         - sean
         - morgan
