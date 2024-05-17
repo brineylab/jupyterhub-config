@@ -50,7 +50,7 @@ singleuser:
   # alternate profiles (images)
   profileList:
     - display_name: "data science - no gpu"
-      description: "default brineylab data analysis environment, including interpreters for Python and R as well as VS Code <br> v2024-02-21"
+      description: "default brineylab data analysis environment, including interpreters for Python and R as well as VS Code <br> v2024-05-17"
       default: true
       kubespawner_override:
         image: brineylab/jupyterhub-datascience:v2024-05-17
