@@ -178,4 +178,3 @@ hub:
       c.KubeSpawner.args = ["--allow-root"]
       import os, nativeauthenticator
       c.JupyterHub.template_paths = [f"{os.path.dirname(nativeauthenticator.__file__)}/templates/"]
-
