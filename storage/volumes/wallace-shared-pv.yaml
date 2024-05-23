@@ -7,7 +7,7 @@ spec:
     storage: 1Ti
   accessModes:
     - ReadWriteMany
-  storageClassName: nfs-wallace-shared
+  storageClassName: nfs-wallace-shared-nvme
   nfs:
     server: wallace.scripps.edu
     path: "/data/brineylab_shared"
