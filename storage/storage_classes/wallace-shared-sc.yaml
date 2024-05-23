@@ -3,7 +3,7 @@
 apiVersion: storage.k8s.io/v1
 kind: StorageClass
 metadata:
-  name: nfs-wallance-shared-nvme
+  name: nfs-wallace-shared-nvme
 provisioner: nfs.csi.k8s.io
 reclaimPolicy: Delete
 volumeBindingMode: Immediate
