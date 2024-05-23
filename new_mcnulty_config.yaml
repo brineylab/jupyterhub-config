@@ -29,8 +29,8 @@ singleuser:
 
   # limits and guarantees
   memory:
-    limit: 64G
-    guarantee: 64G
+    limit: 32G
+    guarantee: 16G
 
   cpu:
     limit: 16
@@ -49,11 +49,12 @@ singleuser:
 
   # alternate profiles (images)
   profileList:
-    - display_name: "data science - no gpu"
+    - display_name: "data science"
       description: "default brineylab data analysis environment, including interpreters for Python and R as well as VS Code <br> v2024-05-17"
       default: true
       kubespawner_override:
-        image: brineylab/jupyterhub-datascience:v2024-05-17
+        node_selector:
+          gpu: "true"
         lifecycle_hooks:
           postStart:
             exec:
@@ -62,11 +63,13 @@ singleuser:
                 - "-c"
                 - >
                   mkdir -p ${HOME}/codeserver;
-    - display_name: "deep learning - 2 gpu"
-      description: "extends the data science environment to include torch and 🤗 libraries, as well as some deep learning-specific JupyterLab extensions and deepspeed support  <br> v2024-05-17"
+    - display_name: "deep learning - no gpu"
+      description: "default brineylab data analysis environment, including interpreters for Python and R as well as VS Code <br> v2024-05-17"
+      default: true
       kubespawner_override:
-        extra_resource_limits:
-          nvidia.com/gpu: 2
+        image: brineylab/jupyterhub-deeplearning:v2024-05-17-jax
+        node_selector:
+          gpu: "true"
         lifecycle_hooks:
           postStart:
             exec:
@@ -75,11 +78,20 @@ singleuser:
                 - "-c"
                 - >
                   mkdir -p ${HOME}/codeserver;
-    - display_name: "deep learning - 4 gpu"
-      description: "extends the data science environment to include torch and 🤗 libraries, as well as some deep learning-specific JupyterLab extensions and deepspeed support  <br> v2024-05-17"
+    - display_name: "deep learning - 1 gpu"
+      description: "deep learning environment with 1 gpu, but limited cpu (use one of the other options for cpu intesive tasks) <br> v2024-05-17-jax"
       kubespawner_override:
+        image: brineylab/jupyterhub-deeplearning:v2024-05-17-jax
         extra_resource_limits:
-          nvidia.com/gpu: 4
+          nvidia.com/gpu: "1"
+        cpu:
+          limit: 8
+          guarantee: 4
+        memory:
+          limit: 16G
+          guarantee: 4G
+        node_selector:
+          gpu: "true"
         lifecycle_hooks:
           postStart:
             exec:
@@ -88,19 +100,6 @@ singleuser:
                 - "-c"
                 - >
                   mkdir -p ${HOME}/codeserver;
-#    - display_name: "deep learning - 8 gpu"
-#      description: "extends the data science environment to include torch and 🤗 libraries, as well as some deep learning-specific JupyterLab extensions and deepspeed support  <br> v2024-05-17"
-#      kubespawner_override:
-#        extra_resource_limits:
-#          nvidia.com/gpu: 8
-#        lifecycle_hooks:
-#          postStart:
-#            exec:
-#              command:
-#                - "sh"
-#                - "-c"
-#                - >
-#                  mkdir -p ${HOME}/codeserver;
   # storage
   storage:
     # don't change default volume
@@ -123,14 +122,6 @@ singleuser:
         mountPath: /home/jovyan/shared
       - name: dshm
         mountPath: /dev/shm
-
-# required for setting up server (of one node)
-# when a load balancer is not being used
-#proxy:
-#  service:
-#    type: NodePort
-#    nodePorts:
-#      http: 32151
 
 hub:
   networkPolicy:
@@ -167,6 +158,8 @@ hub:
     
     JupyterHub:
       authenticator_class: "nativeauthenticator.NativeAuthenticator"
+      allow_named_servers: true
+      named_server_limit_per_user: 1
 
     NativeAuthenticator:
       enable_signup: true
