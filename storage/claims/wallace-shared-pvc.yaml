@@ -10,4 +10,4 @@ spec:
   volumeName: nfs-wallance-shared
   resources:
     requests:
-      storage: 1.7Ti
+      storage: 1700Gi

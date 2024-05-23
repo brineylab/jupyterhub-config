@@ -4,7 +4,7 @@ metadata:
   name: nfs-wallance-shared
 spec:
   capacity:
-    storage: 1.7Ti
+    storage: 1700Gi
   accessModes:
     - ReadWriteMany
   storageClassName: nfs-wallance-shared
