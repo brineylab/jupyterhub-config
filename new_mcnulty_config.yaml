@@ -29,12 +29,12 @@ singleuser:
 
   # limits and guarantees
   memory:
-    limit: 32G
-    guarantee: 16G
+    limit: 256G
+    guarantee: 32G
 
   cpu:
-    limit: 16
-    guarantee: 16
+    limit: 128
+    guarantee: 8
   
   # set extra environmental vars
   extraEnv:
@@ -44,7 +44,7 @@ singleuser:
 
   # default image
   image:
-    name: brineylab/jupyterhub-deeplearning
+    name: brineylab/jupyterhub-datascience
     tag: v2024-05-17
 
   # alternate profiles (images)
@@ -54,7 +54,7 @@ singleuser:
       default: true
       kubespawner_override:
         node_selector:
-          gpu: "true"
+          gpu: "false"
         lifecycle_hooks:
           postStart:
             exec:
@@ -69,7 +69,7 @@ singleuser:
       kubespawner_override:
         image: brineylab/jupyterhub-deeplearning:v2024-05-17-jax
         node_selector:
-          gpu: "true"
+          gpu: "false"
         lifecycle_hooks:
           postStart:
             exec:
@@ -82,16 +82,22 @@ singleuser:
       description: "deep learning environment with 1 gpu, but limited cpu (use one of the other options for cpu intesive tasks) <br> v2024-05-17-jax"
       kubespawner_override:
         image: brineylab/jupyterhub-deeplearning:v2024-05-17-jax
+        
+        # set lower cpu and memory for gpu servers
+        cpu_guarantee: 16
+        cpu_limit: 32
+        mem_guarantee: "16G"
+        mem_limit: "32G"
+
+        # set gpu resources
+        # https://discourse.jupyter.org/t/set-runtimeclassname-for-gpu-enabled-images/21617/5
         extra_resource_limits:
           nvidia.com/gpu: "1"
-        cpu:
-          limit: 8
-          guarantee: 4
-        memory:
-          limit: 16G
-          guarantee: 4G
+        extra_pod_config:
+          runtimeClassName: nvidia
         node_selector:
           gpu: "true"
+
         lifecycle_hooks:
           postStart:
             exec:
@@ -132,9 +138,9 @@ hub:
   config:
     # required to enable gpu
     # https://discourse.jupyter.org/t/set-runtimeclassname-for-gpu-enabled-images/21617/5
-    KubeSpawner:
-      extra_pod_config:
-        runtimeClassName: nvidia
+   # KubeSpawner:
+    #  extra_pod_config:
+     #   runtimeClassName: nvidia
     
     Authenticator:
       admin_users:
@@ -158,8 +164,10 @@ hub:
     
     JupyterHub:
       authenticator_class: "nativeauthenticator.NativeAuthenticator"
+      default_url: /hub/home
       allow_named_servers: true
       named_server_limit_per_user: 1
+      default_server: false
 
     NativeAuthenticator:
       enable_signup: true
