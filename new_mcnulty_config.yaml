@@ -45,12 +45,12 @@ singleuser:
   # default image
   image:
     name: brineylab/jupyterhub-datascience
-    tag: v2024-05-17
+    tag: v2024-05-23
 
   # alternate profiles (images)
   profileList:
     - display_name: "data science"
-      description: "default brineylab data analysis environment, including interpreters for Python and R as well as VS Code <br> v2024-05-17"
+      description: "default brineylab data analysis environment, including interpreters for Python and R as well as VS Code <br> v2024-05-23"
       default: true
       kubespawner_override:
         node_selector:
@@ -64,10 +64,10 @@ singleuser:
                 - >
                   mkdir -p ${HOME}/codeserver;
     - display_name: "deep learning - no gpu"
-      description: "default brineylab data analysis environment, including interpreters for Python and R as well as VS Code <br> v2024-05-17"
+      description: "default brineylab data analysis environment, including interpreters for Python and R as well as VS Code <br> v2024-05-23"
       default: true
       kubespawner_override:
-        image: brineylab/jupyterhub-deeplearning:v2024-05-17-jax
+        image: brineylab/jupyterhub-deeplearning:v2024-05-23
         node_selector:
           gpu: "false"
         lifecycle_hooks:
@@ -79,9 +79,9 @@ singleuser:
                 - >
                   mkdir -p ${HOME}/codeserver;
     - display_name: "deep learning - 1 gpu"
-      description: "deep learning environment with 1 gpu, but limited cpu (use one of the other options for cpu intesive tasks) <br> v2024-05-17-jax"
+      description: "deep learning environment with 1 gpu, but limited cpu (use one of the other options for cpu intesive tasks) <br> v2024-05-23"
       kubespawner_override:
-        image: brineylab/jupyterhub-deeplearning:v2024-05-17-jax
+        image: brineylab/jupyterhub-deeplearning:v2024-05-23
         
         # set lower cpu and memory for gpu servers
         cpu_guarantee: 16
@@ -110,14 +110,19 @@ singleuser:
   storage:
     # change default volume
     dynamic:
-      storageClass: nfs-wallace-jh-nvme
-    capacity: 10Gi
+      storageClass: nfs-wallace-jh-nvme   
+    capacity: 50Gi
 
     extraVolumes:
       # shared volume
       - name: nfs-propjoe-shared
         persistentVolumeClaim:
           claimName: nfs-propjoe-shared
+      # references volume
+      - name: nfs-propjoe-references
+        persistentVolumeClaim:
+          claimName: nfs-propjoe-references
+          readOnly: true
       # wallace workspace volume
       - name: nfs-wallace-shared
         persistentVolumeClaim:
@@ -142,6 +147,8 @@ singleuser:
     extraVolumeMounts:
       - name: nfs-propjoe-shared
         mountPath: /home/jovyan/shared
+      - name: nfs-propjoe-references
+        mountPath: /home/jovyan/references
       - name: nfs-wallace-shared
         mountPath: /home/jovyan/workspace
       - name: nfs-avon-novaseq6k
@@ -163,8 +170,8 @@ hub:
     # required to enable gpu
     # https://discourse.jupyter.org/t/set-runtimeclassname-for-gpu-enabled-images/21617/5
    # KubeSpawner:
-    #  extra_pod_config:
-     #   runtimeClassName: nvidia
+     # extra_pod_config:
+       # runtimeClassName: nvidia
     
     Authenticator:
       admin_users:
@@ -203,3 +210,4 @@ hub:
       c.KubeSpawner.args = ["--allow-root"]
       import os, nativeauthenticator
       c.JupyterHub.template_paths = [f"{os.path.dirname(nativeauthenticator.__file__)}/templates/"]
+
