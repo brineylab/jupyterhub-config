@@ -45,15 +45,15 @@ singleuser:
   # default image
   image:
     name: brineylab/jupyterhub-deeplearning
-    tag: v2024-05-17
+    tag: v2024-05-23
 
   # alternate profiles (images)
   profileList:
     - display_name: "data science - no gpu"
-      description: "default brineylab data analysis environment, including interpreters for Python and R as well as VS Code <br> v2024-05-17"
+      description: "default brineylab data analysis environment, including interpreters for Python and R as well as VS Code <br> v2024-05-23"
       default: true
       kubespawner_override:
-        image: brineylab/jupyterhub-datascience:v2024-05-17
+        image: brineylab/jupyterhub-datascience:v2024-05-23
         lifecycle_hooks:
           postStart:
             exec:
@@ -63,7 +63,7 @@ singleuser:
                 - >
                   mkdir -p ${HOME}/codeserver;
     - display_name: "deep learning - 2 gpu"
-      description: "extends the data science environment to include torch and 🤗 libraries, as well as some deep learning-specific JupyterLab extensions and deepspeed support  <br> v2024-05-17"
+      description: "extends the data science environment to include torch and 🤗 libraries, as well as some deep learning-specific JupyterLab extensions and deepspeed support  <br> v2024-05-23"
       kubespawner_override:
         extra_resource_limits:
           nvidia.com/gpu: 2
@@ -76,7 +76,7 @@ singleuser:
                 - >
                   mkdir -p ${HOME}/codeserver;
     - display_name: "deep learning - 4 gpu"
-      description: "extends the data science environment to include torch and 🤗 libraries, as well as some deep learning-specific JupyterLab extensions and deepspeed support  <br> v2024-05-17"
+      description: "extends the data science environment to include torch and 🤗 libraries, as well as some deep learning-specific JupyterLab extensions and deepspeed support  <br> v2024-05-23"
       kubespawner_override:
         extra_resource_limits:
           nvidia.com/gpu: 4
@@ -89,7 +89,7 @@ singleuser:
                 - >
                   mkdir -p ${HOME}/codeserver;
 #    - display_name: "deep learning - 8 gpu"
-#      description: "extends the data science environment to include torch and 🤗 libraries, as well as some deep learning-specific JupyterLab extensions and deepspeed support  <br> v2024-05-17"
+#      description: "extends the data science environment to include torch and 🤗 libraries, as well as some deep learning-specific JupyterLab extensions and deepspeed support  <br> v2024-05-23"
 #      kubespawner_override:
 #        extra_resource_limits:
 #          nvidia.com/gpu: 8
