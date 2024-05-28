@@ -1,0 +1,213 @@
+# This file can update the JupyterHub Helm chart's default configuration values.
+#
+# For reference see the configuration reference and default values, but make
+# sure to refer to the Helm chart version of interest to you!
+#
+# Introduction to YAML:     https://www.youtube.com/watch?v=cdLNKUoMc6c
+# Chart config reference:   https://zero-to-jupyterhub.readthedocs.io/en/stable/resources/reference.html
+# Chart default values:     https://github.com/jupyterhub/zero-to-jupyterhub-k8s/blob/HEAD/jupyterhub/values.yaml
+# Available chart versions: https://jupyterhub.github.io/helm-chart/
+#
+
+# disable user and server culling
+cull:
+  enabled: false
+
+# from https://z2jh.jupyter.org/en/stable/administrator/optimization.html
+scheduling:
+  userScheduler:
+    enabled: false
+
+singleuser:
+  cmd: jupyterhub-singleuser
+  defaultUrl: lab
+
+  # networking
+  # for some reason, notebook server spawning fails if networkPolicy is set to true
+  networkPolicy:
+    enabled: false
+
+  # limits and guarantees
+  memory:
+    limit: 256G
+    guarantee: 32G
+
+  cpu:
+    limit: 128
+    guarantee: 8
+  
+  # set extra environmental vars
+  extraEnv:
+    GRANT_SUDO: "yes"
+  uid: 0
+  fsGid: 0
+
+  # default image
+  image:
+    name: brineylab/jupyterhub-datascience
+    tag: v2024-05-23
+
+  # alternate profiles (images)
+  profileList:
+    - display_name: "data science"
+      description: "default brineylab data analysis environment, including interpreters for Python and R as well as VS Code <br> v2024-05-23"
+      default: true
+      kubespawner_override:
+        node_selector:
+          gpu: "false"
+        lifecycle_hooks:
+          postStart:
+            exec:
+              command:
+                - "sh"
+                - "-c"
+                - >
+                  mkdir -p ${HOME}/codeserver;
+    - display_name: "deep learning - no gpu"
+      description: "default brineylab data analysis environment, including interpreters for Python and R as well as VS Code <br> v2024-05-23"
+      default: true
+      kubespawner_override:
+        image: brineylab/jupyterhub-deeplearning:v2024-05-23
+        node_selector:
+          gpu: "false"
+        lifecycle_hooks:
+          postStart:
+            exec:
+              command:
+                - "sh"
+                - "-c"
+                - >
+                  mkdir -p ${HOME}/codeserver;
+    - display_name: "deep learning - 1 gpu"
+      description: "deep learning environment with 1 gpu, but limited cpu (use one of the other options for cpu intesive tasks) <br> v2024-05-23"
+      kubespawner_override:
+        image: brineylab/jupyterhub-deeplearning:v2024-05-23
+        
+        # set lower cpu and memory for gpu servers
+        cpu_guarantee: 16
+        cpu_limit: 32
+        mem_guarantee: "16G"
+        mem_limit: "32G"
+
+        # set gpu resources
+        # https://discourse.jupyter.org/t/set-runtimeclassname-for-gpu-enabled-images/21617/5
+        extra_resource_limits:
+          nvidia.com/gpu: "1"
+        extra_pod_config:
+          runtimeClassName: nvidia
+        node_selector:
+          gpu: "true"
+
+        lifecycle_hooks:
+          postStart:
+            exec:
+              command:
+                - "sh"
+                - "-c"
+                - >
+                  mkdir -p ${HOME}/codeserver;
+  # storage
+  storage:
+    # change default volume
+    dynamic:
+      storageClass: nfs-wallace-jh-nvme   
+    capacity: 50Gi
+
+    extraVolumes:
+      # shared volume
+      - name: nfs-propjoe-shared
+        persistentVolumeClaim:
+          claimName: nfs-propjoe-shared
+      # references volume
+      - name: nfs-propjoe-references
+        persistentVolumeClaim:
+          claimName: nfs-propjoe-references
+          readOnly: true
+      # wallace workspace volume
+      - name: nfs-wallace-shared
+        persistentVolumeClaim:
+          claimName: nfs-wallace-shared
+      # sequencing data: NovaSeq
+      - name: nfs-avon-novaseq6k
+        persistentVolumeClaim:
+          claimName: nfs-avon-novaseq6k
+      # sequencing data: NextSeq
+      - name: nfs-avon-nextseq2k
+        persistentVolumeClaim:
+          claimName: nfs-avon-nextseq2k
+      # sequencing data: ONT
+      - name: nfs-stringer-ont
+        persistentVolumeClaim:
+          claimName: nfs-stringer-ont
+      # dshm
+      - name: dshm
+        emptyDir:
+          medium: Memory
+          sizeLimit: "10Gi"
+    extraVolumeMounts:
+      - name: nfs-propjoe-shared
+        mountPath: /home/jovyan/shared
+      - name: nfs-propjoe-references
+        mountPath: /home/jovyan/references
+      - name: nfs-wallace-shared
+        mountPath: /home/jovyan/workspace
+      - name: nfs-avon-novaseq6k
+        mountPath: /home/jovyan/sequencing_runs/novaseq
+      - name: nfs-avon-nextseq2k
+        mountPath: /home/jovyan/sequencing_runs/nextseq
+      - name: nfs-stringer-ont
+        mountPath: /home/jovyan/sequencing_runs/ont
+      - name: dshm
+        mountPath: /dev/shm
+
+hub:
+  networkPolicy:
+    enabled: false
+  containerSecurityContext:
+    runAsUser: 0
+    runAsGroup: 0
+  config:
+    # required to enable gpu
+    # https://discourse.jupyter.org/t/set-runtimeclassname-for-gpu-enabled-images/21617/5
+   # KubeSpawner:
+     # extra_pod_config:
+       # runtimeClassName: nvidia
+    
+    Authenticator:
+      admin_users:
+        - bryan
+        - sarah
+        - terrence
+      allowed_users:
+        - jonathan
+        - pragati
+        - nitesh
+        - simone
+        - sean
+        - morgan
+        - benjamin
+        - jyothi
+        - nathan
+        - karenna
+        - daniella
+        - praneeth
+        - collin
+    
+    JupyterHub:
+      authenticator_class: "nativeauthenticator.NativeAuthenticator"
+      default_url: /hub/home
+      allow_named_servers: true
+      named_server_limit_per_user: 1
+      default_server: false
+
+    NativeAuthenticator:
+      enable_signup: true
+
+  extraConfig:
+    00-first-config: |
+      c.KubeSpawner.environment = {'NB_UMASK': '0000'}
+      c.KubeSpawner.allow_privilege_escalation = True
+      c.KubeSpawner.args = ["--allow-root"]
+      import os, nativeauthenticator
+      c.JupyterHub.template_paths = [f"{os.path.dirname(nativeauthenticator.__file__)}/templates/"]
+

@@ -5,7 +5,7 @@ metadata:
   namespace: jupyterhub
 spec:
   accessModes:
-    - ReadWriteMany
+    - ReadOnlyMany
   storageClassName: nfs-propjoe-hdd
   volumeName: nfs-propjoe-references
   resources:

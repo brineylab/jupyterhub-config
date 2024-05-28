@@ -6,7 +6,7 @@ spec:
   capacity:
     storage: 900Ti
   accessModes:
-    - ReadWriteMany
+    - ReadOnlyMany
   storageClassName: nfs-propjoe-hdd
   nfs:
     server: propjoe.scripps.edu

@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: nfs-wallace-shared
+  namespace: jupyterhub
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: nfs-wallace-shared-nvme
+  volumeName: nfs-wallace-shared
+  resources:
+    requests:
+      storage: 1Ti

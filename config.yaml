@@ -72,12 +72,12 @@ singleuser:
   # default image
   image:
     name: brineylab/jupyterhub-datascience
-    tag: v2024-04-11
+    tag: v2024-05-23
 
   # alternate profiles (images)
   profileList:
     - display_name: "data science"
-      description: "default brineylab data analysis environment, including interpreters for Python and R as well as VS Code <br> v2024-04-11"
+      description: "default brineylab data analysis environment, including interpreters for Python and R as well as VS Code <br> v2024-05-23"
       default: true
       kubespawner_override:
         lifecycle_hooks:
@@ -89,9 +89,9 @@ singleuser:
                 - >
                   mkdir -p ${HOME}/codeserver;
     - display_name: "deep learning"
-      description: "extends the data science environment to include torch and 🤗 libraries, as well as some deep learning-specific JupyterLab extensions <br> v2024-04-11"
+      description: "extends the data science environment to include torch and 🤗 libraries, as well as some deep learning-specific JupyterLab extensions <br> v2024-05-23"
       kubespawner_override:
-        image: brineylab/jupyterhub-deeplearning:v2024-04-11
+        image: brineylab/jupyterhub-deeplearning:v2024-05-23
         # extra_resource_limits:
         #   nvidia.com/gpu: "1"
         lifecycle_hooks:
@@ -146,9 +146,10 @@ singleuser:
         persistentVolumeClaim:
           claimName: nfs-stringer-ont
       # references
-      # - name: nfs-propjoe-references
-      #   persistentVolumeClaim:
-      #     claimName: nfs-propjoe-references
+      - name: nfs-propjoe-references
+        persistentVolumeClaim:
+          claimName: nfs-propjoe-references
+          readOnly: true
       # shared data
       - name: nfs-propjoe-shared
         persistentVolumeClaim:
@@ -165,8 +166,8 @@ singleuser:
         mountPath: /home/jovyan/sequencing_runs/ont
       - name: nfs-propjoe-shared
         mountPath: /home/jovyan/shared
-      # - name: nfs-propjoe-references
-      #   mountPath: /home/jovyan/references
+      - name: nfs-propjoe-references
+        mountPath: /home/jovyan/references
       # - name: nfs-stringer-shared
       #   mountPath: /home/jovyan/shared
 
