@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: nfs-wallace-shared
+spec:
+  capacity:
+    storage: 1Ti
+  accessModes:
+    - ReadWriteMany
+  storageClassName: nfs-wallace-shared-nvme
+  nfs:
+    server: wallace.scripps.edu
+    path: "/data/brineylab_shared"
