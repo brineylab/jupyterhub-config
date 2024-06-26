@@ -29,7 +29,7 @@ singleuser:
 
   # limits and guarantees
   memory:
-    limit: 256G
+    limit: 512G
     guarantee: 64G
 
   cpu:
@@ -88,6 +88,18 @@ singleuser:
                 - "-c"
                 - >
                   mkdir -p ${HOME}/codeserver;
+#    - display_name: "TESTING - no gpu"
+#      description: "default brineylab data analysis environment, including interpreters for Python and R as well as VS Code <br> v2024>"
+#      kubespawner_override:
+#        image: sburbach/jupyterhub-jupyter:v1
+#        lifecycle_hooks:
+#          postStart:
+#            exec:
+#              command:
+#                - "sh"
+#                - "-c"
+#                - >
+#                  mkdir -p ${HOME}/codeserver;
 #    - display_name: "deep learning - 8 gpu"
 #      description: "extends the data science environment to include torch and 🤗 libraries, as well as some deep learning-specific JupyterLab extensions and deepspeed support  <br> v2024-05-23"
 #      kubespawner_override:
@@ -167,6 +179,8 @@ hub:
     
     JupyterHub:
       authenticator_class: "nativeauthenticator.NativeAuthenticator"
+      allow_named_servers: true
+      named_server_limit_per_user: 1
 
     NativeAuthenticator:
       enable_signup: true
