@@ -1,0 +1,148 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: jupyterhub-custom-templates
+data:
+  home.html: |
+    {% extends "page.html" %}
+    {% if announcement_home is string %}
+      {% set announcement = announcement_home %}
+    {% endif %}
+    {% block main %}
+      <div class="container">
+        <h1 class="sr-only">JupyterHub home page</h1>
+        {% if allow_named_servers %}
+          <h2>Servers</h2>
+          <p>
+            You can launch a total of {{ named_server_limit_per_user + 1 }} server(s) at one time. 
+            When adding your second server, there cannot be any spaces in the name!
+            You will only be able to launch 1 GPU server.
+          </p>
+          {% set named_spawners = user.all_spawners(include_default=False)|list %}
+          <table class="server-table table table-striped">
+            <thead>
+              <tr>
+                <th>Server name</th>
+                <th>Profile</th>
+                <th>GPUs</th>
+                <th>URL</th>
+                <th>Last activity</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="home-server-row" data-server-name="default">
+                <td>CPU-only</td>
+                <td>
+                  {% if default_server.user_options.profile and default_server.active %}
+                    {{ default_server.user_options.profile }}
+                  {% else %}
+                    &nbsp
+                  {% endif %}
+                </td>
+                <td>
+                  {% if default_server.user_options.GPUs and default_server.active %}
+                    {{ default_server.user_options.GPUs }}
+                  {% elif not default_server.active %}
+                    &nbsp
+                  {% else %}
+                    0
+                  {% endif %}
+                </td>
+                <td>
+                  <a class="server-link {% if not default_server.active %}hidden{% endif %}"
+                    href="{{ user.server_url('') }}">{{ user.server_url('') }}</a>
+                </td>
+                <td class='time-col'>
+                  {% if default_server.last_activity %}
+                    {{ default_server.last_activity.isoformat() + 'Z' }}
+                  {% else %}
+                    Never
+                  {% endif %}
+                </td>
+                <td>
+                  <a role="button"
+                    class="stop-server btn btn-xs btn-danger{% if not default_server.active %} hidden{% endif %}"
+                    id="stop"
+                    href="{{ url }}">Stop Server</a>
+                  <a role="button"
+                    class="start-server btn btn-xs btn-primary {% if default_server.active %}hidden{% endif %}"
+                    id="start"
+                    href="{{ url }}">Start Server</a>
+                </td>
+              </tr>
+              {% for spawner in named_spawners %}
+                <tr class="home-server-row" data-server-name="{{ spawner.name }}">
+                  {# name #}
+                  <td>{{ spawner.name }}</td>
+                  {# profile type #}
+                  <td>
+                    {% if spawner.user_options.profile and spawner.ready %}
+                      {{ spawner.user_options.profile }}
+                    {% else %}
+                      &nbsp
+                    {% endif %}
+                  </td>
+                  {# num gpus #}
+                  <td>
+                    {% if spawner.user_options.GPUs and spawner.ready %}
+                      {{ spawner.user_options.GPUs }}
+                    {% elif not spawner.ready %}
+                      &nbsp
+                    {% else %}
+                      0
+                    {% endif %}
+                  </td>
+                  {# url #}
+                  <td>
+                    <a class="server-link {% if not spawner.ready %}hidden{% endif %}"
+                      href="{{ user.server_url(spawner.name) }}">{{ user.server_url(spawner.name) }}</a>
+                  </td>
+                  {# activity #}
+                  <td class='time-col'>
+                    {% if spawner.last_activity %}
+                      {{ spawner.last_activity.isoformat() + 'Z' }}
+                    {% else %}
+                      Never
+                    {% endif %}
+                  </td>
+                  {# actions #}
+                  <td>
+                    <a role="button"
+                      class="stop-server btn btn-xs btn-danger{% if not spawner.active %} hidden{% endif %}"
+                      id="stop-{{ spawner.name }}">Stop Server</a>
+                    <a role="button"
+                      class="start-server btn btn-xs btn-primary {% if spawner.active %}hidden{% endif %}"
+                      id="start-{{ spawner.name }}"
+                      href="{{ base_url }}spawn/{{ user.name }}/{{ spawner.name }}">Start Server</a>
+                    <button role="button"
+                            class="delete-server btn btn-xs btn-danger{% if spawner.active %} hidden{% endif %}"
+                            id="delete-{{ spawner.name }}">Delete Server</button>
+                  </td>
+                </tr>
+              {% endfor %}
+              {% if named_spawners|length < named_server_limit_per_user %}
+                <tr class="home-server-row add-server-row">
+                  <td colspan="6">
+                    <div class="input-group">
+                      <input class="new-server-name form-control"
+                            aria-label="server name"
+                            placeholder="name-your-server">
+                      <button role="button"
+                              type="button"
+                              class="new-server-btn btn btn-xs btn-primary">Add New Server</button>
+                    </div>
+                  </td>
+                </tr>
+              {% endif %}
+            </tbody>
+          </table>
+        {% endif %}
+      </div>
+    {% endblock main %}
+    {% block script %}
+      {{ super() }}
+      <script type="text/javascript">
+        require(["home"]);
+      </script>
+    {% endblock script %}

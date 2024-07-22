@@ -4,10 +4,10 @@ metadata:
   name: nfs-wallace-shared
 spec:
   capacity:
-    storage: 1Ti
+    storage:
   accessModes:
     - ReadWriteMany
   storageClassName: nfs-wallace-shared-nvme
   nfs:
-    server: wallace.scripps.edu
-    path: "/data/brineylab_shared"
+    server: 192.168.1.2 #wallace.scripps.edu over mlnx
+    path: "/wallace_data_zfspool/brineylab_shared"

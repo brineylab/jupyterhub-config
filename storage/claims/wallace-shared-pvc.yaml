@@ -10,4 +10,4 @@ spec:
   volumeName: nfs-wallace-shared
   resources:
     requests:
-      storage: 1Ti
+      storage:
