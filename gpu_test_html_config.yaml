@@ -14,10 +14,17 @@ scheduling:
   userScheduler:
     enabled: false
 
+# Update images here
+# NOTE: images need to be updated in a second place in this file
+#       this sets updates the image puller, so that images get
+#       pulled during the helm upgrade
 prePuller:
   extraImages:
     datascience:
       name: brineylab/jupyterhub-datascience
+      tag: v2024-05-23
+    deeplearning:
+      name: brineylab/jupyterhub-deeplearning
       tag: v2024-05-23
 
 singleuser:
@@ -32,7 +39,7 @@ singleuser:
   uid: 0
   fsGid: 0
 
-  # resource limits
+  # default resource limits
   memory:
     limit: 512G
     guarantee: 64G
@@ -51,7 +58,6 @@ singleuser:
             mkdir -p ${HOME}/codeserver;
 
   storage:
-    # don't change default volume
 #    dynamic:
 #      storageClass: nfs-marlo-ssd
     capacity: 250Gi
@@ -81,6 +87,7 @@ proxy:
 hub:
   networkPolicy:
     enabled: false
+  
   containerSecurityContext:
     runAsUser: 0
     runAsGroup: 0
