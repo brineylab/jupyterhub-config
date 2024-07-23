@@ -4,10 +4,17 @@ metadata:
   name: nfs-wallace-shared
 spec:
   capacity:
-    storage:
+    storage: 300Ti
   accessModes:
     - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
   storageClassName: nfs-wallace-shared-nvme
+  mountOptions:
+    - hard
+    - proto=tcp
   nfs:
-    server: 192.168.1.2 #wallace.scripps.edu over mlnx
-    path: "/wallace_data_zfspool/brineylab_shared"
+    path: /wallace_data_zfspool/brineylab_shared
+    server: 192.168.1.3 #wallace.scripps.edu over mlnx
+
+
+
