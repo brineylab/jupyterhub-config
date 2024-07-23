@@ -92,16 +92,11 @@ hub:
     - name: users-config
       configMap:
         name: users-config   
-    - name: named-servers
-      configMap:
-        name: named-servers
   extraVolumeMounts:
     - mountPath: /etc/jupyterhub/templates
       name: jupyterhub-custom-templates
     - mountPath: /etc/jupyterhub/auth
       name: users-config
-    - mountPath: /etc/jupyterhub/jupyterhub_config.py
-      name: named-servers
 
   config:
     # required to enable gpu
