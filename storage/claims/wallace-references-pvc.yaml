@@ -10,4 +10,4 @@ spec:
   volumeName: nfs-wallace-references
   resources:
     requests:
-      storage: 
+      storage: 300Ti 
