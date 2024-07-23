@@ -15,9 +15,9 @@ scheduling:
     enabled: false
 
 # Update images here
-# NOTE: images need to be updated in a second place in this file
-#       this sets updates the image puller, so that images get
-#       pulled during the helm upgrade
+# NOTE: Images need to be updated in a second place in this file.
+#       This only updates the image puller, so that new images get
+#       pulled during the helm upgrade.
 prePuller:
   extraImages:
     datascience:
@@ -47,7 +47,7 @@ singleuser:
     limit: 128
     guarantee: 16
 
-  # create codeserver directory so codeserver can launch
+  # required for codeserver to launch
   lifecycleHooks:
     postStart:
       exec:
