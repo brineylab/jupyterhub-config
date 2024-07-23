@@ -85,6 +85,7 @@ hub:
     runAsUser: 0
     runAsGroup: 0
 
+  # Mount users and home page configmaps
   extraVolumes:
     - name: jupyterhub-custom-templates
       configMap:
@@ -99,16 +100,8 @@ hub:
       name: users-config
 
   config:
-    # required to enable gpu
-    # https://discourse.jupyter.org/t/set-runtimeclassname-for-gpu-enabled-images/21617/5
-    KubeSpawner:
-      extra_pod_config:
-        runtimeClassName: nvidia
-
     JupyterHub:
       authenticator_class: "nativeauthenticator.NativeAuthenticator"
-      # allow_named_servers: true
-      # named_server_limit_per_user: 2
       default_url: "/hub/home"
 
     NativeAuthenticator:
