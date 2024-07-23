@@ -14,9 +14,9 @@ data:
         {% if allow_named_servers %}
           <h2>Servers</h2>
           <p>
-            You can launch a total of {{ named_server_limit_per_user + 1 }} server(s) at one time. 
-            When adding your second server, there cannot be any spaces in the name!
-            You will only be able to launch 1 GPU server.
+            You can launch a total of {{ named_server_limit_per_user + 1 }} server(s) at one time -
+            {{ named_server_limit_per_user }} of these servers can have GPUs.
+            When adding GPU servers using the 'Add New Server' button, don't add any spaces or capital letters in the server name!
           </p>
           {% set named_spawners = user.all_spawners(include_default=False)|list %}
           <table class="server-table table table-striped">
@@ -32,7 +32,7 @@ data:
             </thead>
             <tbody>
               <tr class="home-server-row" data-server-name="default">
-                <td>CPU-only</td>
+                <td>cpu-only</td>
                 <td>
                   {% if default_server.user_options.profile and default_server.active %}
                     {{ default_server.user_options.profile }}

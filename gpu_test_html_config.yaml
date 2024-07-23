@@ -14,6 +14,12 @@ scheduling:
   userScheduler:
     enabled: false
 
+prePuller:
+  extraImages:
+    datascience:
+      name: brineylab/jupyterhub-datascience
+      tag: v2024-05-23
+
 singleuser:
   cmd: jupyterhub-singleuser
   defaultUrl: lab
@@ -21,18 +27,28 @@ singleuser:
   networkPolicy:
     enabled: false
 
-  memory:
-    limit: 512G
-    guarantee: 64G
-
-  cpu:
-    limit: 128
-    guarantee: 16
-
   extraEnv:
     GRANT_SUDO: "yes"
   uid: 0
   fsGid: 0
+
+  # resource limits
+  memory:
+    limit: 512G
+    guarantee: 64G
+  cpu:
+    limit: 128
+    guarantee: 16
+
+  # create codeserver directory so codeserver can launch
+  lifecycleHooks:
+    postStart:
+      exec:
+        command:
+          - "sh"
+          - "-c"
+          - >
+            mkdir -p ${HOME}/codeserver;
 
   storage:
     # don't change default volume
@@ -73,9 +89,19 @@ hub:
     - name: jupyterhub-custom-templates
       configMap:
         name: jupyterhub-custom-templates
+    - name: users-config
+      configMap:
+        name: users-config   
+    - name: named-servers
+      configMap:
+        name: named-servers
   extraVolumeMounts:
     - mountPath: /etc/jupyterhub/templates
       name: jupyterhub-custom-templates
+    - mountPath: /etc/jupyterhub/auth
+      name: users-config
+    - mountPath: /etc/jupyterhub/jupyterhub_config.py
+      name: named-servers
 
   config:
     # required to enable gpu
@@ -84,169 +110,148 @@ hub:
       extra_pod_config:
         runtimeClassName: nvidia
 
-    Authenticator:
-      admin_users:
-        - bryan
-        - sarah
-        - terrence
-      allowed_users:
-        - jonathan
-        - pragati
-        - nitesh
-        - simone
-        - sean
-        - morgan
-        - benjamin
-        - jyothi
-        - nathan
-        - karenna
-        - daniella
-        - praneeth
-        - collin
-
     JupyterHub:
       authenticator_class: "nativeauthenticator.NativeAuthenticator"
-      allow_named_servers: true
-      named_server_limit_per_user: 1
+      # allow_named_servers: true
+      # named_server_limit_per_user: 2
       default_url: "/hub/home"
 
     NativeAuthenticator:
       enable_signup: true
 
   extraConfig:
-    00-first-config: |
+    env: |
       c.KubeSpawner.environment = {'NB_UMASK': '0000'}
       c.KubeSpawner.allow_privilege_escalation = True
       c.KubeSpawner.args = ["--allow-root"]
+    
+    templates: |
       import os, nativeauthenticator
       c.JupyterHub.template_paths = [f"{os.path.dirname(nativeauthenticator.__file__)}/templates/"]
       c.JupyterHub.template_paths.insert(0, "/etc/jupyterhub/templates")
+
+    users: |
+      import yaml
+      with open("/etc/jupyterhub/auth/users.yaml") as f:
+        users = yaml.safe_load(f)
+
+      c.Authenticator.admin_users = users.get("admin", [])
+      c.Authenticator.allowed_users = set(users.get("admin", []) + users.get("gpu", []) + users.get("regular", [])) 
+
+    # ref: https://jupyterhub.readthedocs.io/en/stable/howto/configuration/config-user-env.html#named-servers
+    # src code: https://github.com/jupyterhub/jupyterhub/blob/main/jupyterhub/app.py#L1341
+    namedServers: |
+      def custom_named_server_limit(handler):
+        with open("/etc/jupyterhub/auth/users.yaml") as f:
+          users = yaml.safe_load(f)
+        
+        user = handler.current_user.name
+        three_servers = set(users.get("admin", []) + users.get("gpu", []))
+        if user in three_servers:
+            return 2
+        return 1
+
+      c.JupyterHub.allow_named_servers = True
+      c.JupyterHub.named_server_limit_per_user = custom_named_server_limit
     
     # modified from https://github.com/neurohackademy/nh2020-jupyterhub/blob/8bc0d8304d5090d3a1e21a038a68f0a940e31809/deployments/hub-neurohackademy-org/config/prod.yaml
     # ref for profile_options: https://jupyterhub-kubespawner.readthedocs.io/en/latest/spawner.html
     options-form: |
+        
+        # Define GPU resource options (for different number of GPUs)
+        # extra_pod_config: https://discourse.jupyter.org/t/set-runtimeclassname-for-gpu-enabled-images/21617/5
+        def define_gpu_options(option_list):
+          return {
+            "GPUs": {
+              "display_name": "Number of GPUs",
+              "choices": {
+                str(i): {
+                  "display_name": str(i),
+                  "kubespawner_override": {
+                    "extra_resource_limits": {"nvidia.com/gpu": i},
+                    "extra_pod_config": {"runtimeClassName": "nvidia"},
+                  },
+                } for i in option_list
+              },
+            }
+          }
+        
         async def dynamic_options_form(self):
             
-            # update images here
+            # Update images here
             datascience = "brineylab/jupyterhub-datascience:v2024-05-23"
             deeplearning = "brineylab/jupyterhub-deeplearning:v2024-05-23"
 
-            # define lifecycle hook
-            hook = {
-              "postStart": {
-                "exec": {
-                  "command": ["/bin/sh", "-c", "mkdir -p $HOME/codeserver"]
-                }
-              }
-            }
+            # Update gpu users here
+            import yaml
+            with open("/etc/jupyterhub/auth/users.yaml") as f:
+              users = yaml.safe_load(f)
+            gpu = users.get("gpu", [])
             
-            # define CPU only profiles
-            self.profile_list = [
-                {
-                    "display_name": "data science - no gpu",
-                    "description": "default brineylab data analysis environment, including interpreters for Python and R as well as VS Code <br> v2024-05-23",
-                    "default": True,
-                    "kubespawner_override": {
-                      "image": datascience,
-                      "lifecycle_hooks": hook,
-                    }
-                },
-                {
-                    "display_name": "deep learning - no gpu",
-                    "description": "extends the data science environment to include torch and 🤗 libraries, as well as some deep learning-specific JupyterLab extensions and deepspeed support  <br> v2024-05-23",
-                    "kubespawner_override": {
-                      "image": deeplearning,
-                      "lifecycle_hooks": hook,
-                    }
-                },
-            ]
-
-            # if default server -> restrict to CPU only
+            # For default server -> CPU profiles
             if not self.name:
-              return self._options_form_default()
-            
-            # add inference gpus for all users on named servers
-            self.profile_list.extend([
+              self.profile_list = [
                 {
-                    "display_name": "A30 GPUs",
-                    "description": "extends the data science environment to include torch and 🤗 libraries, as well as some deep learning-specific JupyterLab extensions and deepspeed support  <br> v2024-05-23",
-                    "kubespawner_override": {
-                      "image": deeplearning,
-                      "lifecycle_hooks": hook,
-                    },
-                    "profile_options": {
-                        "GPUs": {
-                          "display_name": "Number of GPUs",
-                          "choices": {
-                            str(i): {
-                              "display_name": str(i),
-                              "kubespawner_override": {
-                                  "extra_resource_limits": {"nvidia.com/gpu": i},
-                              },
-                            } for i in [1, 2]
-                          },
-                        }
-                      },
+                  "display_name": "data science",
+                  "description": "default brineylab data analysis environment, including interpreters for Python and R as well as VS Code <br> v2024-05-23",
+                  "default": True,
+                  "kubespawner_override": {
+                      "image": datascience,
+                      "node_selector": {"node_profile": "cpu"},
+                  }
                 },
-            ])
+                {
+                  "display_name": "deep learning",
+                  "description": "extends the data science environment to include torch and 🤗 libraries, as well as some deep learning-specific JupyterLab extensions and deepspeed support  <br> v2024-05-23",
+                  "kubespawner_override": {
+                      "image": deeplearning,
+                      "node_selector": {"node_profile": "cpu"},
+                  }
+                }
+              ]
+            
+            # For named server(s) -> GPU profiles
+            else:
+              # add inference gpus for all users on named servers
+              self.profile_list = [
+                {
+                  "display_name": "deep learning - A30 GPU",
+                  "description": "One A30 GPU for inference and testing.",
+                  "kubespawner_override": {
+                    "image": deeplearning,
+                    "node_selector": {"node_profile": "A30"},
+                    "extra_resource_limits": {"nvidia.com/gpu": 1},
+                    "extra_pod_config": {"runtimeClassName": "nvidia"},
+                    "cpu_guarantee": 12,
+                    "cpu_limit": 48,
+                    "mem_guarantee": "12G",
+                    "mem_limit": "64G"
+                  },
+                },
+                {
+                  "display_name": "deep learning - A6000 GPU",
+                  "description": "One A6000 GPU for inference and testing.",
+                  "kubespawner_override": {
+                    "image": deeplearning,
+                    "node_selector": {"node_profile": "A6000"},
+                    "extra_resource_limits": {"nvidia.com/gpu": 1},
+                    "extra_pod_config": {"runtimeClassName": "nvidia"},
+                  },
+                }
+              ]
 
-            # add L40s profiles for gpu users only
-            gpu = ['sarah', 'simone', 'praneeth', 'karenna']
-            if self.user.name in gpu or self.user.admin:
+              # add L40s profiles for gpu users only
+              if self.user.name in gpu or self.user.admin:
                 self.profile_list.extend([
                   {
-                      "display_name": "L40s GPUs",
-                      "description": "Only visible to GPU users. Allows users to select the number of GPUs they want.",
-                      "kubespawner_override": {
-                        "image": deeplearning,
-                        "lifecycle_hooks": hook,
-                      },
-                      "profile_options": {
-                        "GPUs": {
-                          "display_name": "Number of GPUs",
-                          "choices": {
-                            str(i): {
-                              "display_name": str(i),
-                              "kubespawner_override": {
-                                  "extra_resource_limits": {"nvidia.com/gpu": i},
-                              },
-                            } for i in [1, 2, 4]
-                          },
-                        }
-                      },
-                  },
-                ])
-
-            # testing
-            if not self.name:
-              self.profile_list.extend([
-                  {
-                      "display_name": "deep learning - L40s 2",
-                      "description": "Only visible to GPU users. Allows users to select the number of GPUs they want.",
-                      "kubespawner_override": {
-                        "image": deeplearning,
-                        "lifecycle_hooks": {
-                          "postStart": {
-                            "exec": {
-                              "command": ["/bin/sh", "-c", "mkdir -p $HOME/codeserver"]
-                            }
-                          }
-                        }
-                      },
-                      "profile_options": {
-                        "GPUs": {
-                          "display_name": "Number of GPUs",
-                          "choices": {
-                            str(i): {
-                              "display_name": str(i),
-                              "kubespawner_override": {
-                                  "extra_resource_limits": {"nvidia.com/gpu": i},
-                              },
-                            } for i in [1, 2, 4]
-                          },
-                        }
-                      },
-                  },
+                    "display_name": "deep learning - L40s GPUs",
+                    "description": "L40s GPUs - avaliable to GPU users only",
+                    "kubespawner_override": {
+                      "image": deeplearning,
+                      "node_selector": {"node_profile": "L40S"},
+                    },
+                    "profile_options": define_gpu_options([1, 2, 4]),
+                  }
                 ])
 
             # NOTE: We let KubeSpawner inspect profile_list and decide what to

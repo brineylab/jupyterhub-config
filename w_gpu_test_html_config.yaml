@@ -208,38 +208,6 @@ hub:
                   },
                 ])
 
-            # testing
-            # if self.server_url == '':
-            #   self.profile_list.extend([
-            #       {
-            #           "display_name": "deep learning - L40s 2",
-            #           "description": "Only visible to GPU users. Allows users to select the number of GPUs they want.",
-            #           "kubespawner_override": {
-            #             "image": deeplearning,
-            #             "lifecycle_hooks": {
-            #               "postStart": {
-            #                 "exec": {
-            #                   "command": ["/bin/sh", "-c", "mkdir -p $HOME/codeserver"]
-            #                 }
-            #               }
-            #             }
-            #           },
-            #           "profile_options": {
-            #             "GPUs": {
-            #               "display_name": "Number of GPUs",
-            #               "choices": {
-            #                 str(i): {
-            #                   "display_name": str(i),
-            #                   "kubespawner_override": {
-            #                       "extra_resource_limits": {"nvidia.com/gpu": i},
-            #                   },
-            #                 } for i in [1, 2, 4]
-            #               },
-            #             }
-            #           },
-            #       },
-            #     ])
-
             # NOTE: We let KubeSpawner inspect profile_list and decide what to
             #       return, it will return a falsy blank string if there is no
             #       profile_list, which makes no options form be presented.
