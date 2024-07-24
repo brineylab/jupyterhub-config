@@ -87,6 +87,8 @@ data:
                   <td>
                     {% if spawner.user_options.GPUs and spawner.ready %}
                       {{ spawner.user_options.GPUs }}
+                    {% elif spawner.ready %}
+                      1
                     {% elif not spawner.ready %}
                       &nbsp
                     {% else %}

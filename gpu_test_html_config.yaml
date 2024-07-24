@@ -55,34 +55,57 @@ singleuser:
           - "sh"
           - "-c"
           - >
-            mkdir -p ${HOME}/codeserver;
-
+            mkdir -p ${HOME}/.codeserver;
   storage:
-#    dynamic:
-#      storageClass: nfs-marlo-ssd
+    # don't change default volume
+    dynamic:
+      storageClass: nfs-wallace-jh-nvme
     capacity: 250Gi
 
-#    extraVolumes:
-#      # shared volume
-#      - name: nfs-propjoe-shared
+    extraVolumes:
+      # shared volume
+      - name:  nfs-wallace-shared
+        persistentVolumeClaim:
+          claimName: nfs-wallace-shared
+      # references volume
+      - name: nfs-wallace-references
+        persistentVolumeClaim:
+          claimName: nfs-wallace-references
+          readOnly: true
+      # sequencing data: NovaSeq
+#      - name: nfs-avon-novaseq6k
 #        persistentVolumeClaim:
-#          claimName: nfs-propjoe-shared
-#      - name: dshm
-#        emptyDir:
-#          medium: Memory
-#          sizeLimit: "10Gi"
-#    extraVolumeMounts:
-#      # shared volume
+#          claimName: nfs-avon-novaseq6k
+#      # sequencing data: NextSeq
+#      - name: nfs-avon-nextseq2k
+#        persistentVolumeClaim:
+#          claimName: nfs-avon-nextseq2k
+      # sequencing data: ONT
+#      - name: nfs-stringer-ont
+#        persistentVolumeClaim:
+#          claimName: nfs-stringer-ont
+      # dshm
+      - name: dshm
+        emptyDir:
+          medium: Memory
+          sizeLimit: "10Gi"
+    extraVolumeMounts:
 #      - name: nfs-propjoe-shared
 #        mountPath: /home/jovyan/shared
-#      - name: dshm
-#        mountPath: /dev/shm
+      - name: nfs-wallace-references
+        mountPath: /home/jovyan/references
+      - name: nfs-wallace-shared
+        mountPath: /home/jovyan/shared
+#      - name: nfs-avon-novaseq6k
+#        mountPath: /home/jovyan/sequencing_runs/novaseq
+#      - name: nfs-avon-nextseq2k
+#        mountPath: /home/jovyan/sequencing_runs/nextseq
+#      - name: nfs-stringer-ont
+#        mountPath: /home/jovyan/sequencing_runs/ont
+      - name: dshm
+        mountPath: /dev/shm
 
-proxy:
-  service:
-    type: NodePort
-    nodePorts:
-      http: 32151
+
 
 hub:
   networkPolicy:
