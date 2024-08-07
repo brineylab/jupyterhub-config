@@ -268,7 +268,7 @@ hub:
                       "image": deeplearning,
                       "node_selector": {"node_profile": "L40S"},
                     },
-                    "profile_options": define_gpu_options([1, 2, 4]),
+                    "profile_options": define_gpu_options([1, 2, 4, 8]),
                   }
                 ])
 

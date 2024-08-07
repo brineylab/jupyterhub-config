@@ -48,16 +48,15 @@ def combine_and_group(node_info, gpu_requests):
     for node, info in node_info.items():
         profile = info['node_profile']
         
-        # adds profiles not yet accounted for
-        if profile not in grouped_info:
-            grouped_info[profile] = {
-                'node_profile': profile,
-                'capacity': 0,
-                'total_gpu_requests': 0
-            }
-        
-        grouped_info[profile]['capacity'] += info['capacity']
-        grouped_info[profile]['total_gpu_requests'] += gpu_requests.get(node, 0)
+        if profile != "cpu":
+            if profile not in grouped_info: # adds profiles not yet accounted for
+                grouped_info[profile] = {
+                    'node_profile': profile,
+                    'capacity': 0,
+                    'total_gpu_requests': 0
+                }
+            grouped_info[profile]['capacity'] += info['capacity']
+            grouped_info[profile]['total_gpu_requests'] += gpu_requests.get(node, 0)
     
     return grouped_info
 
