@@ -151,7 +151,7 @@ hub:
     # handle custom named server limit
     # ref: https://jupyterhub.readthedocs.io/en/stable/howto/configuration/config-user-env.html#named-servers
     # src code: https://github.com/jupyterhub/jupyterhub/blob/main/jupyterhub/app.py#L1341
-    namedServers: |
+    # namedServers: |
       # def custom_named_server_limit(handler):
       #   with open("/etc/jupyterhub/auth/users.yaml") as f:
       #     users = yaml.safe_load(f)
@@ -162,8 +162,8 @@ hub:
       #       return 2
       #   return 1
 
-      c.JupyterHub.allow_named_servers = True
-      c.JupyterHub.named_server_limit_per_user = 1
+      # c.JupyterHub.allow_named_servers = True
+      # c.JupyterHub.named_server_limit_per_user = 1
     
     # modified from https://github.com/neurohackademy/nh2020-jupyterhub/blob/8bc0d8304d5090d3a1e21a038a68f0a940e31809/deployments/hub-neurohackademy-org/config/prod.yaml
     # ref for profile_options: https://jupyterhub-kubespawner.readthedocs.io/en/latest/spawner.html
@@ -188,9 +188,34 @@ hub:
           }
         
         # Define admin options for dev image
-        def admin_options(option_list):
+        def admin_options(deeplearning, datascience):
+          gpu_num = [0, 1, 2, 4, 8]
           return {
-            "GPUs": {
+            "Image": {
+              "display_name": "Image",
+              "choices": {
+                "deeplearning": {
+                  "display_name": "default deeplearning",
+                  "kubespawner_override": {"image": deeplearning,},
+                },
+                "datascience": {
+                  "display_name": "default datascience",
+                  "kubespawner_override": {"image": datascience},
+                }
+              },
+              "unlisted_choice": {
+                "enabled": True,
+                "display_name": "Enter custom image",
+                "display_name_in_choices": "Custom image",
+                "validation_regex": '^.+/.+:.+$',
+                "validation_message": 'Must be an image matching <user>/<name>:<tag>',
+                "kubespawner_override": {
+                  "image": "{value}",
+                  "start_timeout": 600, # increase timeout time to 10mins to allow new images to be pulled
+                },
+              },
+            },
+            "GPU Num": {
               "display_name": "Number of GPUs",
               "choices": {
                 str(i): {
@@ -200,17 +225,7 @@ hub:
                     "extra_resource_limits": {"nvidia.com/gpu": i},
                     "extra_pod_config": {"runtimeClassName": "nvidia"},
                   },
-                } for i in option_list
-              },
-            },
-            "Image": {
-              "display_name": "Image",
-              "unlisted_choice": {
-                "enabled": true,
-                "display_name": "brineylab/jupyterhub-deeplearning:v2024-08-13"
-                "kubespawner_override": {
-                  "image": "{value}",
-                },
+                } for i in gpu_num
               },
             },
           }
@@ -246,7 +261,7 @@ hub:
                 {
                   "display_name": "DEV profile",
                   "description": "Visible to admins only - can set custom images, resources, etc for testing.",
-                  "profile_options": admin_options([1, 2, 4, 8]),
+                  "profile_options": admin_options(deeplearning, datascience),
                 }
               ])
 

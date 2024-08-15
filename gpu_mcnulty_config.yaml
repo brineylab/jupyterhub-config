@@ -197,17 +197,31 @@ hub:
           }
         
         # Define admin options for dev image
-        def admin_options():
+        def admin_options(deeplearning, datascience):
           gpu_types = ["cpu", "L40S", "A30", "A6000"]
           gpu_num = [0, 1, 2, 4, 8]
           return {
             "Image": {
               "display_name": "Image",
+              "choices": {
+                "deeplearning": {
+                  "display_name": "default deeplearning",
+                  "kubespawner_override": {"image": deeplearning,},
+                },
+                "datascience": {
+                  "display_name": "default datascience",
+                  "kubespawner_override": {"image": datascience},
+                }
+              },
               "unlisted_choice": {
-                "enabled": true,
-                "display_name": ""
+                "enabled": True,
+                "display_name": "Enter custom image",
+                "display_name_in_choices": "Custom image",
+                "validation_regex": '^.+/.+:.+$',
+                "validation_message": 'Must be an image matching <user>/<name>:<tag>',
                 "kubespawner_override": {
                   "image": "{value}",
+                  "start_timeout": 600, # increase timeout time to 10mins to allow new images to be pulled
                 },
               },
             },
@@ -230,7 +244,7 @@ hub:
                   # required to enable gpu: https://discourse.jupyter.org/t/set-runtimeclassname-for-gpu-enabled-images/21617/5
                   "kubespawner_override": {
                     "extra_resource_limits": {"nvidia.com/gpu": i},
-                    "extra_pod_config": {"runtimeClassName": "nvidia"},
+                    "extra_pod_config": {"runtimeClassName": "nvidia"} if i > 0 else {},
                   },
                 } for i in gpu_num
               },
@@ -319,9 +333,9 @@ hub:
             if self.user.admin:
               self.profile_list.extend([
                 {
-                  "display_name": "DEV profile",
+                  "display_name": "development",
                   "description": "Visible to admins only - can set custom images, resources, etc for testing.",
-                  "profile_options": admin_options(),
+                  "profile_options": admin_options(deeplearning, datascience),
                 }
               ])
 
