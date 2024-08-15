@@ -146,12 +146,12 @@ hub:
         users = yaml.safe_load(f)
 
       c.Authenticator.admin_users = users.get("admin", [])
-      c.Authenticator.allowed_users = set(users.get("admin", []) + users.get("gpu", [])) 
+      c.Authenticator.allowed_users = set(users.get("admin", []) + users.get("gpu", []) + users.get("regular", [])) 
 
     # handle custom named server limit
     # ref: https://jupyterhub.readthedocs.io/en/stable/howto/configuration/config-user-env.html#named-servers
     # src code: https://github.com/jupyterhub/jupyterhub/blob/main/jupyterhub/app.py#L1341
-    # namedServers: |
+    namedServers: |
       # def custom_named_server_limit(handler):
       #   with open("/etc/jupyterhub/auth/users.yaml") as f:
       #     users = yaml.safe_load(f)
@@ -162,8 +162,8 @@ hub:
       #       return 2
       #   return 1
 
-      # c.JupyterHub.allow_named_servers = True
-      # c.JupyterHub.named_server_limit_per_user = 1
+      c.JupyterHub.allow_named_servers = True
+      c.JupyterHub.named_server_limit_per_user = 0
     
     # modified from https://github.com/neurohackademy/nh2020-jupyterhub/blob/8bc0d8304d5090d3a1e21a038a68f0a940e31809/deployments/hub-neurohackademy-org/config/prod.yaml
     # ref for profile_options: https://jupyterhub-kubespawner.readthedocs.io/en/latest/spawner.html
@@ -247,7 +247,7 @@ hub:
             self.profile_list = [
               {
                 "display_name": "deep learning - L40S GPUs",
-                "description": "L40S GPUs <br> deeplearning v2024-08-13",
+                "description": "extends the data science environment to include ML libraries (such as torch, deepspeed, and 🤗) <br> v2024-08-13",
                 "kubespawner_override": {
                   "image": deeplearning,
                 },
@@ -259,8 +259,8 @@ hub:
             if self.user.admin:
               self.profile_list.extend([
                 {
-                  "display_name": "DEV profile",
-                  "description": "Visible to admins only - can set custom images, resources, etc for testing.",
+                  "display_name": "development",
+                  "description": "visible to admins only - can set custom images, gpus, etc for testing.",
                   "profile_options": admin_options(deeplearning, datascience),
                 }
               ])
