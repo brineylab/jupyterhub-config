@@ -61,7 +61,7 @@ singleuser:
           - "sh"
           - "-c"
           - >
-            mkdir -p ${HOME}/.codeserver;
+            mkdir -p ${HOME}/codeserver;
 
   storage:
     # commented out below bc don't want to change default volume
@@ -248,9 +248,7 @@ hub:
               {
                 "display_name": "deep learning - L40S GPUs",
                 "description": "extends the data science environment to include ML libraries (such as torch, deepspeed, and 🤗) <br> v2024-08-13",
-                "kubespawner_override": {
-                  "image": deeplearning,
-                },
+                "kubespawner_override": {"image": deeplearning,},
                 "profile_options": define_gpu_options([1, 2, 4]),
               }
             ]

@@ -60,52 +60,51 @@ singleuser:
           - "sh"
           - "-c"
           - >
-            mkdir -p ${HOME}/.codeserver;
+            mkdir -p ${HOME}/codeserver;
+  
   storage:
     dynamic:
       storageClass: nfs-wallace-jh-nvme
     capacity: 250Gi
 
     extraVolumes:
-      # shared volume
+      # shared
       - name:  nfs-wallace-shared
         persistentVolumeClaim:
           claimName: nfs-wallace-shared
-      # references volume
+      # references
       - name: nfs-wallace-references
         persistentVolumeClaim:
           claimName: nfs-wallace-references
           readOnly: true
       # sequencing data: NovaSeq
-#      - name: nfs-avon-novaseq6k
-#        persistentVolumeClaim:
-#          claimName: nfs-avon-novaseq6k
-#      # sequencing data: NextSeq
-#      - name: nfs-avon-nextseq2k
-#        persistentVolumeClaim:
-#          claimName: nfs-avon-nextseq2k
+      - name: nfs-avon-novaseq6k
+        persistentVolumeClaim:
+          claimName: nfs-avon-novaseq6k
+      # sequencing data: NextSeq
+      - name: nfs-avon-nextseq2k
+        persistentVolumeClaim:
+          claimName: nfs-avon-nextseq2k
       # sequencing data: ONT
-#      - name: nfs-stringer-ont
-#        persistentVolumeClaim:
-#          claimName: nfs-stringer-ont
+      - name: nfs-stringer-ont
+        persistentVolumeClaim:
+          claimName: nfs-stringer-ont
       # dshm - needed for training on gpu servers running jupyterhub
       - name: dshm
         emptyDir:
           medium: Memory
           sizeLimit: "10Gi"
     extraVolumeMounts:
-#      - name: nfs-propjoe-shared
-#        mountPath: /home/jovyan/shared
-      - name: nfs-wallace-references
-        mountPath: /home/jovyan/references
       - name: nfs-wallace-shared
         mountPath: /home/jovyan/shared
-#      - name: nfs-avon-novaseq6k
-#        mountPath: /home/jovyan/sequencing_runs/novaseq
-#      - name: nfs-avon-nextseq2k
-#        mountPath: /home/jovyan/sequencing_runs/nextseq
-#      - name: nfs-stringer-ont
-#        mountPath: /home/jovyan/sequencing_runs/ont
+      - name: nfs-wallace-references
+        mountPath: /home/jovyan/references
+      - name: nfs-avon-novaseq6k
+        mountPath: /home/jovyan/sequencing_runs/novaseq
+      - name: nfs-avon-nextseq2k
+        mountPath: /home/jovyan/sequencing_runs/nextseq
+      - name: nfs-stringer-ont
+        mountPath: /home/jovyan/sequencing_runs/ont
       - name: dshm
         mountPath: /dev/shm
 
@@ -268,7 +267,7 @@ hub:
               self.profile_list = [
                 {
                   "display_name": "data science",
-                  "description": "default brineylab data analysis environment, including interpreters for Python and R as well as VS Code <br> v2024-05-23",
+                  "description": "default data analysis environment, including interpreters for Python and R <br> v2024-08-13",
                   "default": True,
                   "kubespawner_override": {
                       "image": datascience,
@@ -277,7 +276,7 @@ hub:
                 },
                 {
                   "display_name": "deep learning",
-                  "description": "extends the data science environment to include torch and 🤗 libraries, as well as some deep learning-specific JupyterLab extensions and deepspeed support  <br> v2024-05-23",
+                  "description": "extends the data science environment to include ML libraries (such as torch, deepspeed, and 🤗) <br> v2024-08-13",
                   "kubespawner_override": {
                       "image": deeplearning,
                       "node_selector": {"node_profile": "cpu"},
