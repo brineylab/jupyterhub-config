@@ -4,12 +4,15 @@
 # sure to refer to the Helm chart version of interest to you!
 #
 # Introduction to YAML:     https://www.youtube.com/watch?v=cdLNKUoMc6c
+# Chart config reference:   https://zero-to-jupyterhub.readthedocs.io/en/stable/resources/reference.html
+# Chart default values:     https://github.com/jupyterhub/zero-to-jupyterhub-k8s/blob/HEAD/jupyterhub/values.yaml
+# Available chart versions: https://jupyterhub.github.io/helm-chart/
 
-# JupyterHub configuration values
-
+# disable user and server culling
 cull:
   enabled: false
 
+# from https://z2jh.jupyter.org/en/stable/administrator/optimization.html
 scheduling:
   userScheduler:
     enabled: false
@@ -31,9 +34,11 @@ singleuser:
   cmd: jupyterhub-singleuser
   defaultUrl: lab
 
+  # networking (notebook server spawning fails if networkPolicy is set to true)
   networkPolicy:
     enabled: false
 
+  # set extra environmental vars
   extraEnv:
     GRANT_SUDO: "yes"
   uid: 0
@@ -57,7 +62,6 @@ singleuser:
           - >
             mkdir -p ${HOME}/.codeserver;
   storage:
-    # don't change default volume
     dynamic:
       storageClass: nfs-wallace-jh-nvme
     capacity: 250Gi
@@ -84,7 +88,7 @@ singleuser:
 #      - name: nfs-stringer-ont
 #        persistentVolumeClaim:
 #          claimName: nfs-stringer-ont
-      # dshm
+      # dshm - needed for training on gpu servers running jupyterhub
       - name: dshm
         emptyDir:
           medium: Memory
@@ -104,8 +108,6 @@ singleuser:
 #        mountPath: /home/jovyan/sequencing_runs/ont
       - name: dshm
         mountPath: /dev/shm
-
-
 
 hub:
   networkPolicy:
@@ -176,8 +178,7 @@ hub:
     # ref for profile_options: https://jupyterhub-kubespawner.readthedocs.io/en/latest/spawner.html
     options-form: |
         
-        # Define GPU resource options (for different number of GPUs)
-        # extra_pod_config: https://discourse.jupyter.org/t/set-runtimeclassname-for-gpu-enabled-images/21617/5
+        # Define num of GPU options
         def define_gpu_options(option_list):
           return {
             "GPUs": {
@@ -185,6 +186,7 @@ hub:
               "choices": {
                 str(i): {
                   "display_name": str(i),
+                  # required to enable gpu: https://discourse.jupyter.org/t/set-runtimeclassname-for-gpu-enabled-images/21617/5
                   "kubespawner_override": {
                     "extra_resource_limits": {"nvidia.com/gpu": i},
                     "extra_pod_config": {"runtimeClassName": "nvidia"},
@@ -194,11 +196,52 @@ hub:
             }
           }
         
+        # Define admin options for dev image
+        def admin_options():
+          gpu_types = ["cpu", "L40S", "A30", "A6000"]
+          gpu_num = [0, 1, 2, 4, 8]
+          return {
+            "Image": {
+              "display_name": "Image",
+              "unlisted_choice": {
+                "enabled": true,
+                "display_name": ""
+                "kubespawner_override": {
+                  "image": "{value}",
+                },
+              },
+            },
+            "GPU Type": {
+              "display_name": "Type of GPU (or CPU only)",
+              "choices": {
+                str(i): {
+                  "display_name": str(i),
+                  "kubespawner_override": {
+                    "node_selector": {"node_profile": i},
+                  },
+                } for i in gpu_types
+              },
+            },
+            "GPU Num": {
+              "display_name": "Number of GPUs",
+              "choices": {
+                str(i): {
+                  "display_name": str(i),
+                  # required to enable gpu: https://discourse.jupyter.org/t/set-runtimeclassname-for-gpu-enabled-images/21617/5
+                  "kubespawner_override": {
+                    "extra_resource_limits": {"nvidia.com/gpu": i},
+                    "extra_pod_config": {"runtimeClassName": "nvidia"},
+                  },
+                } for i in gpu_num
+              },
+            },
+          }
+        
         async def dynamic_options_form(self):
             
             # Update images here
-            datascience = "brineylab/jupyterhub-datascience:v2024-05-23"
-            deeplearning = "brineylab/jupyterhub-deeplearning:v2024-05-23"
+            datascience = "brineylab/jupyterhub-datascience:v2024-08-13"
+            deeplearning = "brineylab/jupyterhub-deeplearning:v2024-08-13"
 
             # Update gpu users here
             import yaml
@@ -271,6 +314,16 @@ hub:
                     "profile_options": define_gpu_options([1, 2, 4, 8]),
                   }
                 ])
+            
+            # dev profile for admins only
+            if self.user.admin:
+              self.profile_list.extend([
+                {
+                  "display_name": "DEV profile",
+                  "description": "Visible to admins only - can set custom images, resources, etc for testing.",
+                  "profile_options": admin_options(),
+                }
+              ])
 
             # NOTE: We let KubeSpawner inspect profile_list and decide what to
             #       return, it will return a falsy blank string if there is no
