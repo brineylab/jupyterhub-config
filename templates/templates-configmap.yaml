@@ -13,11 +13,18 @@ data:
         <h1 class="sr-only">JupyterHub home page</h1>
         {% if allow_named_servers %}
           <h2>Servers</h2>
-          <p>
-            You can launch a total of {{ named_server_limit_per_user + 1 }} server(s) at one time -
-            {{ named_server_limit_per_user }} of these servers can have GPUs.
-            When adding GPU servers using the 'Add New Server' button, don't add any spaces or capital letters in the server name!
-          </p>
+          {% if named_server_limit_per_user == 0 %}
+            <p>
+              You can launch an unlimited number of servers (admin only). Regular users are limited to 2 servers and GPU users are limited to 3 servers.
+              When adding servers using the 'Add New Server' button, don't add any spaces or capital letters in the server name!
+            </p>
+          {% else %}
+            <p>
+              You can launch a total of {{ named_server_limit_per_user + 1 }} server(s) at one time -
+              {{ named_server_limit_per_user }} of these servers can have GPUs.
+              When adding GPU servers using the 'Add New Server' button, don't add any spaces or capital letters in the server name!
+            </p>
+          {% endif %}
           {% set named_spawners = user.all_spawners(include_default=False)|list %}
           <table class="server-table table table-striped">
             <thead>
@@ -117,7 +124,7 @@ data:
                   </td>
                 </tr>
               {% endfor %}
-              {% if named_spawners|length < named_server_limit_per_user %}
+              {% if named_server_limit_per_user == 0 or named_spawners|length < named_server_limit_per_user %}
                 <tr class="home-server-row add-server-row">
                   <td colspan="6">
                     <div class="input-group">

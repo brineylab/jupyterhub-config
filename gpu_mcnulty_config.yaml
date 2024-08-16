@@ -25,10 +25,10 @@ prePuller:
   extraImages:
     datascience:
       name: brineylab/jupyterhub-datascience
-      tag: v2024-05-23
+      tag: v2024-08-13
     deeplearning:
       name: brineylab/jupyterhub-deeplearning
-      tag: v2024-05-23
+      tag: v2024-08-13
 
 singleuser:
   cmd: jupyterhub-singleuser
@@ -163,187 +163,172 @@ hub:
       def custom_named_server_limit(handler):
         with open("/etc/jupyterhub/auth/users.yaml") as f:
           users = yaml.safe_load(f)
-        
+
         user = handler.current_user.name
-        three_servers = set(users.get("admin", []) + users.get("gpu", []))
-        if user in three_servers:
-            return 2
-        return 1
+
+        if user in users.get("admin", []):
+            return 0 # unlimited
+        elif user in users.get("gpu", []):
+            return 2 # 3 servers total
+
+        return 1 # 2 servers total
 
       c.JupyterHub.allow_named_servers = True
       c.JupyterHub.named_server_limit_per_user = custom_named_server_limit
-    
+
     # modified from https://github.com/neurohackademy/nh2020-jupyterhub/blob/8bc0d8304d5090d3a1e21a038a68f0a940e31809/deployments/hub-neurohackademy-org/config/prod.yaml
     # ref for profile_options: https://jupyterhub-kubespawner.readthedocs.io/en/latest/spawner.html
-    options-form: |
-        
-        # Define num of GPU options
-        def define_gpu_options(option_list):
-          return {
-            "GPUs": {
-              "display_name": "Number of GPUs",
-              "choices": {
-                str(i): {
-                  "display_name": str(i),
-                  # required to enable gpu: https://discourse.jupyter.org/t/set-runtimeclassname-for-gpu-enabled-images/21617/5
-                  "kubespawner_override": {
-                    "extra_resource_limits": {"nvidia.com/gpu": i},
-                    "extra_pod_config": {"runtimeClassName": "nvidia"},
-                  },
-                } for i in option_list
-              },
-            }
-          }
-        
-        # Define admin options for dev image
-        def admin_options(deeplearning, datascience):
-          gpu_types = ["cpu", "L40S", "A30", "A6000"]
-          gpu_num = [0, 1, 2, 4, 8]
-          return {
-            "Image": {
-              "display_name": "Image",
-              "choices": {
-                "deeplearning": {
-                  "display_name": "default deeplearning",
-                  "kubespawner_override": {"image": deeplearning,},
-                },
-                "datascience": {
-                  "display_name": "default datascience",
-                  "kubespawner_override": {"image": datascience},
-                }
-              },
-              "unlisted_choice": {
-                "enabled": True,
-                "display_name": "Enter custom image",
-                "display_name_in_choices": "Custom image",
-                "validation_regex": '^.+/.+:.+$',
-                "validation_message": 'Must be an image matching <user>/<name>:<tag>',
+    options-form: |    
+      # Define options for num of GPUs
+      def define_num_gpus(option_list):
+        return {
+          "Num GPUs": {
+            "display_name": "Number of GPUs",
+            "choices": {
+              str(i): {
+                "display_name": str(i),
+                # required to enable gpu: https://discourse.jupyter.org/t/set-runtimeclassname-for-gpu-enabled-images/21617/5
                 "kubespawner_override": {
-                  "image": "{value}",
-                  "start_timeout": 600, # increase timeout time to 10mins to allow new images to be pulled
-                },
-              },
-            },
-            "GPU Type": {
-              "display_name": "Type of GPU (or CPU only)",
-              "choices": {
-                str(i): {
-                  "display_name": str(i),
-                  "kubespawner_override": {
-                    "node_selector": {"node_profile": i},
-                  },
-                } for i in gpu_types
-              },
-            },
-            "GPU Num": {
-              "display_name": "Number of GPUs",
-              "choices": {
-                str(i): {
-                  "display_name": str(i),
-                  # required to enable gpu: https://discourse.jupyter.org/t/set-runtimeclassname-for-gpu-enabled-images/21617/5
-                  "kubespawner_override": {
-                    "extra_resource_limits": {"nvidia.com/gpu": i},
-                    "extra_pod_config": {"runtimeClassName": "nvidia"} if i > 0 else {},
-                  },
-                } for i in gpu_num
-              },
+                  "extra_resource_limits": {"nvidia.com/gpu": i},
+                  "extra_pod_config": {"runtimeClassName": "nvidia"},
+                } if i > 0 else {},
+              } for i in option_list
             },
           }
-        
-        async def dynamic_options_form(self):
-            
-            # Update images here
-            datascience = "brineylab/jupyterhub-datascience:v2024-08-13"
-            deeplearning = "brineylab/jupyterhub-deeplearning:v2024-08-13"
+        }
 
-            # Update gpu users here
-            import yaml
-            with open("/etc/jupyterhub/auth/users.yaml") as f:
-              users = yaml.safe_load(f)
-            gpu = users.get("gpu", [])
-            
-            # For default server -> CPU profiles
-            if not self.name:
-              self.profile_list = [
-                {
-                  "display_name": "data science",
-                  "description": "default data analysis environment, including interpreters for Python and R <br> v2024-08-13",
-                  "default": True,
-                  "kubespawner_override": {
-                      "image": datascience,
-                      "node_selector": {"node_profile": "cpu"},
-                  }
+      # Define admin options for dev image
+      def admin_options(deeplearning, datascience, gpu_types, num_gpus = [0, 1, 2, 4, 8]):
+        return {
+          "Image": {
+            "display_name": "Image",
+            "choices": {
+              "deeplearning": {
+                "display_name": "default deep learning",
+                "kubespawner_override": {"image": deeplearning,},
+              },
+              "datascience": {
+                "display_name": "default data science",
+                "kubespawner_override": {"image": datascience},
+              }
+            },
+            "unlisted_choice": {
+              "enabled": True,
+              "display_name": "Enter custom image",
+              "display_name_in_choices": "other - select to provide a custom image",
+              "validation_regex": '^.+/.+:.+$',
+              "validation_message": 'Must be an image matching <user>/<name>:<tag>',
+              "kubespawner_override": {
+                "image": "{value}",
+                "start_timeout": 600, # increase timeout time to 10mins to allow new images to be pulled
+              },
+            },
+          },
+          "GPU Type": {
+            "display_name": "Type of GPU (or CPU only)",
+            "choices": {
+              str(i): {
+                "display_name": str(i),
+                "kubespawner_override": {
+                  "node_selector": {"node_profile": i},
                 },
-                {
-                  "display_name": "deep learning",
-                  "description": "extends the data science environment to include ML libraries (such as torch, deepspeed, and 🤗) <br> v2024-08-13",
-                  "kubespawner_override": {
-                      "image": deeplearning,
-                      "node_selector": {"node_profile": "cpu"},
-                  }
-                }
-              ]
-            
-            # For named server(s) -> GPU profiles
-            else:
-              # add inference gpus for all users on named servers
-              self.profile_list = [
-                {
-                  "display_name": "deep learning - A30 GPU",
-                  "description": "One A30 GPU for inference and testing.",
-                  "kubespawner_override": {
-                    "image": deeplearning,
-                    "node_selector": {"node_profile": "A30"},
-                    "extra_resource_limits": {"nvidia.com/gpu": 1},
-                    "extra_pod_config": {"runtimeClassName": "nvidia"},
-                    "cpu_guarantee": 12,
-                    "cpu_limit": 48,
-                    "mem_guarantee": "12G",
-                    "mem_limit": "64G"
-                  },
-                },
-                {
-                  "display_name": "deep learning - A6000 GPU",
-                  "description": "One A6000 GPU for inference and testing.",
-                  "kubespawner_override": {
-                    "image": deeplearning,
-                    "node_selector": {"node_profile": "A6000"},
-                    "extra_resource_limits": {"nvidia.com/gpu": 1},
-                    "extra_pod_config": {"runtimeClassName": "nvidia"},
-                  },
-                }
-              ]
+              } for i in gpu_types
+            },
+          },
+          **define_num_gpus(num_gpus),
+        }
+      
+      async def dynamic_options_form(self):
+          
+          # Update images here
+          datascience = "brineylab/jupyterhub-datascience:v2024-08-13"
+          deeplearning = "brineylab/jupyterhub-deeplearning:v2024-08-13"
 
-              # add L40s profiles for gpu users only
-              if self.user.name in gpu or self.user.admin:
-                self.profile_list.extend([
-                  {
-                    "display_name": "deep learning - L40s GPUs",
-                    "description": "L40s GPUs - avaliable to GPU users only",
-                    "kubespawner_override": {
-                      "image": deeplearning,
-                      "node_selector": {"node_profile": "L40S"},
-                    },
-                    "profile_options": define_gpu_options([1, 2, 4, 8]),
-                  }
-                ])
-            
-            # dev profile for admins only
-            if self.user.admin:
+          # Update gpu users here
+          import yaml
+          with open("/etc/jupyterhub/auth/users.yaml") as f:
+            users = yaml.safe_load(f)
+          gpu = users.get("gpu", [])
+          
+          # For default server -> CPU profiles
+          if not self.name:
+            self.profile_list = [
+              {
+                "display_name": "data science",
+                "description": "Default data analysis environment, including interpreters for Python and R. <br> v2024-08-13",
+                "default": True,
+                "kubespawner_override": {
+                    "image": datascience,
+                    "node_selector": {"node_profile": "cpu"},
+                }
+              },
+              {
+                "display_name": "deep learning",
+                "description": "Extends the data science environment to include ML libraries (such as torch, deepspeed, and 🤗). <br> v2024-08-13",
+                "kubespawner_override": {
+                    "image": deeplearning,
+                    "node_selector": {"node_profile": "cpu"},
+                }
+              }
+            ]
+          
+          # For named server(s) -> GPU profiles
+          else:
+            # add inference gpus for all users on named servers
+            self.profile_list = [
+              {
+                "display_name": "deep learning - A30 GPU",
+                "description": "A30 GPU for inference and testing.",
+                "kubespawner_override": {
+                  "image": deeplearning,
+                  "node_selector": {"node_profile": "A30"},
+
+                  # limit cpu and memory resources further on A30 node
+                  "cpu_guarantee": 12,
+                  "cpu_limit": 48,
+                  "mem_guarantee": "12G",
+                  "mem_limit": "64G"
+                },
+                "profile_options": define_gpu_options([1]),
+              },
+              {
+                "display_name": "deep learning - A6000 GPU",
+                "description": "A6000 GPU for inference and testing.",
+                "kubespawner_override": {
+                  "image": deeplearning,
+                  "node_selector": {"node_profile": "A6000"},
+                },
+                "profile_options": define_num_gpus([1]),
+              }
+            ]
+
+            # add L40s profiles for gpu users only
+            if self.user.name in gpu or self.user.admin:
               self.profile_list.extend([
                 {
-                  "display_name": "development",
-                  "description": "Visible to admins only - can set custom images, resources, etc for testing.",
-                  "profile_options": admin_options(deeplearning, datascience),
+                  "display_name": "deep learning - L40S GPUs",
+                  "description": "Select 1 to 4 L40S GPUs - avaliable to GPU users only.",
+                  "kubespawner_override": {
+                    "image": deeplearning,
+                    "node_selector": {"node_profile": "L40S"},
+                  },
+                  "profile_options": define_num_gpus([1, 2, 4]),
                 }
               ])
+          
+          # dev profile for admins only
+          if self.user.admin:
+            self.profile_list.extend([
+              {
+                "display_name": "dev (admin only)",
+                "description": "Set custom images, resources, etc for testing - timeout is extended to 10mins if you provide a custom image.",
+                "profile_options": admin_options(deeplearning, datascience, ["cpu", "L40S", "A30", "A6000"]),
+              }
+            ])
 
-            # NOTE: We let KubeSpawner inspect profile_list and decide what to
-            #       return, it will return a falsy blank string if there is no
-            #       profile_list, which makes no options form be presented.
-            #
-            # ref: https://github.com/jupyterhub/kubespawner/blob/37a80abb0a6c826e5c118a068fa1cf2725738038/kubespawner/spawner.py#L1885-L1935
-            #
-            return self._options_form_default()
+          # Let KubeSpawner inspect profile_list and decide what to return.
+          # It will return a falsy blank string if there is no profile_list.
+          # ref: https://github.com/jupyterhub/kubespawner/blob/37a80abb0a6c826e5c118a068fa1cf2725738038/kubespawner/spawner.py#L1885-L1935
+          return self._options_form_default()
 
-        c.KubeSpawner.options_form = dynamic_options_form
+      c.KubeSpawner.options_form = dynamic_options_form
