@@ -289,7 +289,7 @@ hub:
                   "mem_guarantee": "12G",
                   "mem_limit": "64G"
                 },
-                "profile_options": define_gpu_options([1]),
+                "profile_options": define_num_gpus([1]),
               },
               {
                 "display_name": "deep learning - A6000 GPU",
