@@ -152,16 +152,9 @@ hub:
     # ref: https://jupyterhub.readthedocs.io/en/stable/howto/configuration/config-user-env.html#named-servers
     # src code: https://github.com/jupyterhub/jupyterhub/blob/main/jupyterhub/app.py#L1341
     namedServers: |
-      # def custom_named_server_limit(handler):
-      #   with open("/etc/jupyterhub/auth/users.yaml") as f:
-      #     users = yaml.safe_load(f)
-        
-      #   user = handler.current_user.name
-      #   three_servers = set(users.get("admin", []) + users.get("gpu", []))
-      #   if user in three_servers:
-      #       return 2
-      #   return 1
-
+      # This technically allows unlimited named servers for all users
+      # But we remove the 'add new server' interface for all users except
+      # admins on the home page.
       c.JupyterHub.allow_named_servers = True
       c.JupyterHub.named_server_limit_per_user = 0
     
