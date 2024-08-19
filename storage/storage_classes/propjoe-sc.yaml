@@ -5,9 +5,6 @@ kind: StorageClass
 metadata:
   name: nfs-propjoe-hdd
 provisioner: nfs.csi.k8s.io
-# parameters:
-#   server: stringer.scripps.edu
-#   share: /nfs_share
 reclaimPolicy: Delete
 volumeBindingMode: Immediate
 mountOptions:

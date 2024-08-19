@@ -15,13 +15,3 @@ volumeBindingMode: Immediate
 mountOptions:
   - hard
   - nfsvers=4.1
-# apiVersion: storage.k8s.io/v1
-# kind: StorageClass
-# metadata:
-#   name: nfs-marlo-ssd
-# parameters:
-#   archiveOnDelete: "true"
-# provisioner: cluster.local/nfs-subdir-external-provisioner
-# reclaimPolicy: Delete
-# volumeBindingMode: Immediate
-# allowVolumeExpansion: true
