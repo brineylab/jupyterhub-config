@@ -8,13 +8,10 @@ spec:
   accessModes:
     - ReadWriteMany
   persistentVolumeReclaimPolicy: Retain
-  storageClassName: nfs-wallace-shared-nvme
+  storageClassName: nfs-wallace-nvme
   mountOptions:
     - hard
     - proto=tcp
   nfs:
-    path: /wallace_data_zfspool/brineylab_shared
     server: 192.168.1.3 #wallace.scripps.edu over mlnx
-
-
-
+    path: /wallace_data_zfspool/brineylab_shared

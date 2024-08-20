@@ -1,9 +1,9 @@
-# wallace-shared-sc.yaml
+# wallace-sc.yaml
 ---
 apiVersion: storage.k8s.io/v1
 kind: StorageClass
 metadata:
-  name: nfs-wallace-shared-nvme
+  name: nfs-wallace-nvme
 provisioner: nfs.csi.k8s.io
 reclaimPolicy: Delete
 volumeBindingMode: Immediate

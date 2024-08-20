@@ -6,7 +6,7 @@ metadata:
 spec:
   accessModes:
     - ReadWriteMany
-  storageClassName: nfs-wallace-shared-nvme
+  storageClassName: nfs-wallace-nvme
   volumeName: nfs-wallace-shared
   resources:
     requests:
