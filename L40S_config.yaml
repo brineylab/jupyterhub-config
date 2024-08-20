@@ -163,7 +163,7 @@ hub:
     options-form: |
       def define_num_gpus(num_gpus):
         return {
-          "Num GPUs": {
+          "GPUNum": {
             "display_name": "Number of GPUs",
             "choices": {
               str(i): {
@@ -180,7 +180,7 @@ hub:
 
       def define_gpu_types(gpu_types):
         return {
-          "GPU Type": {
+          "GPUType": {
             "display_name": "Type of GPU",
             "choices": {
               str(i): {
