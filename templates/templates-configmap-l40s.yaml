@@ -29,7 +29,7 @@ data:
               <tr>
                 <th>Server name</th>
                 <th>Profile</th>
-                <th>GPUs</th>
+                <th># of GPUs</th>
                 <th>URL</th>
                 <th>Last activity</th>
                 <th>Actions</th>
@@ -46,8 +46,8 @@ data:
                   {% endif %}
                 </td>
                 <td>
-                  {% if default_server.user_options.GPUs and default_server.active %}
-                    {{ default_server.user_options.GPUs }}
+                  {% if default_server.user_options.GPUNum and default_server.active %}
+                    {{ default_server.user_options.GPUNum }}
                   {% elif not default_server.active %}
                     &nbsp
                   {% else %}
@@ -87,10 +87,8 @@ data:
                     {% endif %}
                   </td>
                   <td>
-                    {% if spawner.user_options.GPUs and spawner.ready %}
-                      {{ spawner.user_options.GPUs }}
-                    {% elif spawner.ready %}
-                      1
+                    {% if spawner.user_options.GPUNum and spawner.ready %}
+                      {{ spawner.user_options.GPUNum }}
                     {% elif not spawner.ready %}
                       &nbsp
                     {% else %}

@@ -161,8 +161,7 @@ hub:
     # modified from https://github.com/neurohackademy/nh2020-jupyterhub/blob/8bc0d8304d5090d3a1e21a038a68f0a940e31809/deployments/hub-neurohackademy-org/config/prod.yaml
     # ref for profile_options: https://jupyterhub-kubespawner.readthedocs.io/en/latest/spawner.html
     options-form: |
-      # Define options for num of GPUs
-      def define_num_gpus(option_list):
+      def define_num_gpus(num_gpus):
         return {
           "Num GPUs": {
             "display_name": "Number of GPUs",
@@ -174,23 +173,46 @@ hub:
                   "extra_resource_limits": {"nvidia.com/gpu": i},
                   "extra_pod_config": {"runtimeClassName": "nvidia"},
                 } if i > 0 else {},
-              } for i in option_list
+              } for i in num_gpus
             },
           }
         }
-      
-      # Define admin options for dev image
-      def admin_options(deeplearning, datascience, gpu_types, num_gpus = [0, 1, 2, 4, 8]):
+
+      def define_gpu_types(gpu_types):
+        return {
+          "GPU Type": {
+            "display_name": "Type of GPU",
+            "choices": {
+              str(i): {
+                "display_name": str(i),
+                "kubespawner_override": (
+                  {
+                      "node_selector": {"node_profile": "A30"},
+                      "cpu_guarantee": 12,
+                      "cpu_limit": 48,
+                      "mem_guarantee": "12G",
+                      "mem_limit": "64G"
+                  } if i == "A30" else {
+                      "node_selector": {"node_profile": i},
+                  }
+                )
+              } for i in gpu_types
+            },
+          }
+        }
+
+      def define_custom_images(deeplearning, datascience):
         return {
           "Image": {
             "display_name": "Image",
             "choices": {
               "deeplearning": {
-                "display_name": "default deep learning",
+                "display_name": "deep learning",
+                "default": True,
                 "kubespawner_override": {"image": deeplearning,},
               },
               "datascience": {
-                "display_name": "default data science",
+                "display_name": "data science",
                 "kubespawner_override": {"image": datascience},
               }
             },
@@ -205,21 +227,9 @@ hub:
                 "start_timeout": 600, # increase timeout time to 10mins to allow new images to be pulled
               },
             },
-          },
-          "GPU Type": {
-            "display_name": "Type of GPU (or CPU only)",
-            "choices": {
-              str(i): {
-                "display_name": str(i),
-                "kubespawner_override": {
-                  "node_selector": {"node_profile": i},
-                },
-              } for i in gpu_types
-            },
-          },
-          **define_num_gpus(num_gpus),
+          }
         }
-
+      
       # Populate options form based on user designation (admin, gpu, or regular)
       async def dynamic_options_form(self):
           
@@ -236,10 +246,15 @@ hub:
           # GPU profiles
           self.profile_list = [
             {
-              "display_name": "deep learning - L40S GPUs",
-              "description": "extends the data science environment to include ML libraries (such as torch, deepspeed, and 🤗) <br> v2024-08-13",
-              "kubespawner_override": {"image": deeplearning,},
-              "profile_options": define_num_gpus([1, 2, 4]),
+              "display_name": "L40S GPUs",
+              "description": "Choose between 1 to 4 L40S GPUs.",
+              "kubespawner_override": {
+                "node_selector": {"node_profile": "L40S"},
+              },
+              "profile_options": {
+                **define_custom_images(deeplearning, datascience),
+                **define_num_gpus([1, 2, 4]),
+              },
             }
           ]
 
@@ -248,8 +263,12 @@ hub:
             self.profile_list.extend([
               {
                 "display_name": "dev (admin only)",
-                "description": "set custom images, resources, etc for testing - timeout is extended to 10mins if you provide a custom image",
-                "profile_options": admin_options(deeplearning, datascience, ["L40S"]),
+                "description": "Set custom images, resources, etc for testing - timeout is extended to 10mins if you provide a custom image.",
+                "profile_options": {
+                  **define_custom_images(deeplearning, datascience),
+                  **define_gpu_types(["L40S"]),
+                  **define_num_gpus([0, 1, 2, 4, 8]),
+                },
               }
             ])
 

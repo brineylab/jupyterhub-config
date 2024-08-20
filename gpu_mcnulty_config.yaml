@@ -179,10 +179,9 @@ hub:
     # modified from https://github.com/neurohackademy/nh2020-jupyterhub/blob/8bc0d8304d5090d3a1e21a038a68f0a940e31809/deployments/hub-neurohackademy-org/config/prod.yaml
     # ref for profile_options: https://jupyterhub-kubespawner.readthedocs.io/en/latest/spawner.html
     options-form: |    
-      # Define options for num of GPUs
-      def define_num_gpus(option_list):
+      def define_num_gpus(num_gpus):
         return {
-          "Num GPUs": {
+          "GPUNum": {
             "display_name": "Number of GPUs",
             "choices": {
               str(i): {
@@ -192,25 +191,48 @@ hub:
                   "extra_resource_limits": {"nvidia.com/gpu": i},
                   "extra_pod_config": {"runtimeClassName": "nvidia"},
                 } if i > 0 else {},
-              } for i in option_list
+              } for i in num_gpus
             },
           }
         }
-
-      # Define admin options for dev image
-      def admin_options(deeplearning, datascience, gpu_types, num_gpus = [0, 1, 2, 4, 8]):
+      
+      def define_gpu_types(gpu_types):
+        return {
+          "GPUType": {
+            "display_name": "Type of GPU",
+            "choices": {
+              str(i): {
+                "display_name": str(i),
+                "kubespawner_override": (
+                  {
+                      "node_selector": {"node_profile": i},
+                      "cpu_guarantee": 12,
+                      "cpu_limit": 48,
+                      "mem_guarantee": "12G",
+                      "mem_limit": "64G"
+                  } if i == "A30" else {
+                      "node_selector": {"node_profile": i},
+                  }
+                )
+              } for i in gpu_types
+            },
+          }
+        }
+      
+      def define_custom_images(deeplearning, datascience):
         return {
           "Image": {
             "display_name": "Image",
             "choices": {
               "deeplearning": {
-                "display_name": "default deep learning",
-                "kubespawner_override": {"image": deeplearning,},
+                "display_name": "deep learning",
+                "default": True,
+                "kubespawner_override": {"image": deeplearning},
               },
               "datascience": {
-                "display_name": "default data science",
+                "display_name": "data science",
                 "kubespawner_override": {"image": datascience},
-              }
+              },
             },
             "unlisted_choice": {
               "enabled": True,
@@ -223,19 +245,7 @@ hub:
                 "start_timeout": 600, # increase timeout time to 10mins to allow new images to be pulled
               },
             },
-          },
-          "GPU Type": {
-            "display_name": "Type of GPU (or CPU only)",
-            "choices": {
-              str(i): {
-                "display_name": str(i),
-                "kubespawner_override": {
-                  "node_selector": {"node_profile": i},
-                },
-              } for i in gpu_types
-            },
-          },
-          **define_num_gpus(num_gpus),
+          }
         }
       
       async def dynamic_options_form(self):
@@ -254,22 +264,22 @@ hub:
           if not self.name:
             self.profile_list = [
               {
-                "display_name": "data science",
+                "display_name": "data science (cpu only)",
                 "description": "Default data analysis environment, including interpreters for Python and R. <br> v2024-08-13",
                 "default": True,
                 "kubespawner_override": {
-                    "image": datascience,
-                    "node_selector": {"node_profile": "cpu"},
+                  "image": datascience,
+                  "node_selector": {"node_profile": "cpu"},
                 }
               },
               {
-                "display_name": "deep learning",
+                "display_name": "deep learning (cpu only)",
                 "description": "Extends the data science environment to include ML libraries (such as torch, deepspeed, and 🤗). <br> v2024-08-13",
                 "kubespawner_override": {
-                    "image": deeplearning,
-                    "node_selector": {"node_profile": "cpu"},
+                  "image": deeplearning,
+                  "node_selector": {"node_profile": "cpu"},
                 }
-              }
+              },
             ]
           
           # For named server(s) -> GPU profiles
@@ -277,28 +287,13 @@ hub:
             # add inference gpus for all users on named servers
             self.profile_list = [
               {
-                "display_name": "deep learning - A30 GPU",
-                "description": "A30 GPU for inference and testing.",
-                "kubespawner_override": {
-                  "image": deeplearning,
-                  "node_selector": {"node_profile": "A30"},
-
-                  # limit cpu and memory resources further on A30 node
-                  "cpu_guarantee": 12,
-                  "cpu_limit": 48,
-                  "mem_guarantee": "12G",
-                  "mem_limit": "64G"
+                "display_name": "A30 or A6000 GPU",
+                "description": "Choose between a A30 or A6000 GPU for inference and testing.",
+                "profile_options": {
+                  **define_custom_images(deeplearning, datascience),
+                  **define_gpu_types(["A30", "A6000"]),
+                  **define_num_gpus([1]),
                 },
-                "profile_options": define_num_gpus([1]),
-              },
-              {
-                "display_name": "deep learning - A6000 GPU",
-                "description": "A6000 GPU for inference and testing.",
-                "kubespawner_override": {
-                  "image": deeplearning,
-                  "node_selector": {"node_profile": "A6000"},
-                },
-                "profile_options": define_num_gpus([1]),
               }
             ]
 
@@ -306,13 +301,15 @@ hub:
             if self.user.name in gpu or self.user.admin:
               self.profile_list.extend([
                 {
-                  "display_name": "deep learning - L40S GPUs",
-                  "description": "Select 1 to 4 L40S GPUs - avaliable to GPU users only.",
+                  "display_name": "L40S GPUs",
+                  "description": "Choose between 1 to 4 L40S GPUs.",
                   "kubespawner_override": {
-                    "image": deeplearning,
                     "node_selector": {"node_profile": "L40S"},
                   },
-                  "profile_options": define_num_gpus([1, 2, 4]),
+                  "profile_options": {
+                    **define_custom_images(deeplearning, datascience),
+                    **define_num_gpus([1, 2, 4]),
+                  },
                 }
               ])
           
@@ -322,7 +319,11 @@ hub:
               {
                 "display_name": "dev (admin only)",
                 "description": "Set custom images, resources, etc for testing - timeout is extended to 10mins if you provide a custom image.",
-                "profile_options": admin_options(deeplearning, datascience, ["cpu", "L40S", "A30", "A6000"]),
+                "profile_options": {
+                  **define_custom_images(deeplearning, datascience),
+                  **define_gpu_types(["cpu", "A30", "A6000", "L40S"]),
+                  **define_num_gpus([0, 1, 2, 4, 8]),
+                },
               }
             ])
 
