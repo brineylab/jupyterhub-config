@@ -287,27 +287,25 @@ hub:
             # add inference gpus for all users on named servers
             self.profile_list = [
               {
-                "display_name": "A30 or A6000 GPU",
-                "description": "Choose between a A30 or A6000 GPU for inference and testing.",
+                "display_name": "Power-limited GPUs",
+                "description": "Choose between a A6000 or L40S GPU for inference and testing. Note that these GPUs are currently power limited, so performance may be diminished.",
                 "profile_options": {
                   **define_custom_images(deeplearning, datascience),
-                  **define_gpu_types(["A30", "A6000"]),
+                  **define_gpu_types(["A6000-pwrlimit", "L40s-pwrlimit"]),
                   **define_num_gpus([1]),
                 },
               }
             ]
 
-            # add L40s profiles for gpu users only
+            # add other gpu profiles for gpu users only
             if self.user.name in gpu or self.user.admin:
               self.profile_list.extend([
                 {
-                  "display_name": "L40S GPUs",
-                  "description": "Choose between 1 to 4 L40S GPUs.",
-                  "kubespawner_override": {
-                    "node_selector": {"node_profile": "L40S"},
-                  },
+                  "display_name": "GPUs",
+                  "description": "Choose 1 to 4 L40S, A30, or A6000s GPUs.",
                   "profile_options": {
                     **define_custom_images(deeplearning, datascience),
+                    **define_gpu_types(["L40S", "A6000", "A30"]),
                     **define_num_gpus([1, 2, 4]),
                   },
                 }
@@ -321,7 +319,7 @@ hub:
                 "description": "Set custom images, resources, etc for testing - timeout is extended to 10mins if you provide a custom image.",
                 "profile_options": {
                   **define_custom_images(deeplearning, datascience),
-                  **define_gpu_types(["cpu", "A30", "A6000", "L40S"]),
+                  **define_gpu_types(["cpu", "A30", "A6000", "L40S", "A6000-pwrlimit", "L40S-pwrlimit"]),
                   **define_num_gpus([0, 1, 2, 4, 8]),
                 },
               }

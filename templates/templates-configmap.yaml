@@ -41,8 +41,10 @@ data:
               <tr class="home-server-row" data-server-name="default">
                 <td>cpu-only</td>
                 <td>
-                  {% if default_server.user_options.profile and default_server.active %}
-                    {{ default_server.user_options.profile }}
+                  {% if default_server.user_options.GPUType and default_server.active %}
+                    {{ default_server.user_options.Image}}-{{ default_server.user_options.GPUType}}
+                  {% elif default_server.active %}
+                    {{ default_server.user_options.profile}}
                   {% else %}
                     &nbsp
                   {% endif %}
@@ -82,7 +84,9 @@ data:
                 <tr class="home-server-row" data-server-name="{{ spawner.name }}">
                   <td>{{ spawner.name }}</td>
                   <td>
-                    {% if spawner.user_options.profile and spawner.ready %}
+                    {% if spawner.user_options.GPUType and spawner.ready %}
+                      {{ spawner.user_options.Image }}-{{ spawner.user_options.GPUType }}
+                    {% elif spawner.ready %}
                       {{ spawner.user_options.profile }}
                     {% else %}
                       &nbsp
