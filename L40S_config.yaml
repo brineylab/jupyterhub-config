@@ -62,6 +62,17 @@ singleuser:
           - "-c"
           - >
             mkdir -p ${HOME}/codeserver;
+  
+  # defaults - in case pods get launched w/o specifying profile
+  image:
+    name: brineylab/jupyterhub-datascience
+    tag: v2024-08-13
+  profileList:
+    - display_name: "data science"
+      default: true
+      kubespawner_override:
+        node_selector:
+          node_profile: "cpu"
 
   storage:
     # commented out below bc don't want to change default volume
