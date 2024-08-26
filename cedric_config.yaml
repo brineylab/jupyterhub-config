@@ -62,7 +62,7 @@ singleuser:
           - "-c"
           - >
             mkdir -p ${HOME}/codeserver;
-  
+
   # defaults - in case pods get launched w/o specifying profile
   # i think this can only happen from the admin page
   image:
@@ -91,6 +91,10 @@ singleuser:
         persistentVolumeClaim:
           claimName: nfs-wallace-references
           readOnly: true
+      # workspace
+      - name:  cedric-workspace
+        persistentVolumeClaim:
+          claimName: cedric-workspace
       # sequencing data: NovaSeq
       - name: nfs-avon-novaseq6k
         persistentVolumeClaim:
@@ -113,6 +117,8 @@ singleuser:
         mountPath: /home/jovyan/shared
       - name: nfs-wallace-references
         mountPath: /home/jovyan/references
+      - name: cedric-workspace
+        mountPath: /home/jovyan/workspace
       - name: nfs-avon-novaseq6k
         mountPath: /home/jovyan/sequencing_runs/novaseq
       - name: nfs-avon-nextseq2k
@@ -281,14 +287,14 @@ hub:
           # GPU profiles
           self.profile_list = [
             {
-              "display_name": "L40S GPUs",
-              "description": "Choose between 1 to 4 L40S GPUs.",
+              "display_name": "A100 GPUs",
+              "description": "Choose between 1 to 8 A100 GPUs.",
               "kubespawner_override": {
-                "node_selector": {"node_profile": "L40S"},
+                "node_selector": {"node_profile": "A100"},
               },
               "profile_options": {
                 **define_custom_images(deeplearning, datascience),
-                **define_num_gpus([1, 2, 4]),
+                **define_num_gpus([1, 2, 4, 8]),
               },
             }
           ]
@@ -301,7 +307,7 @@ hub:
                 "description": "Set custom images, resources, etc for testing - timeout is extended to 10mins if you provide a custom image.",
                 "profile_options": {
                   **define_custom_images(deeplearning, datascience),
-                  **define_gpu_types(["L40S"]),
+                  **define_gpu_types(["A100"]),
                   **define_num_gpus([0, 1, 2, 4, 8]),
                 },
               }

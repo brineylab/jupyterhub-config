@@ -1,0 +1,6 @@
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: cedric-workspace
+provisioner: microk8s.io/hostpath
+volumeBindingMode: Immediate

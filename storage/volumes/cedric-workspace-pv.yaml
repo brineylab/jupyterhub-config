@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: cedric-workspace
+  labels:
+    type: local
+spec:
+  storageClassName: cedric-workspace
+  capacity:
+    storage: 10000Gi
+  accessModes:
+    - ReadWriteMany
+  hostPath:
+    path: "/data/shared_data"

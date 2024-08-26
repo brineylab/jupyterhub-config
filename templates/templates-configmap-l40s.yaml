@@ -37,7 +37,7 @@ data:
             </thead>
             <tbody>
               <tr class="home-server-row" data-server-name="default">
-                <td>L40S-server</td>
+                <td>gpu-server</td>
                 <td>
                   {% if default_server.user_options.profile and default_server.active %}
                     {{ default_server.user_options.profile }}

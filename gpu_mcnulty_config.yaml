@@ -63,6 +63,7 @@ singleuser:
             mkdir -p ${HOME}/codeserver;
   
   # defaults - in case pods get launched w/o specifying profile
+  # i think this can only happen from the admin page
   image:
     name: brineylab/jupyterhub-datascience
     tag: v2024-08-13
