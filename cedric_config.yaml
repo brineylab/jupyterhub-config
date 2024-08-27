@@ -65,15 +65,13 @@ singleuser:
 
   # defaults - in case pods get launched w/o specifying profile
   # i think this can only happen from the admin page
-  image:
-    name: brineylab/jupyterhub-datascience
-    tag: v2024-08-13
   profileList:
     - display_name: "data science"
       default: true
       kubespawner_override:
+        image: "brineylab/jupyterhub-datascience:v2024-08-13"
         node_selector:
-          node_profile: "cpu"
+          node_profile: "A100"
 
   storage:
     # commented out below bc don't want to change default volume
@@ -284,7 +282,7 @@ hub:
             users = yaml.safe_load(f)
           gpu = users.get("gpu", [])
           
-          # GPU profiles
+          # profiles
           self.profile_list = [
             {
               "display_name": "A100 GPUs",
@@ -295,6 +293,19 @@ hub:
               "profile_options": {
                 **define_custom_images(deeplearning, datascience),
                 **define_num_gpus([1, 2, 4, 8]),
+              },
+            },
+            {
+              "display_name": "volume access",
+              "description": "Use for access to the workspace volume.",
+              "kubespawner_override": {
+                "cpu_guarantee": 1,
+                "cpu_limit": 12,
+                "mem_guarantee": "1G",
+                "mem_limit": "12G"
+              },
+              "profile_options": {
+                **define_custom_images(deeplearning, datascience),
               },
             }
           ]
