@@ -65,15 +65,13 @@ singleuser:
   
   # defaults - in case pods get launched w/o specifying profile
   # i think this can only happen from the admin page
-  image:
-    name: brineylab/jupyterhub-datascience
-    tag: v2024-08-13
   profileList:
-    - display_name: "data science"
+    - display_name: "data science v2024-08-13"
       default: true
       kubespawner_override:
+        image: "brineylab/jupyterhub-datascience:v2024-08-13"
         node_selector:
-          node_profile: "cpu"
+          node_profile: "L40S"
 
   storage:
     # commented out below bc don't want to change default volume
