@@ -50,7 +50,7 @@ singleuser:
     guarantee: 64G
 
   cpu:
-    limit: 256
+    limit: 128
     guarantee: 16
   
   # required for codeserver to launch
@@ -62,20 +62,21 @@ singleuser:
           - "-c"
           - >
             mkdir -p ${HOME}/codeserver;
-  
+
   # defaults - in case pods get launched w/o specifying profile
   # i think this can only happen from the admin page
   profileList:
-    - display_name: "data science v2024-08-13"
+    - display_name: "data science"
       default: true
       kubespawner_override:
         image: "brineylab/jupyterhub-datascience:v2024-08-13"
         node_selector:
-          node_profile: "L40S"
+          node_profile: "A100"
 
   storage:
-    dynamic:
-      storageClass: nfs-sparrow-jh-nvme
+    # commented out below bc don't want to change default volume
+    # dynamic:
+    #   storageClass: nfs-marlo-ssd
     capacity: 250Gi
 
     extraVolumes:
@@ -88,6 +89,10 @@ singleuser:
         persistentVolumeClaim:
           claimName: nfs-wallace-references
           readOnly: true
+      # workspace
+      - name:  cedric-workspace
+        persistentVolumeClaim:
+          claimName: cedric-workspace
       # sequencing data: NovaSeq
       - name: nfs-avon-novaseq6k
         persistentVolumeClaim:
@@ -110,6 +115,8 @@ singleuser:
         mountPath: /home/jovyan/shared
       - name: nfs-wallace-references
         mountPath: /home/jovyan/references
+      - name: cedric-workspace
+        mountPath: /home/jovyan/workspace
       - name: nfs-avon-novaseq6k
         mountPath: /home/jovyan/sequencing_runs/novaseq
       - name: nfs-avon-nextseq2k
@@ -275,17 +282,30 @@ hub:
             users = yaml.safe_load(f)
           gpu = users.get("gpu", [])
           
-          # GPU profiles
+          # profiles
           self.profile_list = [
             {
-              "display_name": "L40S GPUs",
-              "description": "Choose between 2 to 8 L40S GPUs. If you only need GPUs for inference, please use the GPUs on mcnulty!",
+              "display_name": "A100 GPUs",
+              "description": "Choose between 1 to 8 A100 GPUs.",
               "kubespawner_override": {
-                "node_selector": {"node_profile": "L40S"},
+                "node_selector": {"node_profile": "A100"},
               },
               "profile_options": {
                 **define_custom_images(deeplearning, datascience),
-                **define_num_gpus([2, 4, 8]),
+                **define_num_gpus([1, 2, 4, 8]),
+              },
+            },
+            {
+              "display_name": "volume access",
+              "description": "Use for access to the workspace volume.",
+              "kubespawner_override": {
+                "cpu_guarantee": 1,
+                "cpu_limit": 12,
+                "mem_guarantee": "1G",
+                "mem_limit": "12G"
+              },
+              "profile_options": {
+                **define_custom_images(deeplearning, datascience),
               },
             }
           ]
@@ -298,7 +318,7 @@ hub:
                 "description": "Set custom images, resources, etc for testing - timeout is extended to 10mins if you provide a custom image.",
                 "profile_options": {
                   **define_custom_images(deeplearning, datascience),
-                  **define_gpu_types(["L40S"]),
+                  **define_gpu_types(["A100"]),
                   **define_num_gpus([0, 1, 2, 4, 8]),
                 },
               }

@@ -63,13 +63,12 @@ singleuser:
             mkdir -p ${HOME}/codeserver;
   
   # defaults - in case pods get launched w/o specifying profile
-  image:
-    name: brineylab/jupyterhub-datascience
-    tag: v2024-09-12
+  # i think this can only happen from the admin page
   profileList:
     - display_name: "data science"
       default: true
       kubespawner_override:
+        image: "brineylab/jupyterhub-datascience:v2024-09-12"
         node_selector:
           node_profile: "cpu"
 
