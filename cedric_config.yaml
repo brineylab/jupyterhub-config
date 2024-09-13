@@ -74,9 +74,8 @@ singleuser:
           node_profile: "A100"
 
   storage:
-    # commented out below bc don't want to change default volume
-    # dynamic:
-    #   storageClass: nfs-marlo-ssd
+    dynamic:
+      storageClass: cedric-jh
     capacity: 250Gi
 
     extraVolumes:
