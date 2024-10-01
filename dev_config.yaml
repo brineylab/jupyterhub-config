@@ -133,12 +133,18 @@ hub:
         name: jupyterhub-custom-templates
     - name: users-config
       configMap:
-        name: users-config   
+        name: users-config
+    - name: alertmanager-config
+      configMap:
+        name: alertmanager-config
   extraVolumeMounts:
     - mountPath: /etc/jupyterhub/templates
       name: jupyterhub-custom-templates
     - mountPath: /etc/jupyterhub/auth
       name: users-config
+    - mountPath: /etc/alertmanager/
+      subPath: alertmanager.yaml
+      name: alertmanager-config
 
   config:
     JupyterHub:

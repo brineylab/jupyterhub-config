@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: crash-loop-pod
+  namespace: default
+spec:
+  containers:
+  - name: crash-container
+    image: busybox
+    command: ["/bin/sh", "-c"]
+    args:
+      - echo "Simulating a crash..."; exit 1;
+  restartPolicy: Always
