@@ -25,10 +25,10 @@ prePuller:
   extraImages:
     datascience:
       name: brineylab/jupyterhub-datascience
-      tag: v2024-08-13
+      tag: v2024-09-12
     deeplearning:
       name: brineylab/jupyterhub-deeplearning
-      tag: v2024-08-13
+      tag: v2024-09-12
 
 singleuser:
   cmd: jupyterhub-singleuser
@@ -68,7 +68,7 @@ singleuser:
     - display_name: "data science"
       default: true
       kubespawner_override:
-        image: "brineylab/jupyterhub-datascience:v2024-08-13"
+        image: "brineylab/jupyterhub-datascience:v2024-09-12"
         node_selector:
           node_profile: "cpu"
 
@@ -261,8 +261,8 @@ hub:
       async def dynamic_options_form(self):
           
           # Update images here
-          datascience = "brineylab/jupyterhub-datascience:v2024-08-13"
-          deeplearning = "brineylab/jupyterhub-deeplearning:v2024-08-13"
+          datascience = "brineylab/jupyterhub-datascience:v2024-09-12"
+          deeplearning = "brineylab/jupyterhub-deeplearning:v2024-09-12"
 
           # Update gpu users here
           import yaml
@@ -275,7 +275,7 @@ hub:
             self.profile_list = [
               {
                 "display_name": "data science (cpu only)",
-                "description": "Default data analysis environment, including interpreters for Python and R. <br> v2024-08-13",
+                "description": "Default data analysis environment, including interpreters for Python and R. <br> v2024-09-12",
                 "default": True,
                 "kubespawner_override": {
                   "image": datascience,
@@ -284,7 +284,7 @@ hub:
               },
               {
                 "display_name": "deep learning (cpu only)",
-                "description": "Extends the data science environment to include ML libraries (such as torch, deepspeed, and 🤗). <br> v2024-08-13",
+                "description": "Extends the data science environment to include ML libraries (such as torch, deepspeed, and 🤗). <br> v2024-09-12",
                 "kubespawner_override": {
                   "image": deeplearning,
                   "node_selector": {"node_profile": "cpu"},

@@ -50,7 +50,7 @@ singleuser:
     guarantee: 64G
 
   cpu:
-    limit: 128
+    limit: 256
     guarantee: 16
   
   # required for codeserver to launch
@@ -74,9 +74,8 @@ singleuser:
           node_profile: "L40S"
 
   storage:
-    # commented out below bc don't want to change default volume
-    # dynamic:
-    #   storageClass: nfs-marlo-ssd
+    dynamic:
+      storageClass: nfs-sparrow-jh-nvme
     capacity: 250Gi
 
     extraVolumes:
@@ -280,13 +279,13 @@ hub:
           self.profile_list = [
             {
               "display_name": "L40S GPUs",
-              "description": "Choose between 1 to 4 L40S GPUs.",
+              "description": "Choose between 2 to 8 L40S GPUs. If you only need GPUs for inference, please use the GPUs on mcnulty!",
               "kubespawner_override": {
                 "node_selector": {"node_profile": "L40S"},
               },
               "profile_options": {
                 **define_custom_images(deeplearning, datascience),
-                **define_num_gpus([1, 2, 4]),
+                **define_num_gpus([2, 4, 8]),
               },
             }
           ]
