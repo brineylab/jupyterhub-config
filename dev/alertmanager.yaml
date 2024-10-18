@@ -39,10 +39,10 @@ inhibit_rules:
 receivers:
 - name: "slack"
   slack_configs:
-  - api_url: '' ### TODO: paste slack hook
+  - api_url: '{{SLACK_HOOK}}'
     channel: '#is-the-server-broken'
     send_resolved: true
-    title: '[{{ .Status | toUpper }}:{{ .Alerts.Firing | len }}] {{ .CommonLabels.alertname }} - cluster unknown' ### TODO: update cluster name for message alerts
+    title: '[{{ .Status | toUpper }}:{{ .Alerts.Firing | len }}] {{ .CommonLabels.alertname }} - {{CLUSTER_NAME}}'
     text: |-
       *Severity:* {{ .CommonLabels.severity }}
       *Namespace:* {{ .CommonLabels.namespace }}
