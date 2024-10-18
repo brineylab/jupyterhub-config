@@ -42,44 +42,29 @@ def get_node_capacity_and_profile():
     
     return node_info
 
-# group by node profile (aka, gpu type)
+# group by node
 def combine_and_group(node_info, gpu_requests):
-    grouped_info = {}
+    combined_info = []
     for node, info in node_info.items():
-        profile = info['node_profile']
-        
-        if profile not in ["cpu", "headnode"]:
-            if profile not in grouped_info: # adds profiles not yet accounted for
-                grouped_info[profile] = {
-                    'node_profile': profile,
-                    'capacity': 0,
-                    'total_gpu_requests': 0
-                }
-            grouped_info[profile]['capacity'] += info['capacity']
-            grouped_info[profile]['total_gpu_requests'] += gpu_requests.get(node, 0)
+        if info['node_profile'] not in ["cpu", "headnode"]:
+            combined_info.append({
+                'node_name': node.split('.')[0],
+                'node_profile': info['node_profile'],
+                'capacity': info['capacity'],
+                'total_gpu_requests': gpu_requests.get(node, 0)
+            })
     
-    return grouped_info
+    return combined_info
 
-@app.route('/gpu_status')
+@app.route('/gpu_status_bynode')
 def gpu_status():
     gpu_requests = get_gpu_requests()
     node_info = get_node_capacity_and_profile()
-    grouped_info = combine_and_group(node_info, gpu_requests)
+    combined_info = combine_and_group(node_info, gpu_requests)
 
     # Format output as a list of dicts
-    output = [
-        {
-            'node_profile': value['node_profile'],
-            'capacity': value['capacity'],
-            'total_gpu_requests': value['total_gpu_requests']
-        }
-        for value in grouped_info.values()
-    ]
-
-    # Sort the list of dicts by the 'node_profile' field
-    output = sorted(output, key=lambda x: x['node_profile'])
-    
-    return jsonify(output)
+    combined_info = sorted(combined_info, key=lambda x: x['node_name'])
+    return jsonify(combined_info)
 
 if __name__ == "__main__":
     # Running the Flask app on all interfaces on port 5000

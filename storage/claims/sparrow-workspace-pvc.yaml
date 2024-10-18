@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: nfs-sparrow-workspace
+  namespace: jupyterhub
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: nfs-sparrow-nvme
+  volumeName: nfs-sparrow-workspace
+  resources:
+    requests:
+      storage: 100Ti

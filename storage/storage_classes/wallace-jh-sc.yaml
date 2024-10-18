@@ -15,4 +15,3 @@ volumeBindingMode: Immediate
 mountOptions:
   - hard
   - proto=tcp
- # - nfsvers=4.1

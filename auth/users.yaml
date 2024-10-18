@@ -9,13 +9,14 @@ data:
       - terrence
       - sarah
     gpu:
+      - devgpu
       - karenna
       - praneeth
       - simone
       - mshafiei
       - nitesh
-      - devgpu
     regular:
+      - devreg
       - jonathan
       - pragati
       - sean
@@ -32,4 +33,3 @@ data:
       - jmagura
       - tanand
       - civester
-      - devreg
