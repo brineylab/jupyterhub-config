@@ -13,6 +13,11 @@ route:
   - receiver: "null"
     matchers:
     - alertname =~ "InfoInhibitor|Watchdog"
+  # skip TargetDown alerts caused by failure to check monitor non-existent resources on worker nodes
+  - receiver: "null"
+    matchers:
+    - alertname = "TargetDown"
+    - job =~ "kube-scheduler|kube-controller-manager"
 
 inhibit_rules:
 - target_matchers:
