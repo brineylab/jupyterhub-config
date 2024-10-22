@@ -294,22 +294,18 @@ hub:
           
           # For named server(s) -> GPU profiles
           else:
-            # add inference gpus for all users on named servers
-            self.profile_list = [
-              {
-                "display_name": "Power-limited GPUs",
-                "description": "Choose between a A6000 or L40S GPU for inference and testing. Note that these GPUs are currently power limited, so performance may be diminished.",
-                "profile_options": {
-                  **define_custom_images(deeplearning, datascience),
-                  **define_gpu_types(["A6000-pwrlimit", "L40s-pwrlimit"]),
-                  **define_num_gpus([1]),
-                },
-              }
-            ]
-
-            # add other gpu profiles for gpu users only
+            # add all profiles for gpu users
             if self.user.name in gpu or self.user.admin:
-              self.profile_list.extend([
+              self.profile_list = [
+                {
+                  "display_name": "Power-limited GPUs",
+                  "description": "Choose between a A6000 or L40S GPU for inference and testing. Note that these GPUs are currently power limited, so performance may be diminished.",
+                  "profile_options": {
+                    **define_custom_images(deeplearning, datascience),
+                    **define_gpu_types(["A6000-pwrlimit", "L40s-pwrlimit"]),
+                    **define_num_gpus([1, 2, 4]),
+                  },
+                },
                 {
                   "display_name": "GPUs",
                   "description": "Choose 1 to 4 L40S, A30, or A6000s GPUs.",
@@ -319,7 +315,19 @@ hub:
                     **define_num_gpus([1, 2, 4]),
                   },
                 }
-              ])
+              ]
+            else:
+              self.profile_list = [
+                {
+                  "display_name": "Power-limited GPUs",
+                  "description": "Choose between a A6000 or L40S GPU for inference and testing. Note that these GPUs are currently power limited, so performance may be diminished.",
+                  "profile_options": {
+                    **define_custom_images(deeplearning, datascience),
+                    **define_gpu_types(["A6000-pwrlimit", "L40s-pwrlimit"]),
+                    **define_num_gpus([1]),
+                  },
+                }
+              ]
           
           # dev profile for admins only
           if self.user.admin:
