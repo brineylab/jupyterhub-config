@@ -92,6 +92,10 @@ singleuser:
       - name:  cedric-workspace
         persistentVolumeClaim:
           claimName: cedric-workspace
+      # sparrow workspace
+      - name: nfs-sparrow-workspace
+        persistentVolumeClaim:
+          claimName: nfs-sparrow-workspace
       # sequencing data: NovaSeq
       - name: nfs-avon-novaseq6k
         persistentVolumeClaim:
@@ -116,6 +120,8 @@ singleuser:
         mountPath: /home/jovyan/references
       - name: cedric-workspace
         mountPath: /home/jovyan/workspace
+      - name: nfs-sparrow-workspace
+        mountPath: /home/jovyan/workspace-blackpearl
       - name: nfs-avon-novaseq6k
         mountPath: /home/jovyan/sequencing_runs/novaseq
       - name: nfs-avon-nextseq2k
