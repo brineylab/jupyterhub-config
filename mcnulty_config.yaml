@@ -46,10 +46,10 @@ singleuser:
 
   # default resource limits
   memory:
-    limit: 512G
+    limit: 2T
     guarantee: 64G
   cpu:
-    limit: 128
+    limit: 256
     guarantee: 16
 
   # required for codeserver to launch
@@ -213,17 +213,9 @@ hub:
             "choices": {
               str(i): {
                 "display_name": str(i),
-                "kubespawner_override": (
-                  {
-                      "node_selector": {"node_profile": i},
-                      "cpu_guarantee": 12,
-                      "cpu_limit": 48,
-                      "mem_guarantee": "12G",
-                      "mem_limit": "64G"
-                  } if i == "A30" else {
+                "kubespawner_override": {
                       "node_selector": {"node_profile": i},
                   }
-                )
               } for i in gpu_types
             },
           }
