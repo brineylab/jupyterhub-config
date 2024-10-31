@@ -46,10 +46,10 @@ singleuser:
 
   # default resource limits
   memory:
-    limit: 2T
+    limit: 512T
     guarantee: 64G
   cpu:
-    limit: 256
+    limit: 128
     guarantee: 16
 
   # required for codeserver to launch
