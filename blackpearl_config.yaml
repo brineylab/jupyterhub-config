@@ -270,6 +270,19 @@ hub:
                 **define_gpu_types(["L40S"]),
                 **define_num_gpus([2, 4, 8]),
               },
+            },
+            {
+              "display_name": "volume access",
+              "description": "Use for access to the workspace volume.",
+              "kubespawner_override": {
+                "cpu_guarantee": 1,
+                "cpu_limit": 12,
+                "mem_guarantee": "1G",
+                "mem_limit": "12G"
+              },
+              "profile_options": {
+                **define_custom_images(deeplearning, datascience),
+              },
             }
           ]
           
