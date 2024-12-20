@@ -46,11 +46,16 @@ singleuser:
 
   # default resource limits
   memory:
-    limit: 2T
+    limit: 700G
     guarantee: 64G
   cpu:
-    limit: 384
+    limit: 256
     guarantee: 64
+  extraResource:
+    limits:
+      ephemeral-storage: "750Gi"
+    guarantees:
+      ephemeral-storage: "20Gi"
 
   # required for codeserver to launch
   lifecycleHooks:
@@ -295,7 +300,7 @@ hub:
                 "profile_options": {
                   **define_custom_images(deeplearning, datascience),
                   **define_gpu_types(["L40S"]),
-                  **define_num_gpus([0, 1, 2, 4, 8]),
+                  **define_num_gpus([0, 1, 2, 4, 5, 6, 7, 8]),
                 },
               }
             ])
