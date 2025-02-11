@@ -15,7 +15,7 @@ data:
           <h2>Servers</h2>
           {% if user.admin %}
             <p>
-              You can launch an unlimited number of servers (admin only). Regular users are limited to 1 server.
+              You can launch an unlimited number of servers (admin only). Other users are limited to 2 servers.
               When adding servers using the 'Add New Server' button, don't add any spaces or capital letters in the server name!
             </p>
           {% else %}
@@ -37,10 +37,12 @@ data:
             </thead>
             <tbody>
               <tr class="home-server-row" data-server-name="default">
-                <td>gpu-server</td>
+                <td>default-server</td>
                 <td>
-                  {% if default_server.user_options.profile and default_server.active %}
-                    {{ default_server.user_options.profile }}
+                  {% if default_server.user_options.GPUType and default_server.active %}
+                    {{ default_server.user_options.Image}}-{{ default_server.user_options.GPUType}}
+                  {% elif default_server.active %}
+                    {{ default_server.user_options.profile}}
                   {% else %}
                     &nbsp
                   {% endif %}
