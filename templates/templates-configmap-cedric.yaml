@@ -152,100 +152,100 @@ data:
       {% set announcement = announcement_spawn %}
     {% endif %}
     {% block main %}
-    <div class="container">
-      {% block heading %}
-      <div class="row text-center">
-        <h1>Server Options</h1>
-      </div>
-      {% endblock %}
-      <div class="row col-sm-offset-2 col-sm-8">
-        {% if for_user and user.name != for_user.name -%}
-          <p>Spawning server for {{ for_user.name }}</p>
-        {% endif -%}
-        {% if error_message -%}
-          <p class="spawn-error-msg text-danger">
-            Error: {{error_message}}
-          </p>
-        {% endif %}
-        <form enctype="multipart/form-data" id="spawn_form" action="{{ url | safe }}" method="post" role="form">
-          {{spawner_options_form | safe}}
-          <br>
-          <div class="feedback-container">
-            <input type="submit" value="Start" class="btn btn-jupyter form-control">
-            <div class="feedback-widget hidden">
-              <i class="fa fa-spinner"></i>
+      <div class="container">
+          <!-- Default spawner options -->
+          {% block heading %}
+          <div class="row text-center">
+            <h1>Server Options</h1>
+          </div>
+          {% endblock heading %}
+          <div class="row justify-content-center">
+            <div class="col-md-8">
+              {% if for_user and user.name != for_user.name -%}
+                <p>Spawning server for {{ for_user.name }}</p>
+              {% endif -%}
+              {% if error_message -%}<p class="spawn-error-msg alert alert-danger">Error: {{ error_message }}</p>{% endif %}
+              <form enctype="multipart/form-data"
+                  id="spawn_form"
+                  action="{{ url | safe }}"
+                  method="post"
+                  role="form">
+                {{ spawner_options_form | safe }}
+                <br>
+                <div class="feedback-container">
+                  <button type="submit" class="btn btn-jupyter form-control">Start</button>
+                  <div class="feedback-widget hidden">
+                    <i class="fa fa-spinner"></i>
+                  </div>
+                </div>
+              </form>
             </div>
           </div>
-        </form>
-      </div>
 
-    <!-- GPU Availability Section -->
-    <div class="row col-sm-offset-2 col-sm-8" style="margin-top: 20px; align-items: center;">
-      <div class="gpu-status" style="font-size: 1.3em; text-align: center;">
-        <h3>GPU Availability</h3>
-        <div class="table-wrapper" style="width: 40%; margin: 0 auto;">
-          <table id="gpu-status-container" class="table table-bordered" style="display: none;">
-            <thead>
-              <tr>
-                <th>Node Profile</th>
-                <th>Available GPUs</th>
-              </tr>
-            </thead>
-            <tbody>
-              <!-- This section will be dynamically updated -->
-            </tbody>
-          </table>
-        </div>
-        <h4 style="font-weight: normal; margin: 0;">Your server will fail to launch if you request more <s>cats</s> GPUs than available!</h4>
+          <!-- Custom GPU availability -->
+          <div class="row justify-content-center mt-5">
+            <div class="col-md-8 text-center">
+              <h3>GPU Availability</h3>
+              <table id="gpu-status-container" class="table table-bordered mx-auto" style="display: none; width: auto;">
+                  <thead>
+                  <tr>
+                    <th>Node Profile</th>
+                    <th>Available GPUs</th>
+                  </tr>
+                  </thead>
+                  <tbody><!-- dynamically updated by updateGpuStatus fn--></tbody>
+              </table>
+              <p class="mt-2">Your server will fail to launch if you request more <s>cats</s> GPUs than available!</p>
+            </div>
+          </div>
       </div>
-    </div>
-    </div>
-    {% endblock %}
+    {% endblock main %}
+
+    <!-- scripts -->
     {% block script %}
       {{ super() }}
       <script>
-      // setup onSubmit feedback
-      $('form').submit((e) => {
-        var form = $(e.target);
-        form.find('.feedback-container>input').attr('disabled', true);
-        form.find('.feedback-container>*').toggleClass('hidden');
-        form.find('.feedback-widget>*').toggleClass('fa-pulse');
-      });
+        // setup onSubmit feedback
+        $('form').submit((e) => {
+          var form = $(e.target);
+          form.find('.feedback-container>input').attr('disabled', true);
+          form.find('.feedback-container>*').toggleClass('hidden');
+          form.find('.feedback-widget>*').toggleClass('fa-pulse');
+        });
 
-      // Function to update GPU status
-      function updateGpuStatus() {
-        const baseUrl = window.location.origin;
-        const fetchUrl = `${baseUrl.split(':')[0]}:${baseUrl.split(':')[1]}:5000/gpu_status`;
-        fetch(fetchUrl)
-          .then(response => response.json())
-          .then(data => {
-            const container = document.getElementById('gpu-status-container');
-            container.innerHTML = ''; // Clear previous content
+        // Function to update GPU status
+        function updateGpuStatus() {
+          const baseUrl = window.location.origin;
+          const fetchUrl = `${baseUrl.split(':')[0]}:${baseUrl.split(':')[1]}:5000/gpu_status`;
+          fetch(fetchUrl)
+            .then(response => response.json())
+            .then(data => {
+              const container = document.getElementById('gpu-status-container');
+              container.innerHTML = ''; // clear previous content
 
-            data.forEach(gpuInfo => {
-              const availableGpus = gpuInfo.capacity - gpuInfo.total_gpu_requests;
-              container.innerHTML += `
-                <tr>
-                  <td>${gpuInfo.node_profile}</td>
-                  <td>${availableGpus}&nbsp;${'😸'.repeat(availableGpus)}</td>
-                </tr>
-              `; 
+              data.forEach(gpuInfo => {
+                const availableGpus = gpuInfo.capacity - gpuInfo.total_gpu_requests;
+                container.innerHTML += `
+                  <tr>
+                    <td>${gpuInfo.node_profile}</td>
+                    <td>${availableGpus}&nbsp;${'😸'.repeat(availableGpus)}</td>
+                  </tr>
+                `; 
+              });
+              // only show table once data is loaded
+              container.style.display = 'table';
+            })
+            .catch(error => {
+              console.error('Error fetching GPU status:', error);
+              const container = document.getElementById('gpu-status-container');
+              container.innerHTML = `<p>Error fetching data: ${error.message}</p>`;
             });
-            // Show the table once data is loaded
-            container.style.display = 'table';
-          })
-          .catch(error => {
-            console.error('Error fetching GPU status:', error);
-            const container = document.getElementById('gpu-status-container');
-            container.innerHTML = `<p>Error fetching data: ${error.message}</p>`; // Use backticks for template literals
-          });
-      }
+        }
 
-      // Update GPU status every 10 seconds
-      setInterval(updateGpuStatus, 10000);
-
-      // Initial update
-      updateGpuStatus();
+        // update status every 10 seconds
+        setInterval(updateGpuStatus, 10000);
+        updateGpuStatus();
+        
       </script>
     {% endblock %}
 

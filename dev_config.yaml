@@ -46,8 +46,8 @@ singleuser:
 
   # default resource limits
   memory:
-    limit: 512G
-    guarantee: 64G
+    limit: 128G
+    guarantee: 16G
   cpu:
     limit: 128
     guarantee: 16
@@ -64,13 +64,13 @@ singleuser:
   
   # defaults - in case pods get launched w/o specifying profile
   # i think this can only happen from the admin page
-#  profileList:
-#    - display_name: "data science"
-#      default: true
-#      kubespawner_override:
-#        image: "brineylab/jupyterhub-datascience:v2024-08-13"
-#        node_selector:
-#          node_profile: "cpu"
+  profileList:
+    - display_name: "data science"
+      default: true
+      kubespawner_override:
+        image: "brineylab/jupyterhub-datascience:v2024-08-13"
+        node_selector:
+          node_profile: "cpu"
 
   storage:
     dynamic:
@@ -104,6 +104,10 @@ singleuser:
         emptyDir:
           medium: Memory
           sizeLimit: "10Gi"
+      # backup user data
+      - name: hub-database
+        persistentVolumeClaim:
+          claimName: hub-database
     extraVolumeMounts:
       - name: nfs-wallace-shared
         mountPath: /home/jovyan/shared
@@ -117,13 +121,15 @@ singleuser:
         mountPath: /home/jovyan/sequencing_runs/ont
       - name: dshm
         mountPath: /dev/shm
+      - name: hub-database
+        mountPath: /srv/jupyterhub
 
 hub:
   networkPolicy:
     enabled: false
   
   containerSecurityContext:
-    runAsUser: 0
+    runAsUser: 1000 # needs to be non-root user (root is 0): https://discourse.jupyter.org/t/customizing-jupyterhub-on-kubernetes/1769/39
     runAsGroup: 0
 
   # Mount users and home page configmaps
@@ -134,17 +140,17 @@ hub:
     - name: users-config
       configMap:
         name: users-config
-    - name: alertmanager-config
-      configMap:
-        name: alertmanager-config
+#    - name: alertmanager-config
+#      configMap:
+#        name: alertmanager-config
   extraVolumeMounts:
     - mountPath: /etc/jupyterhub/templates
       name: jupyterhub-custom-templates
     - mountPath: /etc/jupyterhub/auth
       name: users-config
-    - mountPath: /etc/alertmanager/
-      subPath: alertmanager.yaml
-      name: alertmanager-config
+#    - mountPath: /etc/alertmanager/
+#      subPath: alertmanager.yaml
+#      name: alertmanager-config
 
   config:
     JupyterHub:
@@ -153,6 +159,11 @@ hub:
 
     NativeAuthenticator:
       enable_signup: true
+    #   enable_auth_state: true # test
+
+    # CryptKeeper:
+    #   keys:
+    #     - c5b256de6a849e719bb86bb266a880ec192260defa06d88fc02f9de65d93c2cb # test
 
   extraConfig:
     env: |
