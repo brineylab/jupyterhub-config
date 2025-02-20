@@ -46,11 +46,11 @@ singleuser:
 
   # default resource limits
   memory:
-    limit: 512G
+    limit: 1.5T
     guarantee: 64G
 
   cpu:
-    limit: 128
+    limit: 250
     guarantee: 16
   
   # required for codeserver to launch
@@ -196,11 +196,19 @@ hub:
     # ref: https://jupyterhub.readthedocs.io/en/stable/howto/configuration/config-user-env.html#named-servers
     # src code: https://github.com/jupyterhub/jupyterhub/blob/main/jupyterhub/app.py#L1341
     namedServers: |
-      # This technically allows unlimited named servers for all users
-      # But we remove the 'add new server' interface for all users except
-      # admins on the home page.
+      def custom_named_server_limit(handler):
+        with open("/etc/jupyterhub/auth/users.yaml") as f:
+          users = yaml.safe_load(f)
+
+        user = handler.current_user.name
+
+        if user in users.get("admin", []):
+            return 0 # unlimited
+
+        return 1 # 2 servers total
+
       c.JupyterHub.allow_named_servers = True
-      c.JupyterHub.named_server_limit_per_user = 0
+      c.JupyterHub.named_server_limit_per_user = custom_named_server_limit
     
     # modified from https://github.com/neurohackademy/nh2020-jupyterhub/blob/8bc0d8304d5090d3a1e21a038a68f0a940e31809/deployments/hub-neurohackademy-org/config/prod.yaml
     # ref for profile_options: https://jupyterhub-kubespawner.readthedocs.io/en/latest/spawner.html
