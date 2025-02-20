@@ -46,7 +46,7 @@ singleuser:
 
   # default resource limits
   memory:
-    limit: 512T
+    limit: 512G
     guarantee: 64G
   cpu:
     limit: 128
@@ -126,7 +126,15 @@ singleuser:
 hub:
   networkPolicy:
     enabled: false
-  
+
+  readinessProbe:
+    httpGet:
+      path: /hub/health
+      port: 8081
+    initialDelaySeconds: 30  # increased from the default (e.g., 10)
+    timeoutSeconds: 5        # increase if needed
+    periodSeconds: 10        # adjust the check frequency
+
   containerSecurityContext:
     runAsUser: 0
     runAsGroup: 0
@@ -249,7 +257,7 @@ hub:
               "validation_message": 'Must be an image matching <user>/<name>:<tag>',
               "kubespawner_override": {
                 "image": "{value}",
-                "start_timeout": 600, # increase timeout time to 10mins to allow new images to be pulled
+                "start_timeout": 900, # increase timeout time to 15mins to allow new images to be pulled
               },
             },
           }
@@ -334,8 +342,8 @@ hub:
                 "description": "Set custom images, resources, etc for testing - timeout is extended to 10mins if you provide a custom image.",
                 "profile_options": {
                   **define_custom_images(deeplearning, datascience),
-                  **define_gpu_types(["cpu", "A30", "A6000", "L40S", "A6000-pwrlimit", "L40S-pwrlimit"]),
-                  **define_num_gpus([0, 1, 2, 4, 8]),
+                  **define_gpu_types(["cpu", "A6000", "L40S", "A6000-pwrlimit", "L40s-pwrlimit"]),
+                  **define_num_gpus([0, 1, 2, 3, 4, 5, 6, 7, 8]),
                 },
               }
             ])
