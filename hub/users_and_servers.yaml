@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: users-config
+  name: users-nodes-config
 data:
   users.yaml: |
     admin:
@@ -33,3 +33,15 @@ data:
       - civester
       - tixu
       - mgee
+  
+  node_resources.csv: |
+    node,gpu_type,num_gpus,cpu_threads,gb_memory
+    randy,A6000,8,256,2000
+    ellis,A6000,4,56,187
+    jay,A6000,4,56,384
+    michael,L40S,8,256,2000
+    rawls,L40S,4,128,512
+    swann,L40S,8,384,1500
+    turner,L40S,8,384,1500
+    cedric,A100,8,256,2000
+    kraken,H200,8,NA,1500

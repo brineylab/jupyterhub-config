@@ -21,7 +21,7 @@ scheduling:
 # NOTE: Images need to be updated in a second place in this file.
 #       This only updates the image puller, so that new images get
 #       pulled during the helm upgrade.
-#prePuller:
+# prePuller:
  # extraImages:
    # datascience:
     #  name: brineylab/jupyterhub-datascience
@@ -82,23 +82,23 @@ singleuser:
       - name:  nfs-wallace-shared
         persistentVolumeClaim:
           claimName: nfs-wallace-shared
-      # references
-      - name: nfs-wallace-references
-        persistentVolumeClaim:
-          claimName: nfs-wallace-references
-          readOnly: true
-      # sequencing data: NovaSeq
-      - name: nfs-avon-novaseq6k
-        persistentVolumeClaim:
-          claimName: nfs-avon-novaseq6k
-      # sequencing data: NextSeq
-      - name: nfs-avon-nextseq2k
-        persistentVolumeClaim:
-          claimName: nfs-avon-nextseq2k
-      # sequencing data: ONT
-      - name: nfs-stringer-ont
-        persistentVolumeClaim:
-          claimName: nfs-stringer-ont
+      # # references
+      # - name: nfs-wallace-references
+      #   persistentVolumeClaim:
+      #     claimName: nfs-wallace-references
+      #     readOnly: true
+      # # sequencing data: NovaSeq
+      # - name: nfs-avon-novaseq6k
+      #   persistentVolumeClaim:
+      #     claimName: nfs-avon-novaseq6k
+      # # sequencing data: NextSeq
+      # - name: nfs-avon-nextseq2k
+      #   persistentVolumeClaim:
+      #     claimName: nfs-avon-nextseq2k
+      # # sequencing data: ONT
+      # - name: nfs-stringer-ont
+      #   persistentVolumeClaim:
+      #     claimName: nfs-stringer-ont
       # dshm - needed for training on gpu servers running jupyterhub
       - name: dshm
         emptyDir:
@@ -107,14 +107,14 @@ singleuser:
     extraVolumeMounts:
       - name: nfs-wallace-shared
         mountPath: /home/jovyan/shared
-      - name: nfs-wallace-references
-        mountPath: /home/jovyan/references
-      - name: nfs-avon-novaseq6k
-        mountPath: /home/jovyan/sequencing_runs/novaseq
-      - name: nfs-avon-nextseq2k
-        mountPath: /home/jovyan/sequencing_runs/nextseq
-      - name: nfs-stringer-ont
-        mountPath: /home/jovyan/sequencing_runs/ont
+      # - name: nfs-wallace-references
+      #   mountPath: /home/jovyan/references
+      # - name: nfs-avon-novaseq6k
+      #   mountPath: /home/jovyan/sequencing_runs/novaseq
+      # - name: nfs-avon-nextseq2k
+      #   mountPath: /home/jovyan/sequencing_runs/nextseq
+      # - name: nfs-stringer-ont
+      #   mountPath: /home/jovyan/sequencing_runs/ont
       - name: dshm
         mountPath: /dev/shm
 
@@ -129,20 +129,20 @@ hub:
 
   # Mount users and home page configmaps
   extraVolumes:
-    - name: jupyterhub-custom-templates
+    - name: jupyterhub-templates
       configMap:
-        name: jupyterhub-custom-templates
-    - name: users-config
+        name: jupyterhub-templates
+    - name: users-nodes-config
       configMap:
-        name: users-config
+        name: users-nodes-config
 #    - name: alertmanager-config
 #      configMap:
 #        name: alertmanager-config
   extraVolumeMounts:
     - mountPath: /etc/jupyterhub/templates
-      name: jupyterhub-custom-templates
-    - mountPath: /etc/jupyterhub/auth
-      name: users-config
+      name: jupyterhub-templates
+    - mountPath: /etc/jupyterhub/conf
+      name: users-nodes-config
 #    - mountPath: /etc/alertmanager/
 #      subPath: alertmanager.yaml
 #      name: alertmanager-config

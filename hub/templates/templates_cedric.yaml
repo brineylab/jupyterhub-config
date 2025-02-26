@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: jupyterhub-custom-templates
+  name: jupyterhub-templates
 data:
   home.html: |
     {% extends "page.html" %}
@@ -15,14 +15,12 @@ data:
           <h2>Servers</h2>
           {% if user.admin %}
             <p>
-              You can launch an unlimited number of servers (admin only). Regular users are limited to 2 servers and GPU users are limited to 3 servers.
+              You can launch an unlimited number of servers (admin only). Other users are limited to 2 servers.
               When adding servers using the 'Add New Server' button, don't add any spaces or capital letters in the server name!
             </p>
           {% else %}
             <p>
-              You can launch a total of {{ named_server_limit_per_user + 1 }} server(s) at one time -
-              {{ named_server_limit_per_user }} of these servers can have GPUs.
-              When adding GPU servers using the 'Add New Server' button, don't add any spaces or capital letters in the server name!
+              You can launch a total of {{ named_server_limit_per_user + 1 }} server(s).
             </p>
           {% endif %}
           {% set named_spawners = user.all_spawners(include_default=False)|list %}
@@ -39,7 +37,7 @@ data:
             </thead>
             <tbody>
               <tr class="home-server-row" data-server-name="default">
-                <td>cpu-only</td>
+                <td>default-server</td>
                 <td>
                   {% if default_server.user_options.GPUType and default_server.active %}
                     {{ default_server.user_options.Image}}-{{ default_server.user_options.GPUType}}
@@ -84,9 +82,7 @@ data:
                 <tr class="home-server-row" data-server-name="{{ spawner.name }}">
                   <td>{{ spawner.name }}</td>
                   <td>
-                    {% if spawner.user_options.GPUType and spawner.ready %}
-                      {{ spawner.user_options.Image }}-{{ spawner.user_options.GPUType }}
-                    {% elif spawner.ready %}
+                    {% if spawner.user_options.profile and spawner.ready %}
                       {{ spawner.user_options.profile }}
                     {% else %}
                       &nbsp
@@ -219,9 +215,11 @@ data:
           form.find('.feedback-widget>*').toggleClass('fa-pulse');
         });
 
-        // function to update GPU status
+        // Function to update GPU status
         function updateGpuStatus() {
-          fetch('http://172.29.180.217:5000/gpu_status')
+          const baseUrl = window.location.origin;
+          const fetchUrl = `${baseUrl.split(':')[0]}:${baseUrl.split(':')[1]}:5000/gpu_status`;
+          fetch(fetchUrl)
             .then(response => response.json())
             .then(data => {
               const container = document.getElementById('gpu-status-container');
@@ -249,8 +247,9 @@ data:
         // update status every 10 seconds
         setInterval(updateGpuStatus, 10000);
         updateGpuStatus();
+        
       </script>
-    {% endblock script %}
+    {% endblock %}
 
   spawn_pending.html: |
     {% extends "page.html" %}
@@ -354,130 +353,3 @@ data:
         });
       </script>
     {% endblock script %}
-  
-  form.html: |
-    <style>
-      #kubespawner-profiles-list .profile {
-        display: flex;
-        flex-direction: row;
-        font-weight: normal;
-        border-bottom: 1px solid #ccc;
-        padding-bottom: 12px;
-      }
-
-      #kubespawner-profiles-list .profile .radio {
-        padding: 12px;
-      }
-
-      #kubespawner-profiles-list .profile .option {
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        padding-bottom: 12px;
-      }
-
-      #kubespawner-profiles-list .profile .option label {
-        font-weight: normal;
-        margin-right: 8px;
-        min-width: 96px;
-      }
-    </style>
-
-    <div class="form-group" id="kubespawner-profiles-list">
-      {%- for profile in profile_list %}
-        {#- Wrap everything in a label tag so clicking anywhere selects the option #}
-        <label for="profile-item-{{ profile.slug }}"
-              class="profile js-profile-label">
-          <div class="radio">
-            <input type="radio"
-                  name="profile"
-                  id="profile-item-{{ profile.slug }}"
-                  value="{{ profile.slug }}"
-                  {% if profile.default %}checked{% endif %} />
-          </div>
-          <div>
-            <h3>{{ profile.display_name }}</h3>
-            {%- if profile.description %}<p>{{ profile.description }}</p>{%- endif %}
-            {%- if profile.profile_options %}
-              <div>
-                {%- for k, option in profile.profile_options.items() %}
-                  <div class="js-options-container">
-                    <div class="option">
-                      <label for="profile-option-{{ profile.slug }}--{{ k }}"
-                            class="js-profile-option-label">{{ option.display_name }}</label>
-                      <select name="profile-option-{{ profile.slug }}--{{ k }}"
-                              class="form-control js-profile-option-select">
-                        {%- for k, choice in option['choices'].items() %}
-                          <option value="{{ k }}" {% if choice.default %}selected{% endif %}>{{ choice.display_name }}</option>
-                        {%- endfor %}
-                        {%- if option['unlisted_choice']['enabled'] %}
-                          <option value="unlisted-choice">{{ option['unlisted_choice']['display_name_in_choices'] }}</option>
-                        {%- endif %}
-                      </select>
-                    </div>
-                    {%- if option['unlisted_choice']['enabled'] %}
-                      <div class="option d-none js-other-input-container">
-                        <label for="profile-option-{{ profile.slug }}--{{ k }}--unlisted-choice">
-                          {{ option['unlisted_choice']['display_name'] }}
-                        </label>
-                        <input data-name="profile-option-{{ profile.slug }}--{{ k }}--unlisted-choice"
-                              {%- if option['unlisted_choice']['validation_regex'] %}
-                              pattern="{{ option['unlisted_choice']['validation_regex'] }}"
-                              {%- endif %}
-                              title="{{ option['unlisted_choice']['validation_message'] }}"
-                              class="form-control js-other-input" />
-                      </div>
-                    {%- endif %}
-                  </div>
-                {%- endfor %}
-              </div>
-            {%- endif %}
-          </div>
-        </label>
-      {%- endfor %}
-    </div>
-    <script>
-      $('.js-profile-option-select, .js-profile-option-label').click(function() {
-        // we need this bit of JS to select the profile when a <select> inside is clicked.
-        $(this).parents('.js-profile-label')
-          .find('input[type=radio]')
-          .prop('checked', true);
-      });
-
-      // If the user selects "Other" in the dropdown, show the free text field
-      $('.js-profile-option-select').change(function() {
-        const selectionValue = $(this).val();
-        const $otherInputContainer = $(this).parents('.js-options-container').find('.js-other-input-container');
-        const $otherInput = $(this).parents('.js-options-container').find('.js-other-input');
-        if (selectionValue === 'unlisted-choice') {
-
-          // if the Select box is selected with a value that is not 'unlisted-choice',
-          // we remove the "name" attribute for the unlisted-choice input
-          // and vice-versa, so that we only submit valid form values
-          // and don't leave the complexity of figuring out which value
-          // to use to the back-end.
-
-          // This can probably be done cleaner by completely refactoring
-          // how we send values from the frontend.
-          $(this).data('name', $(this).attr('name'));
-          $(this).removeAttr('name');
-          $otherInput.attr('name', $otherInput.data('name'));
-          $otherInputContainer.removeClass('d-none');
-        } else {
-          $otherInput.removeAttr('name');
-          $(this).attr('name', $(this).data('name'));
-          $otherInputContainer.addClass('d-none');
-        }
-      });
-
-      // wrapping in a document.ready to make clear this is executed once
-      // on page load
-      $(document).ready(() => {
-        // trigger the `change` event on the select inputs,
-        // so that if "Other" is selected on page load, the corresponding
-        // free-text input shows
-        $('.js-profile-option-select').trigger('change');
-      });
-
-    </script>
-
