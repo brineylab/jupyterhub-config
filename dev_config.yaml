@@ -68,7 +68,7 @@ singleuser:
     - display_name: "data science"
       default: true
       kubespawner_override:
-        image: "brineylab/jupyterhub-datascience:v2024-08-13"
+        # image: "brineylab/jupyterhub-datascience:v2024-08-13"
         node_selector:
           node_profile: "cpu"
 
@@ -104,10 +104,6 @@ singleuser:
         emptyDir:
           medium: Memory
           sizeLimit: "10Gi"
-      # backup user data
-      - name: hub-database
-        persistentVolumeClaim:
-          claimName: hub-database
     extraVolumeMounts:
       - name: nfs-wallace-shared
         mountPath: /home/jovyan/shared
@@ -121,15 +117,14 @@ singleuser:
         mountPath: /home/jovyan/sequencing_runs/ont
       - name: dshm
         mountPath: /dev/shm
-      - name: hub-database
-        mountPath: /srv/jupyterhub
 
 hub:
   networkPolicy:
     enabled: false
   
   containerSecurityContext:
-    runAsUser: 1000 # needs to be non-root user (root is 0): https://discourse.jupyter.org/t/customizing-jupyterhub-on-kubernetes/1769/39
+    # needs to be non-root user (root is 0): https://discourse.jupyter.org/t/customizing-jupyterhub-on-kubernetes/1769/39
+    runAsUser: 1000 
     runAsGroup: 0
 
   # Mount users and home page configmaps
@@ -159,11 +154,6 @@ hub:
 
     NativeAuthenticator:
       enable_signup: true
-    #   enable_auth_state: true # test
-
-    # CryptKeeper:
-    #   keys:
-    #     - c5b256de6a849e719bb86bb266a880ec192260defa06d88fc02f9de65d93c2cb # test
 
   extraConfig:
     env: |
@@ -171,10 +161,10 @@ hub:
       c.KubeSpawner.allow_privilege_escalation = True
       c.KubeSpawner.args = ["--allow-root"]
     
-    templates: |
+    templates: | # insert path to custom templates
       import os, nativeauthenticator
-      c.JupyterHub.template_paths = [f"{os.path.dirname(nativeauthenticator.__file__)}/templates/"]
-      c.JupyterHub.template_paths.insert(0, "/etc/jupyterhub/templates")
+      c.JupyterHub.template_paths = ["/etc/jupyterhub/templates", 
+                                      f"{os.path.dirname(nativeauthenticator.__file__)}/templates/"]
 
     users: |
       import yaml
@@ -205,6 +195,7 @@ hub:
 
     # modified from https://github.com/neurohackademy/nh2020-jupyterhub/blob/8bc0d8304d5090d3a1e21a038a68f0a940e31809/deployments/hub-neurohackademy-org/config/prod.yaml
     # ref for profile_options: https://jupyterhub-kubespawner.readthedocs.io/en/latest/spawner.html
+    # config required to enable gpu: https://discourse.jupyter.org/t/set-runtimeclassname-for-gpu-enabled-images/21617/5
     options-form: |    
       def define_num_gpus(num_gpus):
         return {
@@ -213,7 +204,6 @@ hub:
             "choices": {
               str(i): {
                 "display_name": str(i),
-                # required to enable gpu: https://discourse.jupyter.org/t/set-runtimeclassname-for-gpu-enabled-images/21617/5
                 "kubespawner_override": {
                   "extra_resource_limits": {"nvidia.com/gpu": i},
                   "extra_pod_config": {"runtimeClassName": "nvidia"},
@@ -314,30 +304,16 @@ hub:
             # add inference gpus for all users on named servers
             self.profile_list = [
               {
-                "display_name": "Power-limited GPUs",
-                "description": "Choose between a A6000 or L40S GPU for inference and testing. Note that these GPUs are currently power limited, so performance may be diminished.",
+                "display_name": "GPUs",
+                "description": "Choose GPUs",
                 "profile_options": {
                   **define_custom_images(deeplearning, datascience),
-                  **define_gpu_types(["A6000-pwrlimit", "L40s-pwrlimit"]),
-                  **define_num_gpus([1]),
+                  **define_gpu_types(["3090"]),
+                  **define_num_gpus([1, 2]),
                 },
               }
             ]
 
-            # add other gpu profiles for gpu users only
-            if self.user.name in gpu or self.user.admin:
-              self.profile_list.extend([
-                {
-                  "display_name": "GPUs",
-                  "description": "Choose 1 to 4 L40S, A30, or A6000s GPUs.",
-                  "profile_options": {
-                    **define_custom_images(deeplearning, datascience),
-                    **define_gpu_types(["L40S", "A6000", "A30"]),
-                    **define_num_gpus([1, 2, 4]),
-                  },
-                }
-              ])
-          
           # dev profile for admins only
           if self.user.admin:
             self.profile_list.extend([
@@ -346,8 +322,8 @@ hub:
                 "description": "Set custom images, resources, etc for testing - timeout is extended to 10mins if you provide a custom image.",
                 "profile_options": {
                   **define_custom_images(deeplearning, datascience),
-                  **define_gpu_types(["cpu", "A30", "A6000", "L40S", "A6000-pwrlimit", "L40S-pwrlimit"]),
-                  **define_num_gpus([0, 1, 2, 4, 8]),
+                  **define_gpu_types(["cpu", "3090"]),
+                  **define_num_gpus([0, 1, 2]),
                 },
               }
             ])
@@ -356,5 +332,10 @@ hub:
           # It will return a falsy blank string if there is no profile_list.
           # ref: https://github.com/jupyterhub/kubespawner/blob/37a80abb0a6c826e5c118a068fa1cf2725738038/kubespawner/spawner.py#L1885-L1935
           return self._options_form_default()
-
+      
       c.KubeSpawner.options_form = dynamic_options_form
+
+      # maybe: https://github.com/jupyterhub/kubespawner/blob/main/kubespawner/spawner.py#L1699
+      # bootstrap updated to v5 -> removes the 'hidden' class, need to use 'd-none' instead
+      # kubespawner hasn't updated their html template with this fix as of Feb 24th 2025
+      c.KubeSpawner.additional_profile_form_template_paths = "/etc/jupyterhub/templates"
