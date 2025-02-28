@@ -1,0 +1,17 @@
+nodes:
+  - node: "thor"
+    gpu_type: "3090"
+    num_gpus: 2
+    cpu_threads: 128
+    gb_memory: 256
+  # add fake info for testing
+  - node: "rym"
+    gpu_type: "3090"
+    num_gpus: 0
+    cpu_threads: 16
+    gb_memory: 16
+  - node: "atli"
+    gpu_type: "L40S"
+    num_gpus: 0
+    cpu_threads: 16
+    gb_memory: 16
