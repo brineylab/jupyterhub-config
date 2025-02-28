@@ -38,13 +38,14 @@
         <div class="col-md-8 text-center">
           <h3>GPU Availability</h3>
           <table id="gpu-status-container" class="table table-bordered mx-auto" style="display: none; width: auto;">
-              <thead>
+            <thead>
               <tr>
-                <th>Node Profile</th>
-                <th>Available GPUs</th>
+                <th>Type</th>
+                <th>Node</th>
+                <th>Available</th>
               </tr>
-              </thead>
-              <tbody><!-- dynamically updated by updateGpuStatus fn--></tbody>
+            </thead>  
+            <tbody><!-- dynamically updated by updateGpuStatus fn--></tbody>
           </table>
           <p class="mt-2">Your server will fail to launch if you request more <s>cats</s> GPUs than available!</p>
         </div>
@@ -66,59 +67,48 @@
 
     // function to update GPU status
     function updateGpuStatus() {
-      fetch('http://172.29.180.91:5000/gpu_status_bynode')
+      fetch("{{ gpu_status_url }}")
         .then(response => response.json())
         .then(data => {
           const container = document.getElementById('gpu-status-container');
-          container.innerHTML = ''; // clear previous content
+          const tbody = container.querySelector('tbody');
+          tbody.innerHTML = '';
 
-          // group data by GPU type
+          // group by node
           const groupedData = {};
           data.forEach(gpuInfo => {
-              if (!groupedData[gpuInfo.node_profile]) {
-                  groupedData[gpuInfo.node_profile] = [];
-              }
-              groupedData[gpuInfo.node_profile].push(gpuInfo);
+            if (!groupedData[gpuInfo.node_profile]) {
+              groupedData[gpuInfo.node_profile] = [];
+            }
+            groupedData[gpuInfo.node_profile].push(gpuInfo);
           });
 
-          // table headers
-          let tableContent = `
-            <table border="1" style="border-collapse: collapse; width: 100%; text-align: center;">
-              <thead>
-                <tr>
-                  <th>Type</th>
-                  <th>Node</th>
-                  <th>Available</th>
-                </tr>
-              </thead>
-              <tbody>
-          `;
-
-          // populate info
+          // update table content
           Object.entries(groupedData).forEach(([gpuType, nodes]) => {
-            tableContent += `<tr><td rowspan="${nodes.length}" style="font-weight: bold; vertical-align: middle;">${gpuType}</td>`;
-            
-            nodes.forEach((gpuInfo, index) => {
+            let firstRow = true;
+            nodes.forEach(gpuInfo => {
               const availableGpus = gpuInfo.capacity - gpuInfo.total_gpu_requests;
-              if (index > 0) tableContent += `<tr>`; // Start a new row if not the first node in the group
-              tableContent += `
+              const row = document.createElement('tr');
+              
+              if (firstRow) {
+                row.innerHTML += `<td rowspan="${nodes.length}" style="font-weight: bold; vertical-align: middle;">${gpuType}</td>`;
+                firstRow = false;
+              }
+              
+              row.innerHTML += `
                 <td>${gpuInfo.node_name}</td>
-                <td>${availableGpus}&nbsp;${'😸'.repeat(availableGpus)}</td>
-              </tr>
+                <td>${availableGpus} ${'😸'.repeat(availableGpus)}</td>
               `;
+              tbody.appendChild(row);
             });
           });
 
-          tableContent += `</tbody></table>`;
-
-          // only show table once data is loaded
-          container.innerHTML = tableContent;
+          // show table
           container.style.display = 'table';
         })
         .catch(error => {
           console.error('Error fetching GPU status:', error);
-          const container = document.getElementById('gpu-status-container');
-          container.innerHTML = `<p>Error fetching data: ${error.message}</p>`;
+          tbody.innerHTML = `<tr><td colspan="3">Error fetching data: ${error.message}</td></tr>`;
         });
     }
 

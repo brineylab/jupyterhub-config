@@ -163,8 +163,15 @@ hub:
     
     templates: |
       import os, nativeauthenticator
+
+      # inject custom templates
       c.JupyterHub.template_paths = ["/etc/jupyterhub/templates", 
                                       f"{os.path.dirname(nativeauthenticator.__file__)}/templates/"]
+
+      # set url for gpu status
+      c.JupyterHub.template_vars.update({
+          "gpu_status_url": "http://172.29.180.91:5000/gpu_status_bynode"
+      })
 
       # ref: https://github.com/jupyterhub/kubespawner/blob/main/kubespawner/spawner.py#L1699
       # bootstrap updated to v5 -> removes the 'hidden' class, need to use 'd-none' instead
