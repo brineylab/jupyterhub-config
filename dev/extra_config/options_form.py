@@ -95,6 +95,23 @@ def gpu_profile(CONFIG):
     },
   }]
 
+# define volume access profile - for accessing workspace volume
+# has low resources and no gpus
+def volume_profile(CONFIG):
+  return [{
+    "display_name": "Volume Access",
+    "description": "Use this profile to access the workspace volume.",
+    "profile_options": {
+      **_define_images(CONFIG["images"]),
+    },
+    "kubespawner_override": {
+      "cpu_guarantee": 1,
+      "cpu_limit": 12,
+      "mem_guarantee": "1G",
+      "mem_limit": "12G"
+    },
+  }]
+
 # define dev profile
 # def dev_profile(CONFIG):
 #   return [{
@@ -113,21 +130,18 @@ def dynamic_options_form_withconfig(CONFIG):
     
     server_type = CONFIG['server_type']
     
-    if server_type == 'cpu-gpu': # For default server -> CPU profiles, For named server -> GPU profiles
+    if server_type == 'cpu-gpu': # For default server -> CPU profiles, for named servers -> GPU profiles
       self.profile_list = cpu_profile(CONFIG) if not self.name else gpu_profile(CONFIG)
     
     elif server_type == 'cpu-only':
       self.profile_list = cpu_profile(CONFIG)
     
     elif server_type == 'gpu-only':  
-      self.profile_list = gpu_profile(CONFIG)
+      self.profile_list = gpu_profile(CONFIG) + volume_profile(CONFIG)
     
     else:
       raise Exception("Fix server type to be one of: 'cpu-gpu', 'cpu-only', or 'gpu-only'")
     
-    # Dev profile for admins only
-    # if self.user.admin:
-    #   self.profile_list.extend(dev_profile())
 
     # Let KubeSpawner inspect profile_list and decide what to return.
     # ref: https://github.com/jupyterhub/kubespawner/blob/37a80abb0a6c826e5c118a068fa1cf2725738038/kubespawner/spawner.py#L1885-L1935

@@ -156,11 +156,13 @@ hub:
       enable_signup: true
 
   extraConfig:
+    # set env variables
     env: |
       c.KubeSpawner.environment = {'NB_UMASK': '0000'}
       c.KubeSpawner.allow_privilege_escalation = True
       c.KubeSpawner.args = ["--allow-root"]
     
+    # custom templates
     templates: |
       import os, nativeauthenticator
 
@@ -178,6 +180,7 @@ hub:
       # kubespawner hasn't updated their html template with this fix as of Feb 24th 2025
       c.KubeSpawner.additional_profile_form_template_paths = "/etc/jupyterhub/templates"
 
+    # set admin and allowed users -> allow admin and gpu users only
     users: |
       import yaml
       with open("/etc/jupyterhub/config/users.yaml") as f:
@@ -186,6 +189,7 @@ hub:
       c.Authenticator.admin_users = users.get("admin", [])
       c.Authenticator.allowed_users = set(users.get("admin", []) + users.get("gpu", []) + users.get("regular", [])) 
 
+    # custom named server limit
     # ref: https://jupyterhub.readthedocs.io/en/stable/howto/configuration/config-user-env.html#named-servers
     namedServers: |
       def custom_named_server_limit(handler):
@@ -225,7 +229,7 @@ hub:
         },
         "gpu_counts": [1, 2, 4, 8],
         "node_info": node_info["nodes"],
-        "server_type": "cpu-gpu" # can be: "cpu-gpu", "cpu-only", and "gpu-only"
+        "server_type": "gpu-only" # can be: "cpu-gpu", "cpu-only", and "gpu-only"
       }
       
       # options for users to select from
