@@ -44,13 +44,17 @@ singleuser:
   uid: 0
   fsGid: 0
 
-  # default resource limits
+  # defaults - in case pods get launched w/o specifying profile
+  # i think this can only happen from the admin page
   memory:
-    limit: "16G"
-    guarantee: "4G"
+    limit: 16G
+    guarantee: 4G
   cpu:
     limit: 16
     guarantee: 4
+  image:
+    name: "brineylab/jupyterhub-datascience"
+    tag: "v2024-08-13"
 
   # required for codeserver to launch
   lifecycleHooks:
@@ -61,16 +65,6 @@ singleuser:
           - "-c"
           - >
             mkdir -p ${HOME}/codeserver;
-  
-  # defaults - in case pods get launched w/o specifying profile
-  # i think this can only happen from the admin page
-  profileList:
-    - display_name: "data science"
-      default: true
-      kubespawner_override:
-        # image: "brineylab/jupyterhub-datascience:v2024-08-13"
-        node_selector:
-          node_profile: "cpu"
 
   storage:
     dynamic:

@@ -112,18 +112,6 @@ def volume_profile(CONFIG):
     },
   }]
 
-# define dev profile
-# def dev_profile(CONFIG):
-#   return [{
-#     "display_name": "Dev (admin only)",
-#     "description": "Set custom images, resources, etc for testing",
-#     "profile_options": {
-#       **_define_images(CONFIG),
-#       **_define_gpu_nodes(CONFIG),
-#       **_define_num_gpus(CONFIG),
-#     },
-#   }]
-
 # return profile options based on the server type and config provided 
 def dynamic_options_form_withconfig(CONFIG):
   def dynamic_options_form(self):
