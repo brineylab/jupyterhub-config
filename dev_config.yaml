@@ -228,7 +228,7 @@ hub:
             "deeplearning": "brineylab/jupyterhub-deeplearning:v2024-08-13",
         },
         "gpu_counts": [1, 2, 4, 8],
-        "node_info": node_info["nodes"],
+        "node_info": node_info["dev"],
         "server_type": "gpu-only" # can be: "cpu-gpu", "cpu-only", and "gpu-only"
       }
       
