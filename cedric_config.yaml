@@ -190,7 +190,7 @@ hub:
     # set admin and allowed users -> allow admin and gpu users only
     users: |
       import yaml
-      with open("/etc/jupyterhub/auth/users.yaml") as f:
+      with open("/etc/jupyterhub/config/users.yaml") as f:
         users = yaml.safe_load(f)
 
       c.Authenticator.admin_users = users.get("admin", [])
@@ -201,7 +201,7 @@ hub:
     # src code: https://github.com/jupyterhub/jupyterhub/blob/main/jupyterhub/app.py#L1341
     namedServers: |
       def custom_named_server_limit(handler):
-        with open("/etc/jupyterhub/auth/users.yaml") as f:
+        with open("/etc/jupyterhub/config/users.yaml") as f:
           users = yaml.safe_load(f)
 
         user = handler.current_user.name
