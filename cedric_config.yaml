@@ -184,7 +184,7 @@ hub:
 
       # set url for gpu status
       c.JupyterHub.template_vars.update({
-          "gpu_status_url": "http://172.29.80.13:5000/gpu_status"
+          "gpu_status_url": "http://172.29.80.13:5000/gpu_status_bynode"
       })
 
     # set admin and allowed users -> allow admin and gpu users only
