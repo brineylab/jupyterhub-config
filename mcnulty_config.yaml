@@ -127,14 +127,6 @@ hub:
   networkPolicy:
     enabled: false
 
-  readinessProbe:
-    httpGet:
-      path: /hub/health
-      port: 8081
-    initialDelaySeconds: 30  # increased from the default (e.g., 10)
-    timeoutSeconds: 5        # increase if needed
-    periodSeconds: 10        # adjust the check frequency
-
   containerSecurityContext:
     runAsUser: 0
     runAsGroup: 0
