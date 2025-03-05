@@ -22,13 +22,13 @@ scheduling:
 #       This only updates the image puller, so that new images get
 #       pulled during the helm upgrade.
 prePuller:
- extraImages:
-   datascience:
-     name: brineylab/jupyterhub-datascience
-     tag: v2024-08-13
-   deeplearning:
-     name: brineylab/jupyterhub-deeplearning
-     tag: v2024-08-13
+  extraImages:
+    datascience:
+      name: brineylab/jupyterhub-datascience
+      tag: v2024-08-13
+    deeplearning:
+      name: brineylab/jupyterhub-deeplearning
+      tag: v2024-08-13
 
 singleuser:
   cmd: jupyterhub-singleuser
@@ -116,10 +116,24 @@ hub:
   networkPolicy:
     enabled: false
   
+  # needs to be non-root user (root is 0): https://discourse.jupyter.org/t/customizing-jupyterhub-on-kubernetes/1769/39
   containerSecurityContext:
-    # needs to be non-root user (root is 0): https://discourse.jupyter.org/t/customizing-jupyterhub-on-kubernetes/1769/39
     runAsUser: 1000 
     runAsGroup: 0
+  
+  # change hub database to postgresql (default sqlite not compatible with NFS)
+  # https://jupyterhub.readthedocs.io/en/latest/explanation/database.html#sqlite
+  db:
+    upgrade: true
+    type: postgres
+    url: "postgresql://brineylab:@192.168.1.1:5432/jupyterhub_db"
+  
+  extraEnv:
+    PGPASSWORD: # will automatically provide password when env variable is named PGPASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: postgres-secret
+          key: POSTGRES_PASSWORD
 
   # Mount users and home page configmaps
   extraVolumes:
@@ -129,17 +143,11 @@ hub:
     - name: extra-config
       configMap:
         name: extra-config
-#    - name: alertmanager-config
-#      configMap:
-#        name: alertmanager-config
   extraVolumeMounts:
     - mountPath: /etc/jupyterhub/templates
       name: templates
     - mountPath: /etc/jupyterhub/config
       name: extra-config
-#    - mountPath: /etc/alertmanager/
-#      subPath: alertmanager.yaml
-#      name: alertmanager-config
 
   config:
     JupyterHub:
