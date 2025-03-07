@@ -231,6 +231,7 @@ hub:
             "datascience": "brineylab/jupyterhub-datascience:v2024-09-12",
             "deeplearning": "brineylab/jupyterhub-deeplearning:v2024-09-12",
         },
+        "image_default": "deeplearning",
         "gpu_counts": [1, 2, 4, 8],
         "node_info": node_info["cedric"],
         "server_type": "gpu-only" # can be: "cpu-gpu", "cpu-only", and "gpu-only"

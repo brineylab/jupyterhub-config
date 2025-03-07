@@ -1,7 +1,7 @@
 # modified from https://github.com/neurohackademy/nh2020-jupyterhub/blob/8bc0d8304d5090d3a1e21a038a68f0a940e31809/deployments/hub-neurohackademy-org/config/prod.yaml
 # ref for profile_options: https://jupyterhub-kubespawner.readthedocs.io/en/latest/spawner.html
 
-def _define_images(images):
+def _define_images(images, default):
   """Define the image choices"""
   return {
     "Image": {
@@ -9,7 +9,7 @@ def _define_images(images):
       "choices": {
           name: {
               "display_name": name,
-              "default": (name == "datascience"),
+              "default": (name == default),
               "kubespawner_override": {"image": url},
           } for name, url in images.items()
       },
@@ -65,7 +65,7 @@ def _define_gpu_nodes(node_info):
 # image descriptions
 image_des = """Choose your image.
                 <ul>
-                <li><b>datascience</b>: default data analysis environment (including interpreters for Python and R)</li>
+                <li><b>datascience</b>: base data analysis environment (including interpreters for Python and R)</li>
                 <li><b>deeplearning</b>: extends datascience environment to include ML libraries (including torch, deepspeed, and 🤗)</li>
                 </ul>
             """
@@ -76,7 +76,7 @@ def cpu_profile(CONFIG):
     "display_name": "CPU Server",
     "description": image_des,
     "profile_options": {
-      **_define_images(CONFIG["images"]),
+      **_define_images(CONFIG["images"], CONFIG['image_default']),
     },
     "kubespawner_override": {
       "node_selector": {"node_profile": "cpu"},
@@ -89,7 +89,7 @@ def gpu_profile(CONFIG):
     "display_name": "GPU Server",
     "description": image_des + "Reference the GPU availability below to select your node and number of GPUs.",
     "profile_options": {
-      **_define_images(CONFIG["images"]),
+      **_define_images(CONFIG["images"], CONFIG['image_default']),
       **_define_gpu_nodes(CONFIG["node_info"]),
       **_define_num_gpus(CONFIG["gpu_counts"]),
     },
@@ -102,7 +102,7 @@ def volume_profile(CONFIG):
     "display_name": "Volume Access",
     "description": "Use this profile to access the workspace volume.",
     "profile_options": {
-      **_define_images(CONFIG["images"]),
+      **_define_images(CONFIG["images"], CONFIG['image_default']),
     },
     "kubespawner_override": {
       "cpu_guarantee": 1,
