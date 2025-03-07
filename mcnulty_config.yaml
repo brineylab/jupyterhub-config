@@ -45,6 +45,8 @@ singleuser:
   fsGid: 0
 
   # default resource limits
+  # used for cpu pods 
+  # or for pods launched w/o a profile (only happens from the admin page, I think)
   memory:
     limit: 512G
     guarantee: 64G
@@ -56,6 +58,9 @@ singleuser:
       ephemeral-storage: "200Gi"
     guarantees:
       ephemeral-storage: "20Gi"
+  image:
+    name: "brineylab/jupyterhub-datascience"
+    tag: "v2024-09-12"
 
   # required for codeserver to launch
   lifecycleHooks:
@@ -66,16 +71,6 @@ singleuser:
           - "-c"
           - >
             mkdir -p ${HOME}/codeserver;
-  
-  # defaults - in case pods get launched w/o specifying profile
-  # i think this can only happen from the admin page
-  profileList:
-    - display_name: "data science"
-      default: true
-      kubespawner_override:
-        image: "brineylab/jupyterhub-datascience:v2024-09-12"
-        node_selector:
-          node_profile: "cpu"
 
   storage:
     dynamic:
@@ -127,31 +122,23 @@ hub:
   networkPolicy:
     enabled: false
 
-  readinessProbe:
-    httpGet:
-      path: /hub/health
-      port: 8081
-    initialDelaySeconds: 30  # increased from the default (e.g., 10)
-    timeoutSeconds: 5        # increase if needed
-    periodSeconds: 10        # adjust the check frequency
-
   containerSecurityContext:
     runAsUser: 0
     runAsGroup: 0
 
   # Mount users and home page configmaps
   extraVolumes:
-    - name: jupyterhub-custom-templates
+    - name: templates
       configMap:
-        name: jupyterhub-custom-templates
-    - name: users-config
+        name: templates
+    - name: extra-config
       configMap:
-        name: users-config   
+        name: extra-config
   extraVolumeMounts:
     - mountPath: /etc/jupyterhub/templates
-      name: jupyterhub-custom-templates
-    - mountPath: /etc/jupyterhub/auth
-      name: users-config
+      name: templates
+    - mountPath: /etc/jupyterhub/config
+      name: extra-config
 
   config:
     JupyterHub:
@@ -162,29 +149,40 @@ hub:
       enable_signup: true
 
   extraConfig:
+    # set env variables
     env: |
       c.KubeSpawner.environment = {'NB_UMASK': '0000'}
       c.KubeSpawner.allow_privilege_escalation = True
       c.KubeSpawner.args = ["--allow-root"]
     
+    # add custom templates to template path
     templates: |
       import os, nativeauthenticator
+
+      # inject custom templates
       c.JupyterHub.template_paths = [f"{os.path.dirname(nativeauthenticator.__file__)}/templates/"]
       c.JupyterHub.template_paths.insert(0, "/etc/jupyterhub/templates")
 
+      # set url for gpu status
+      c.JupyterHub.template_vars.update({
+          "gpu_status_url": "http://172.29.180.217:5000/gpu_status_bynode"
+      })
+
+    # set admin and allowed users -> allow admin and gpu users only
     users: |
       import yaml
-      with open("/etc/jupyterhub/auth/users.yaml") as f:
+      with open("/etc/jupyterhub/config/users.yaml") as f:
         users = yaml.safe_load(f)
 
       c.Authenticator.admin_users = users.get("admin", [])
       c.Authenticator.allowed_users = set(users.get("admin", []) + users.get("gpu", []) + users.get("regular", [])) 
 
+    # handle custom named server limit
     # ref: https://jupyterhub.readthedocs.io/en/stable/howto/configuration/config-user-env.html#named-servers
     # src code: https://github.com/jupyterhub/jupyterhub/blob/main/jupyterhub/app.py#L1341
     namedServers: |
       def custom_named_server_limit(handler):
-        with open("/etc/jupyterhub/auth/users.yaml") as f:
+        with open("/etc/jupyterhub/config/users.yaml") as f:
           users = yaml.safe_load(f)
 
         user = handler.current_user.name
@@ -202,155 +200,32 @@ hub:
     # modified from https://github.com/neurohackademy/nh2020-jupyterhub/blob/8bc0d8304d5090d3a1e21a038a68f0a940e31809/deployments/hub-neurohackademy-org/config/prod.yaml
     # ref for profile_options: https://jupyterhub-kubespawner.readthedocs.io/en/latest/spawner.html
     options-form: |    
-      def define_num_gpus(num_gpus):
-        return {
-          "GPUNum": {
-            "display_name": "Number of GPUs",
-            "choices": {
-              str(i): {
-                "display_name": str(i),
-                # required to enable gpu: https://discourse.jupyter.org/t/set-runtimeclassname-for-gpu-enabled-images/21617/5
-                "kubespawner_override": {
-                  "extra_resource_limits": {"nvidia.com/gpu": i},
-                  "extra_pod_config": {"runtimeClassName": "nvidia"},
-                } if i > 0 else {},
-              } for i in num_gpus
-            },
-          }
-        }
-      
-      def define_gpu_types(gpu_types):
-        return {
-          "GPUType": {
-            "display_name": "Type of GPU",
-            "choices": {
-              str(i): {
-                "display_name": str(i),
-                "kubespawner_override": {
-                  "node_selector": {"node_profile": i},
-                },
-              } for i in gpu_types
-            },
-          }
-        }
-      
-      def define_custom_images(deeplearning, datascience):
-        return {
-          "Image": {
-            "display_name": "Image",
-            "choices": {
-              "deeplearning": {
-                "display_name": "deep learning",
-                "default": True,
-                "kubespawner_override": {"image": deeplearning},
-              },
-              "datascience": {
-                "display_name": "data science",
-                "kubespawner_override": {"image": datascience},
-              },
-            },
-            "unlisted_choice": {
-              "enabled": True,
-              "display_name": "Enter custom image",
-              "display_name_in_choices": "other - select to provide a custom image",
-              "validation_regex": '^.+/.+:.+$',
-              "validation_message": 'Must be an image matching <user>/<name>:<tag>',
-              "kubespawner_override": {
-                "image": "{value}",
-                "start_timeout": 900, # increase timeout time to 15mins to allow new images to be pulled
-              },
-            },
-          }
-        }
-      
-      async def dynamic_options_form(self):
-          
-          # Update images here
-          datascience = "brineylab/jupyterhub-datascience:v2024-09-12"
-          deeplearning = "brineylab/jupyterhub-deeplearning:v2024-09-12"
+      import yaml
+      import sys
 
-          # Update gpu users here
-          import yaml
-          with open("/etc/jupyterhub/auth/users.yaml") as f:
-            users = yaml.safe_load(f)
-          gpu = users.get("gpu", [])
-          
-          # For default server -> CPU profiles
-          if not self.name:
-            self.profile_list = [
-              {
-                "display_name": "data science (cpu only)",
-                "description": "Default data analysis environment, including interpreters for Python and R. <br> v2024-09-12",
-                "default": True,
-                "kubespawner_override": {
-                  "image": datascience,
-                  "node_selector": {"node_profile": "cpu"},
-                }
-              },
-              {
-                "display_name": "deep learning (cpu only)",
-                "description": "Extends the data science environment to include ML libraries (such as torch, deepspeed, and 🤗). <br> v2024-09-12",
-                "kubespawner_override": {
-                  "image": deeplearning,
-                  "node_selector": {"node_profile": "cpu"},
-                }
-              },
-            ]
-          
-          # For named server(s) -> GPU profiles
-          else:
-            # add all profiles for gpu users
-            if self.user.name in gpu or self.user.admin:
-              self.profile_list = [
-                {
-                  "display_name": "Power-limited GPUs",
-                  "description": "Choose between a A6000 or L40S GPU for inference and testing. Note that these GPUs are currently power limited, so performance may be diminished.",
-                  "profile_options": {
-                    **define_custom_images(deeplearning, datascience),
-                    **define_gpu_types(["A6000-pwrlimit", "L40s-pwrlimit"]),
-                    **define_num_gpus([1, 2, 4]),
-                  },
-                },
-                {
-                  "display_name": "GPUs",
-                  "description": "Choose 1 to 4 L40S or A6000 GPUs.",
-                  "profile_options": {
-                    **define_custom_images(deeplearning, datascience),
-                    **define_gpu_types(["L40S", "A6000"]),
-                    **define_num_gpus([1, 2, 4]),
-                  },
-                }
-              ]
-            else:
-              self.profile_list = [
-                {
-                  "display_name": "Power-limited GPUs",
-                  "description": "Choose between a A6000 or L40S GPU for inference and testing. Note that these GPUs are currently power limited, so performance may be diminished.",
-                  "profile_options": {
-                    **define_custom_images(deeplearning, datascience),
-                    **define_gpu_types(["A6000-pwrlimit", "L40s-pwrlimit"]),
-                    **define_num_gpus([1]),
-                  },
-                }
-              ]
-          
-          # dev profile for admins only
-          if self.user.admin:
-            self.profile_list.extend([
-              {
-                "display_name": "dev (admin only)",
-                "description": "Set custom images, resources, etc for testing - timeout is extended to 10mins if you provide a custom image.",
-                "profile_options": {
-                  **define_custom_images(deeplearning, datascience),
-                  **define_gpu_types(["cpu", "A6000", "L40S", "A6000-pwrlimit", "L40s-pwrlimit"]),
-                  **define_num_gpus([0, 1, 2, 3, 4, 5, 6, 7, 8]),
-                },
-              }
-            ])
+      # import functions
+      sys.path.append('/etc/jupyterhub/config')
+      from options_form import dynamic_options_form_withconfig
+      from prespawn_hook import set_spawner_resources
 
-          # Let KubeSpawner inspect profile_list and decide what to return.
-          # It will return a falsy blank string if there is no profile_list.
-          # ref: https://github.com/jupyterhub/kubespawner/blob/37a80abb0a6c826e5c118a068fa1cf2725738038/kubespawner/spawner.py#L1885-L1935
-          return self._options_form_default()
+      # read node info
+      with open("/etc/jupyterhub/config/nodes.yaml", "r") as file:
+        node_info = yaml.safe_load(file)
 
-      c.KubeSpawner.options_form = dynamic_options_form
+      # update images and options for number of GPUs here
+      CONFIG = {
+        "images": {
+            "datascience": "brineylab/jupyterhub-datascience:v2024-09-12",
+            "deeplearning": "brineylab/jupyterhub-deeplearning:v2024-09-12",
+        },
+        "image_default": "datascience",
+        "gpu_counts": [1, 2, 4],
+        "node_info": node_info["mcnulty"],
+        "server_type": "cpu-gpu" # can be: "cpu-gpu", "cpu-only", and "gpu-only"
+      }
+      
+      # options for users to select from
+      c.KubeSpawner.options_form = dynamic_options_form_withconfig(CONFIG)
+
+      # pre-spawn hook to set resource limits based on user selections
+      c.KubeSpawner.pre_spawn_hook = lambda spawner: set_spawner_resources(spawner, CONFIG)      
