@@ -35,9 +35,15 @@ def get_node_capacity_and_profile():
     node_info = {}
     for item in nodes['items']:
         node_name = item['metadata']['name']
+
+        # check if node is schedulable
+        # then calculate GPU capacity
+        is_unschedulable = item.get('spec', {}).get('unschedulable', False)
+        capacity = 0 if is_unschedulable else int(item['status']['capacity'].get('nvidia.com/gpu', 0))
+
         node_info[node_name] = {
             'node_profile': item['metadata']['labels'].get('node_profile', 'unknown'),
-            'capacity': int(item['status']['capacity'].get('nvidia.com/gpu', 0)),
+            'capacity': capacity,
         }
     
     return node_info
@@ -47,11 +53,16 @@ def combine_and_group(node_info, gpu_requests):
     combined_info = []
     for node, info in node_info.items():
         if info['node_profile'] not in ["cpu", "headnode"]:
+
+            # zero out requests if capacity is 0
+            # to prevent negative GPU availability
+            requests = 0 if info['capacity'] == 0 else gpu_requests.get(node, 0)
+
             combined_info.append({
                 'node_name': node.split('.')[0],
                 'node_profile': info['node_profile'],
                 'capacity': info['capacity'],
-                'total_gpu_requests': gpu_requests.get(node, 0)
+                'total_gpu_requests': requests
             })
     
     return combined_info
