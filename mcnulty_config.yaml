@@ -197,8 +197,8 @@ hub:
       c.JupyterHub.allow_named_servers = True
       c.JupyterHub.named_server_limit_per_user = custom_named_server_limit
 
-    # modified from https://github.com/neurohackademy/nh2020-jupyterhub/blob/8bc0d8304d5090d3a1e21a038a68f0a940e31809/deployments/hub-neurohackademy-org/config/prod.yaml
-    # ref for profile_options: https://jupyterhub-kubespawner.readthedocs.io/en/latest/spawner.html
+    # custom profiles
+    # import options form and pre-spawn hook helper fns from extra-config configmap
     options-form: |    
       import yaml
       import sys
