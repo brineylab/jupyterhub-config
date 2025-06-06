@@ -1,0 +1,70 @@
+mcnulty:
+  - node: "randy"
+    gpu_type: "A6000"
+    num_gpus: 8
+    cpu_threads: 256
+    gb_memory: 2000
+  - node: "ellis"
+    gpu_type: "A6000"
+    num_gpus: 4
+    cpu_threads: 56
+    gb_memory: 187
+  - node: "jay"
+    gpu_type: "A6000"
+    num_gpus: 4
+    cpu_threads: 56
+    gb_memory: 384
+  - node: "michael"
+    gpu_type: "L40S"
+    num_gpus: 8
+    cpu_threads: 256
+    gb_memory: 2000
+  - node: "rawls"
+    gpu_type: "L40S"
+    num_gpus: 4
+    cpu_threads: 128
+    gb_memory: 512
+
+blackpearl:
+  - node: "swann"
+    gpu_type: "L40S"
+    num_gpus: 8
+    cpu_threads: 384
+    gb_memory: 1500
+  - node: "turner"
+    gpu_type: "L40S"
+    num_gpus: 8
+    cpu_threads: 384
+    gb_memory: 1500
+
+cedric:
+  - node: "cedric"
+    gpu_type: "A100"
+    num_gpus: 8
+    cpu_threads: 256
+    gb_memory: 2000
+
+kraken:
+  - node: "kraken"
+    gpu_type: "H200"
+    num_gpus: 8
+    cpu_threads: 384
+    gb_memory: 1500
+
+dev:
+  - node: "thor"
+    gpu_type: "3090"
+    num_gpus: 2
+    cpu_threads: 128
+    gb_memory: 256
+  # add fake info for testing
+  - node: "rym"
+    gpu_type: "3090"
+    num_gpus: 0
+    cpu_threads: 16
+    gb_memory: 16
+  - node: "atli"
+    gpu_type: "L40S"
+    num_gpus: 0
+    cpu_threads: 16
+    gb_memory: 16

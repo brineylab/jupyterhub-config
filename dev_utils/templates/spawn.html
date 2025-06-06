@@ -1,0 +1,119 @@
+{% extends "page.html" %}
+{% if announcement_spawn is string %}
+  {% set announcement = announcement_spawn %}
+{% endif %}
+{% block main %}
+  <div class="container">
+      <!-- Default spawner options -->
+      {% block heading %}
+      <div class="row text-center">
+        <h1>Server Options</h1>
+      </div>
+      {% endblock heading %}
+      <div class="row justify-content-center">
+        <div class="col-md-8">
+          {% if for_user and user.name != for_user.name -%}
+            <p>Spawning server for {{ for_user.name }}</p>
+          {% endif -%}
+          {% if error_message -%}<p class="spawn-error-msg alert alert-danger">Error: {{ error_message }}</p>{% endif %}
+          <form enctype="multipart/form-data"
+              id="spawn_form"
+              action="{{ url | safe }}"
+              method="post"
+              role="form">
+            {{ spawner_options_form | safe }}
+            <br>
+            <div class="feedback-container">
+              <button type="submit" class="btn btn-jupyter form-control">Start</button>
+              <div class="feedback-widget hidden">
+                <i class="fa fa-spinner"></i>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Custom GPU availability -->
+      <div class="row justify-content-center mt-5">
+        <div class="col-md-8 text-center">
+          <h3>GPU Availability</h3>
+          <table id="gpu-status-container" class="table table-bordered mx-auto" style="display: none; width: auto;">
+            <thead>
+              <tr>
+                <th>Type</th>
+                <th>Node</th>
+                <th>Available</th>
+              </tr>
+            </thead>  
+            <tbody><!-- dynamically updated by updateGpuStatus fn--></tbody>
+          </table>
+          <p class="mt-2">Your server will fail to launch if you request more <s>cats</s> GPUs than available!</p>
+        </div>
+      </div>
+  </div>
+{% endblock main %}
+
+<!-- scripts -->
+{% block script %}
+  {{ super() }}
+  <script>
+    // setup onSubmit feedback
+    $('form').submit((e) => {
+      var form = $(e.target);
+      form.find('.feedback-container>input').attr('disabled', true);
+      form.find('.feedback-container>*').toggleClass('hidden');
+      form.find('.feedback-widget>*').toggleClass('fa-pulse');
+    });
+
+    // function to update GPU status
+    function updateGpuStatus() {
+      fetch("{{ gpu_status_url }}")
+        .then(response => response.json())
+        .then(data => {
+          const container = document.getElementById('gpu-status-container');
+          const tbody = container.querySelector('tbody');
+          tbody.innerHTML = '';
+
+          // group by node
+          const groupedData = {};
+          data.forEach(gpuInfo => {
+            if (!groupedData[gpuInfo.node_profile]) {
+              groupedData[gpuInfo.node_profile] = [];
+            }
+            groupedData[gpuInfo.node_profile].push(gpuInfo);
+          });
+
+          // update table content
+          Object.entries(groupedData).forEach(([gpuType, nodes]) => {
+            let firstRow = true;
+            nodes.forEach(gpuInfo => {
+              const availableGpus = gpuInfo.capacity - gpuInfo.total_gpu_requests;
+              const row = document.createElement('tr');
+              
+              if (firstRow) {
+                row.innerHTML += `<td rowspan="${nodes.length}" style="font-weight: bold; vertical-align: middle;">${gpuType}</td>`;
+                firstRow = false;
+              }
+              
+              row.innerHTML += `
+                <td>${gpuInfo.node_name}</td>
+                <td>${availableGpus} ${'😸'.repeat(availableGpus)}</td>
+              `;
+              tbody.appendChild(row);
+            });
+          });
+
+          // show table
+          container.style.display = 'table';
+        })
+        .catch(error => {
+          console.error('Error fetching GPU status:', error);
+          tbody.innerHTML = `<tr><td colspan="3">Error fetching data: ${error.message}</td></tr>`;
+        });
+    }
+
+    // update status every 10 seconds
+    setInterval(updateGpuStatus, 10000);
+    updateGpuStatus();
+  </script>
+{% endblock script %}

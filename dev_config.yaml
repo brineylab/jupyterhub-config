@@ -21,14 +21,14 @@ scheduling:
 # NOTE: Images need to be updated in a second place in this file.
 #       This only updates the image puller, so that new images get
 #       pulled during the helm upgrade.
-#prePuller:
- # extraImages:
-   # datascience:
-    #  name: brineylab/jupyterhub-datascience
-     # tag: v2024-08-13
-   # deeplearning:
-   #   name: brineylab/jupyterhub-deeplearning
-   #   tag: v2024-08-13
+prePuller:
+  extraImages:
+    datascience:
+      name: brineylab/jupyterhub-datascience
+      tag: v2024-08-13
+    deeplearning:
+      name: brineylab/jupyterhub-deeplearning
+      tag: v2024-08-13
 
 singleuser:
   cmd: jupyterhub-singleuser
@@ -44,13 +44,17 @@ singleuser:
   uid: 0
   fsGid: 0
 
-  # default resource limits
+  # defaults - in case pods get launched w/o specifying profile
+  # i think this can only happen from the admin page
   memory:
-    limit: 128G
-    guarantee: 16G
+    limit: 16G
+    guarantee: 4G
   cpu:
-    limit: 128
-    guarantee: 16
+    limit: 16
+    guarantee: 4
+  image:
+    name: "brineylab/jupyterhub-datascience"
+    tag: "v2024-08-13"
 
   # required for codeserver to launch
   lifecycleHooks:
@@ -61,96 +65,89 @@ singleuser:
           - "-c"
           - >
             mkdir -p ${HOME}/codeserver;
-  
-  # defaults - in case pods get launched w/o specifying profile
-  # i think this can only happen from the admin page
-  profileList:
-    - display_name: "data science"
-      default: true
-      kubespawner_override:
-        image: "brineylab/jupyterhub-datascience:v2024-08-13"
-        node_selector:
-          node_profile: "cpu"
 
   storage:
     dynamic:
-      storageClass: nfs-wallace-jh-nvme
-    capacity: 250Gi
+      storageClass: nfs-rym-jh-sata
+    capacity: 100Gi
 
-    extraVolumes:
-      # shared
-      - name:  nfs-wallace-shared
-        persistentVolumeClaim:
-          claimName: nfs-wallace-shared
-      # references
-      - name: nfs-wallace-references
-        persistentVolumeClaim:
-          claimName: nfs-wallace-references
-          readOnly: true
-      # sequencing data: NovaSeq
-      - name: nfs-avon-novaseq6k
-        persistentVolumeClaim:
-          claimName: nfs-avon-novaseq6k
-      # sequencing data: NextSeq
-      - name: nfs-avon-nextseq2k
-        persistentVolumeClaim:
-          claimName: nfs-avon-nextseq2k
-      # sequencing data: ONT
-      - name: nfs-stringer-ont
-        persistentVolumeClaim:
-          claimName: nfs-stringer-ont
-      # dshm - needed for training on gpu servers running jupyterhub
-      - name: dshm
-        emptyDir:
-          medium: Memory
-          sizeLimit: "10Gi"
-      # backup user data
-      - name: hub-database
-        persistentVolumeClaim:
-          claimName: hub-database
-    extraVolumeMounts:
-      - name: nfs-wallace-shared
-        mountPath: /home/jovyan/shared
-      - name: nfs-wallace-references
-        mountPath: /home/jovyan/references
-      - name: nfs-avon-novaseq6k
-        mountPath: /home/jovyan/sequencing_runs/novaseq
-      - name: nfs-avon-nextseq2k
-        mountPath: /home/jovyan/sequencing_runs/nextseq
-      - name: nfs-stringer-ont
-        mountPath: /home/jovyan/sequencing_runs/ont
-      - name: dshm
-        mountPath: /dev/shm
-      - name: hub-database
-        mountPath: /srv/jupyterhub
+    # extraVolumes:
+    #   # shared
+    #   - name:  nfs-wallace-shared
+    #     persistentVolumeClaim:
+    #       claimName: nfs-wallace-shared
+    #   # references
+    #   - name: nfs-wallace-references
+    #     persistentVolumeClaim:
+    #       claimName: nfs-wallace-references
+    #       readOnly: true
+    #   # sequencing data: NovaSeq
+    #   - name: nfs-avon-novaseq6k
+    #     persistentVolumeClaim:
+    #       claimName: nfs-avon-novaseq6k
+    #   # sequencing data: NextSeq
+    #   - name: nfs-avon-nextseq2k
+    #     persistentVolumeClaim:
+    #       claimName: nfs-avon-nextseq2k
+    #   # sequencing data: ONT
+    #   - name: nfs-stringer-ont
+    #     persistentVolumeClaim:
+    #       claimName: nfs-stringer-ont
+    #   # dshm - needed for training on gpu servers running jupyterhub
+    #   - name: dshm
+    #     emptyDir:
+    #       medium: Memory
+    #       sizeLimit: "10Gi"
+    # extraVolumeMounts:
+    #   - name: nfs-wallace-shared
+    #     mountPath: /home/jovyan/shared
+    #   - name: nfs-wallace-references
+    #     mountPath: /home/jovyan/references
+    #   - name: nfs-avon-novaseq6k
+    #     mountPath: /home/jovyan/sequencing_runs/novaseq
+    #   - name: nfs-avon-nextseq2k
+    #     mountPath: /home/jovyan/sequencing_runs/nextseq
+    #   - name: nfs-stringer-ont
+    #     mountPath: /home/jovyan/sequencing_runs/ont
+    #   - name: dshm
+    #     mountPath: /dev/shm
 
 hub:
   networkPolicy:
     enabled: false
   
+  # needs to be non-root user (root is 0): https://discourse.jupyter.org/t/customizing-jupyterhub-on-kubernetes/1769/39
   containerSecurityContext:
-    runAsUser: 1000 # needs to be non-root user (root is 0): https://discourse.jupyter.org/t/customizing-jupyterhub-on-kubernetes/1769/39
+    runAsUser: 1000 
     runAsGroup: 0
+  
+  # change hub database to postgresql (default sqlite not compatible with NFS)
+  # https://jupyterhub.readthedocs.io/en/latest/explanation/database.html#sqlite
+  db:
+    upgrade: true
+    type: postgres
+    url: "postgresql://brineylab:@192.168.1.1:5432/jupyterhub_db"
+  
+  extraEnv:
+    PGPASSWORD: # will automatically provide password when env variable is named PGPASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: postgres-secret
+          key: POSTGRES_PASSWORD
 
   # Mount users and home page configmaps
   extraVolumes:
-    - name: jupyterhub-custom-templates
+    - name: templates
       configMap:
-        name: jupyterhub-custom-templates
-    - name: users-config
+        name: templates
+    - name: extra-config
       configMap:
-        name: users-config
-#    - name: alertmanager-config
-#      configMap:
-#        name: alertmanager-config
+        name: extra-config
   extraVolumeMounts:
     - mountPath: /etc/jupyterhub/templates
-      name: jupyterhub-custom-templates
-    - mountPath: /etc/jupyterhub/auth
-      name: users-config
-#    - mountPath: /etc/alertmanager/
-#      subPath: alertmanager.yaml
-#      name: alertmanager-config
+      name: templates
+    - mountPath: /etc/jupyterhub/config
+      name: extra-config
 
   config:
     JupyterHub:
@@ -159,36 +156,46 @@ hub:
 
     NativeAuthenticator:
       enable_signup: true
-    #   enable_auth_state: true # test
-
-    # CryptKeeper:
-    #   keys:
-    #     - c5b256de6a849e719bb86bb266a880ec192260defa06d88fc02f9de65d93c2cb # test
 
   extraConfig:
+    # set env variables
     env: |
       c.KubeSpawner.environment = {'NB_UMASK': '0000'}
       c.KubeSpawner.allow_privilege_escalation = True
       c.KubeSpawner.args = ["--allow-root"]
     
+    # custom templates
     templates: |
       import os, nativeauthenticator
-      c.JupyterHub.template_paths = [f"{os.path.dirname(nativeauthenticator.__file__)}/templates/"]
-      c.JupyterHub.template_paths.insert(0, "/etc/jupyterhub/templates")
 
+      # inject custom templates
+      c.JupyterHub.template_paths = ["/etc/jupyterhub/templates", 
+                                      f"{os.path.dirname(nativeauthenticator.__file__)}/templates/"]
+
+      # set url for gpu status
+      c.JupyterHub.template_vars.update({
+          "gpu_status_url": "http://172.29.180.91:5000/gpu_status_bynode"
+      })
+
+      # ref: https://github.com/jupyterhub/kubespawner/blob/main/kubespawner/spawner.py#L1699
+      # bootstrap updated to v5 -> removes the 'hidden' class, need to use 'd-none' instead
+      # kubespawner hasn't updated their html template with this fix as of Feb 24th 2025
+      c.KubeSpawner.additional_profile_form_template_paths = "/etc/jupyterhub/templates"
+
+    # set admin and allowed users -> allow admin and gpu users only
     users: |
       import yaml
-      with open("/etc/jupyterhub/auth/users.yaml") as f:
+      with open("/etc/jupyterhub/config/users.yaml") as f:
         users = yaml.safe_load(f)
 
       c.Authenticator.admin_users = users.get("admin", [])
       c.Authenticator.allowed_users = set(users.get("admin", []) + users.get("gpu", []) + users.get("regular", [])) 
 
+    # custom named server limit
     # ref: https://jupyterhub.readthedocs.io/en/stable/howto/configuration/config-user-env.html#named-servers
-    # src code: https://github.com/jupyterhub/jupyterhub/blob/main/jupyterhub/app.py#L1341
     namedServers: |
       def custom_named_server_limit(handler):
-        with open("/etc/jupyterhub/auth/users.yaml") as f:
+        with open("/etc/jupyterhub/config/users.yaml") as f:
           users = yaml.safe_load(f)
 
         user = handler.current_user.name
@@ -203,158 +210,33 @@ hub:
       c.JupyterHub.allow_named_servers = True
       c.JupyterHub.named_server_limit_per_user = custom_named_server_limit
 
-    # modified from https://github.com/neurohackademy/nh2020-jupyterhub/blob/8bc0d8304d5090d3a1e21a038a68f0a940e31809/deployments/hub-neurohackademy-org/config/prod.yaml
-    # ref for profile_options: https://jupyterhub-kubespawner.readthedocs.io/en/latest/spawner.html
-    options-form: |    
-      def define_num_gpus(num_gpus):
-        return {
-          "GPUNum": {
-            "display_name": "Number of GPUs",
-            "choices": {
-              str(i): {
-                "display_name": str(i),
-                # required to enable gpu: https://discourse.jupyter.org/t/set-runtimeclassname-for-gpu-enabled-images/21617/5
-                "kubespawner_override": {
-                  "extra_resource_limits": {"nvidia.com/gpu": i},
-                  "extra_pod_config": {"runtimeClassName": "nvidia"},
-                } if i > 0 else {},
-              } for i in num_gpus
-            },
-          }
-        }
+    options-form: |
+      import yaml
+      import sys
+
+      # import functions
+      sys.path.append('/etc/jupyterhub/config')
+      from options_form import dynamic_options_form_withconfig
+      from prespawn_hook import set_spawner_resources
+
+      # read node info
+      with open("/etc/jupyterhub/config/nodes.yaml", "r") as file:
+        node_info = yaml.safe_load(file)
+
+      # update images and options for number of GPUs here
+      CONFIG = {
+        "images": {
+            "datascience": "brineylab/jupyterhub-datascience:v2024-08-13",
+            "deeplearning": "brineylab/jupyterhub-deeplearning:v2024-08-13",
+        },
+        "image_default": "datascience",
+        "gpu_counts": [1, 2, 4, 8],
+        "node_info": node_info["dev"],
+        "server_type": "gpu-only" # can be: "cpu-gpu", "cpu-only", and "gpu-only"
+      }
       
-      def define_gpu_types(gpu_types):
-        return {
-          "GPUType": {
-            "display_name": "Type of GPU",
-            "choices": {
-              str(i): {
-                "display_name": str(i),
-                "kubespawner_override": (
-                  {
-                      "node_selector": {"node_profile": i},
-                      "cpu_guarantee": 12,
-                      "cpu_limit": 48,
-                      "mem_guarantee": "12G",
-                      "mem_limit": "64G"
-                  } if i == "A30" else {
-                      "node_selector": {"node_profile": i},
-                  }
-                )
-              } for i in gpu_types
-            },
-          }
-        }
-      
-      def define_custom_images(deeplearning, datascience):
-        return {
-          "Image": {
-            "display_name": "Image",
-            "choices": {
-              "deeplearning": {
-                "display_name": "deep learning",
-                "default": True,
-                "kubespawner_override": {"image": deeplearning},
-              },
-              "datascience": {
-                "display_name": "data science",
-                "kubespawner_override": {"image": datascience},
-              },
-            },
-            "unlisted_choice": {
-              "enabled": True,
-              "display_name": "Enter custom image",
-              "display_name_in_choices": "other - select to provide a custom image",
-              "validation_regex": '^.+/.+:.+$',
-              "validation_message": 'Must be an image matching <user>/<name>:<tag>',
-              "kubespawner_override": {
-                "image": "{value}",
-                "start_timeout": 600, # increase timeout time to 10mins to allow new images to be pulled
-              },
-            },
-          }
-        }
-      
-      async def dynamic_options_form(self):
-          
-          # Update images here
-          datascience = "brineylab/jupyterhub-datascience:v2024-08-13"
-          deeplearning = "brineylab/jupyterhub-deeplearning:v2024-08-13"
+      # options for users to select from
+      c.KubeSpawner.options_form = dynamic_options_form_withconfig(CONFIG)
 
-          # Update gpu users here
-          import yaml
-          with open("/etc/jupyterhub/auth/users.yaml") as f:
-            users = yaml.safe_load(f)
-          gpu = users.get("gpu", [])
-          
-          # For default server -> CPU profiles
-          if not self.name:
-            self.profile_list = [
-              {
-                "display_name": "data science (cpu only)",
-                "description": "Default data analysis environment, including interpreters for Python and R. <br> v2024-08-13",
-                "default": True,
-                "kubespawner_override": {
-                  "image": datascience,
-                  "node_selector": {"node_profile": "cpu"},
-                }
-              },
-              {
-                "display_name": "deep learning (cpu only)",
-                "description": "Extends the data science environment to include ML libraries (such as torch, deepspeed, and 🤗). <br> v2024-08-13",
-                "kubespawner_override": {
-                  "image": deeplearning,
-                  "node_selector": {"node_profile": "cpu"},
-                }
-              },
-            ]
-          
-          # For named server(s) -> GPU profiles
-          else:
-            # add inference gpus for all users on named servers
-            self.profile_list = [
-              {
-                "display_name": "Power-limited GPUs",
-                "description": "Choose between a A6000 or L40S GPU for inference and testing. Note that these GPUs are currently power limited, so performance may be diminished.",
-                "profile_options": {
-                  **define_custom_images(deeplearning, datascience),
-                  **define_gpu_types(["A6000-pwrlimit", "L40s-pwrlimit"]),
-                  **define_num_gpus([1]),
-                },
-              }
-            ]
-
-            # add other gpu profiles for gpu users only
-            if self.user.name in gpu or self.user.admin:
-              self.profile_list.extend([
-                {
-                  "display_name": "GPUs",
-                  "description": "Choose 1 to 4 L40S, A30, or A6000s GPUs.",
-                  "profile_options": {
-                    **define_custom_images(deeplearning, datascience),
-                    **define_gpu_types(["L40S", "A6000", "A30"]),
-                    **define_num_gpus([1, 2, 4]),
-                  },
-                }
-              ])
-          
-          # dev profile for admins only
-          if self.user.admin:
-            self.profile_list.extend([
-              {
-                "display_name": "dev (admin only)",
-                "description": "Set custom images, resources, etc for testing - timeout is extended to 10mins if you provide a custom image.",
-                "profile_options": {
-                  **define_custom_images(deeplearning, datascience),
-                  **define_gpu_types(["cpu", "A30", "A6000", "L40S", "A6000-pwrlimit", "L40S-pwrlimit"]),
-                  **define_num_gpus([0, 1, 2, 4, 8]),
-                },
-              }
-            ])
-
-          # Let KubeSpawner inspect profile_list and decide what to return.
-          # It will return a falsy blank string if there is no profile_list.
-          # ref: https://github.com/jupyterhub/kubespawner/blob/37a80abb0a6c826e5c118a068fa1cf2725738038/kubespawner/spawner.py#L1885-L1935
-          return self._options_form_default()
-
-      c.KubeSpawner.options_form = dynamic_options_form
+      # pre-spawn hook to set resource limits based on user selections
+      c.KubeSpawner.pre_spawn_hook = lambda spawner: set_spawner_resources(spawner, CONFIG)
