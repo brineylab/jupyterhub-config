@@ -100,11 +100,12 @@ def gpu_profile(CONFIG):
 def volume_profile(CONFIG):
   return [{
     "display_name": "Volume Access",
-    "description": "Use this profile to access the workspace volume.",
-    "profile_options": {
-      **_define_images(CONFIG["images"], "datascience"),
-    },
+    "description": (
+      "Use this profile to access the workspace volume only. "
+      "Resources are limited, so please don't try to run large jobs."
+    ),
     "kubespawner_override": {
+      "image": CONFIG["images"]["datascience"],
       "cpu_guarantee": 1,
       "cpu_limit": 12,
       "mem_guarantee": "1G",
@@ -113,19 +114,26 @@ def volume_profile(CONFIG):
   }]
 
 # dev profile (admin only)
-# allow any server config
-def dev_profile(CONFIG):
-  nodes = CONFIG["node_info"].append("cpu")
+# mostly useful for servers with gpus, to allow any number of gpus
+def dev_profile(CONFIG, server_type):
+  
+  # add 'cpu' node if needed
+  if server_type == "cpu-gpu":
+    nodes = CONFIG["node_info"].copy()
+    nodes.append({"node": "cpu"})
+  else:
+    nodes = CONFIG["node_info"]
+
   return [{
     "display_name": "Dev Profile (admin only)",
     "description": (
-      "Set custom images, resources, etc for testing." 
+      "Set custom images, resources, etc for testing. " 
       "Timeout is extended to 10mins if you provide a custom image."
     ),
     "profile_options": {
       **_define_images(CONFIG["images"], "datascience"),
       **_define_gpu_nodes(nodes),
-      **_define_num_gpus([0, 1, 2, 4, 6, 8]),
+      **_define_num_gpus(range(9)),
     },
   }]
 
@@ -144,8 +152,9 @@ def dynamic_options_form_withconfig(CONFIG):
     else:
       raise Exception("Fix server type to be one of: 'cpu-gpu', 'cpu-only', or 'gpu-only'")
     
-    if self.user.admin:
-      self.profile_list.extend(dev_profile(CONFIG))
+    # admin only dev profile (only useful on servers with GPUs)
+    if self.user.admin and server_type != 'cpu-only':
+      self.profile_list.extend(dev_profile(CONFIG, server_type=server_type))
     
 
     # Let KubeSpawner inspect profile_list and decide what to return.
