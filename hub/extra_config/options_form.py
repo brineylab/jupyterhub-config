@@ -76,7 +76,7 @@ def cpu_profile(CONFIG):
     "display_name": "CPU Server",
     "description": image_des,
     "profile_options": {
-      **_define_images(CONFIG["images"], CONFIG['image_default']),
+      **_define_images(CONFIG["images"], "datascience"),
     },
     "kubespawner_override": {
       "node_selector": {"node_profile": "cpu"},
@@ -89,7 +89,7 @@ def gpu_profile(CONFIG):
     "display_name": "GPU Server",
     "description": image_des + "Reference the GPU availability below to select your node and number of GPUs.",
     "profile_options": {
-      **_define_images(CONFIG["images"], CONFIG['image_default']),
+      **_define_images(CONFIG["images"], "deeplearning"),
       **_define_gpu_nodes(CONFIG["node_info"]),
       **_define_num_gpus(CONFIG["gpu_counts"]),
     },
@@ -102,7 +102,7 @@ def volume_profile(CONFIG):
     "display_name": "Volume Access",
     "description": "Use this profile to access the workspace volume.",
     "profile_options": {
-      **_define_images(CONFIG["images"], CONFIG['image_default']),
+      **_define_images(CONFIG["images"], "datascience"),
     },
     "kubespawner_override": {
       "cpu_guarantee": 1,
@@ -112,23 +112,40 @@ def volume_profile(CONFIG):
     },
   }]
 
+# dev profile (admin only)
+# allow any server config
+def dev_profile(CONFIG):
+  nodes = CONFIG["node_info"].append("cpu")
+  return [{
+    "display_name": "Dev Profile (admin only)",
+    "description": (
+      "Set custom images, resources, etc for testing." 
+      "Timeout is extended to 10mins if you provide a custom image."
+    ),
+    "profile_options": {
+      **_define_images(CONFIG["images"], "datascience"),
+      **_define_gpu_nodes(nodes),
+      **_define_num_gpus([0, 1, 2, 4, 6, 8]),
+    },
+  }]
+
 # return profile options based on the server type and config provided 
 def dynamic_options_form_withconfig(CONFIG):
   def dynamic_options_form(self):
     
+    # generate profile list based on server type
     server_type = CONFIG['server_type']
-    
     if server_type == 'cpu-gpu': # For default server -> CPU profiles, for named servers -> GPU profiles
       self.profile_list = cpu_profile(CONFIG) if not self.name else gpu_profile(CONFIG)
-    
     elif server_type == 'cpu-only':
       self.profile_list = cpu_profile(CONFIG)
-    
     elif server_type == 'gpu-only':  
       self.profile_list = gpu_profile(CONFIG) + volume_profile(CONFIG)
-    
     else:
       raise Exception("Fix server type to be one of: 'cpu-gpu', 'cpu-only', or 'gpu-only'")
+    
+    if self.user.admin:
+      self.profile_list.extend(dev_profile(CONFIG))
     
 
     # Let KubeSpawner inspect profile_list and decide what to return.

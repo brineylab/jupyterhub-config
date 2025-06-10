@@ -213,12 +213,12 @@ hub:
         node_info = yaml.safe_load(file)
 
       # update images and options for number of GPUs here
+      # datascience is default for cpu servers, deeplearning is default for gpu servers
       CONFIG = {
         "images": {
             "datascience": "brineylab/jupyterhub-datascience:v2024-09-12",
             "deeplearning": "brineylab/jupyterhub-deeplearning:v2024-09-12",
         },
-        "image_default": "datascience",
         "gpu_counts": [1, 2, 4],
         "node_info": node_info["mcnulty"],
         "server_type": "cpu-gpu" # can be: "cpu-gpu", "cpu-only", and "gpu-only"
