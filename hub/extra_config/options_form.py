@@ -55,16 +55,17 @@ def _define_num_gpus(gpu_counts):
 
 
 def _define_gpu_nodes(node_info):
-    """Define node choices, based on CONFIG"""
+    """Define node choices. Allows kubespawner override for dev profile."""
     return {
         "Node": {
             "display_name": "Node",
             "choices": {
                 str(node["node"]): {
                     "display_name": str(node["node"]),
-                    "kubespawner_override": {
-                        "node_selector": {"kubernetes.io/hostname": str(node["node"])},
-                    },
+                    "kubespawner_override": node.get(
+                        "kubespawner_override",
+                        {"node_selector": {"kubernetes.io/hostname": str(node["node"])}},
+                    ),
                 }
                 for node in node_info
             },
@@ -137,13 +138,16 @@ def volume_profile(CONFIG):
 # dev profile (admin only)
 # mostly useful for servers with gpus, to allow any number of gpus
 def dev_profile(CONFIG, server_type):
+    nodes = CONFIG["node_info"].copy()
 
-    # add 'cpu' node if needed
+    # add CPU node with kubespawner_override
     if server_type == "cpu-gpu":
-        nodes = CONFIG["node_info"].copy()
-        nodes.append({"node": "cpu"})
-    else:
-        nodes = CONFIG["node_info"]
+        nodes.append({
+            "node": "CPU (any)",
+            "kubespawner_override": {
+                "node_selector": {"node_profile": "cpu"}
+            }
+        })
 
     return [
         {
