@@ -19,8 +19,6 @@ def _define_images(images, default):
                 "enabled": True,
                 "display_name": "Enter custom image",
                 "display_name_in_choices": "other - select to provide a custom image",
-                "validation_regex": "^.+/.+:.+$",
-                "validation_message": "Must be an image matching <user>/<name>:<tag>",
                 "kubespawner_override": {
                     "image": "{value}",
                     "start_timeout": 600,  # increase timeout to allow new images to be pulled
