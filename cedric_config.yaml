@@ -57,7 +57,8 @@ singleuser:
     name: "brineylab/jupyterhub-datascience"
     tag: "v2024-09-12"
 
-  # required for codeserver to launch
+  # required for server to launch becuase the files in /home/jovyan/
+  # from the docker image are overwriten by user volume
   lifecycleHooks:
     postStart:
       exec:
@@ -66,6 +67,9 @@ singleuser:
           - "-c"
           - >
             mkdir -p ${HOME}/codeserver;
+            mkdir -p ${HOME}/.local;
+            chown -R ${NB_UID:-1000}:${NB_GID:-100} ${HOME}/codeserver;
+            chown -R ${NB_UID:-1000}:${NB_GID:-100} ${HOME}/.local;
 
   storage:
     dynamic:
