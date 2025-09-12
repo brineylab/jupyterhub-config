@@ -98,6 +98,10 @@ def cpu_profile(CONFIG):
 
 # define GPU profile
 def gpu_profile(CONFIG):
+    # filter out admin only nodes
+    node_info = CONFIG["node_info"].copy()
+    filtered_nodes = [n for n in node_info if not n.get("admin_only", False)]
+
     return [
         {
             "display_name": "GPU Server",
@@ -105,7 +109,7 @@ def gpu_profile(CONFIG):
             + "Reference the GPU availability below to select your node and number of GPUs.",
             "profile_options": {
                 **_define_images(CONFIG["images"], "deeplearning"),
-                **_define_gpu_nodes(CONFIG["node_info"]),
+                **_define_gpu_nodes(filtered_nodes),
                 **_define_num_gpus(CONFIG["gpu_counts"]),
             },
         }

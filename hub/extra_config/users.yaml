@@ -2,6 +2,7 @@ admin:
   - bryan
   - terrence
   - sarah
+  - jonathan
 gpu:
   - devgpu
   - karenna
@@ -14,7 +15,6 @@ gpu:
   - cdibiase
 regular:
   - devreg
-  - jonathan
   - pragati
   - morgan
   - jyothi
