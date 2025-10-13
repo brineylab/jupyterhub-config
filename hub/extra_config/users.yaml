@@ -3,6 +3,7 @@ admin:
   - terrence
   - sarah
   - jonathan
+  - benjamin
 gpu:
   - devgpu
   - karenna
@@ -11,7 +12,6 @@ gpu:
   - nitesh
   - sean
   - sferrier
-  - benjamin
   - cdibiase
 regular:
   - devreg
@@ -26,3 +26,5 @@ regular:
   - civester
   - nprice
   - bhinnant
+  - sradak
+  - jcapolla
