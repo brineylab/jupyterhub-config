@@ -19,8 +19,6 @@ def _define_images(images, default):
                 "enabled": True,
                 "display_name": "Enter custom image",
                 "display_name_in_choices": "other - select to provide a custom image",
-                "validation_regex": "^.+/.+:.+$",
-                "validation_message": "Must be an image matching <user>/<name>:<tag>",
                 "kubespawner_override": {
                     "image": "{value}",
                     "start_timeout": 600,  # increase timeout to allow new images to be pulled
@@ -64,7 +62,11 @@ def _define_gpu_nodes(node_info):
                     "display_name": str(node["node"]),
                     "kubespawner_override": node.get(
                         "kubespawner_override",
-                        {"node_selector": {"kubernetes.io/hostname": str(node["node"])}},
+                        {
+                            "node_selector": {
+                                "kubernetes.io/hostname": str(node["node"])
+                            }
+                        },
                     ),
                 }
                 for node in node_info
@@ -82,17 +84,44 @@ image_des = """Choose your image.
             """
 
 
-# define CPU profile
-def cpu_profile(CONFIG):
+# define low resource CPU profile
+def low_cpu_profile(CONFIG):
     return [
         {
-            "display_name": "CPU Server",
-            "description": image_des,
+            "display_name": "Low-Resource CPU Server",
+            "description": "Use this profile to for smaller jobs and day-to-day use."
+            + image_des,
+            "profile_options": {
+                **_define_images(CONFIG["images"], "datascience"),
+            },
+            "kubespawner_override": {
+                "node_selector": {"node_profile": "low-cpu"},
+                "cpu_guarantee": 16,
+                "cpu_limit": 32,
+                "mem_guarantee": "64G",
+                "mem_limit": "128G",
+            },
+        }
+    ]
+
+
+# define high resource CPU profile
+def high_cpu_profile(CONFIG):
+    return [
+        {
+            "display_name": "High-Resource CPU Server",
+            "description": "Use this profile to for larger jobs requiring more resources."
+            + "Please remember to shut down your server after your job completes."
+            + image_des,
             "profile_options": {
                 **_define_images(CONFIG["images"], "datascience"),
             },
             "kubespawner_override": {
                 "node_selector": {"node_profile": "cpu"},
+                "cpu_guarantee": 16,
+                "cpu_limit": 128,
+                "mem_guarantee": "64G",
+                "mem_limit": "512G",
             },
         }
     ]
@@ -100,6 +129,10 @@ def cpu_profile(CONFIG):
 
 # define GPU profile
 def gpu_profile(CONFIG):
+    # filter out admin only nodes
+    node_info = CONFIG["node_info"].copy()
+    filtered_nodes = [n for n in node_info if not n.get("admin_only", False)]
+
     return [
         {
             "display_name": "GPU Server",
@@ -107,7 +140,7 @@ def gpu_profile(CONFIG):
             + "Reference the GPU availability below to select your node and number of GPUs.",
             "profile_options": {
                 **_define_images(CONFIG["images"], "deeplearning"),
-                **_define_gpu_nodes(CONFIG["node_info"]),
+                **_define_gpu_nodes(filtered_nodes),
                 **_define_num_gpus(CONFIG["gpu_counts"]),
             },
         }
@@ -142,12 +175,12 @@ def dev_profile(CONFIG, server_type):
 
     # add CPU node with kubespawner_override
     if server_type == "cpu-gpu":
-        nodes.append({
-            "node": "CPU node",
-            "kubespawner_override": {
-                "node_selector": {"node_profile": "cpu"}
+        nodes.append(
+            {
+                "node": "CPU node",
+                "kubespawner_override": {"node_selector": {"node_profile": "cpu"}},
             }
-        })
+        )
 
     return [
         {
@@ -174,11 +207,12 @@ def dynamic_options_form_withconfig(CONFIG):
         if (
             server_type == "cpu-gpu"
         ):  # For default server -> CPU profiles, for named servers -> GPU profiles
-            self.profile_list = (
-                cpu_profile(CONFIG) if not self.name else gpu_profile(CONFIG)
-            )
+            if self.name:
+                self.profile_list = gpu_profile(CONFIG)
+            else:
+                self.profile_list = low_cpu_profile(CONFIG) + high_cpu_profile(CONFIG)
         elif server_type == "cpu-only":
-            self.profile_list = cpu_profile(CONFIG)
+            self.profile_list = low_cpu_profile(CONFIG) + high_cpu_profile(CONFIG)
         elif server_type == "gpu-only":
             self.profile_list = gpu_profile(CONFIG) + volume_profile(CONFIG)
         else:

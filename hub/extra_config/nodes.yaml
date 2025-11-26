@@ -4,6 +4,7 @@ mcnulty:
     num_gpus: 8
     cpu_threads: 256
     gb_memory: 2000
+    admin_only: true
   - node: "ellis"
     gpu_type: "A6000"
     num_gpus: 4

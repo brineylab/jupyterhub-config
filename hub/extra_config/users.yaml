@@ -2,6 +2,8 @@ admin:
   - bryan
   - terrence
   - sarah
+  - jonathan
+  - benjamin
 gpu:
   - devgpu
   - karenna
@@ -10,11 +12,10 @@ gpu:
   - nitesh
   - sean
   - sferrier
-  - benjamin
   - cdibiase
+  - sudhasinip
 regular:
   - devreg
-  - jonathan
   - pragati
   - morgan
   - jyothi
@@ -24,5 +25,7 @@ regular:
   - jdye
   - jmagura
   - civester
-  - mgee
-  - aweiss
+  - nprice
+  - bhinnant
+  - sradak
+  - jcapolla
