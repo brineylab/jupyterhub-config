@@ -98,8 +98,8 @@ def low_cpu_profile(CONFIG):
                 "node_selector": {"node_profile": "low-cpu"},
                 "cpu_guarantee": 16,
                 "cpu_limit": 32,
-                "mem_guarantee": "64G",
-                "mem_limit": "128G",
+                "mem_guarantee": "32G",
+                "mem_limit": "64G",
             },
         }
     ]
