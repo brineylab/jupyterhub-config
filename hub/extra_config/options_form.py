@@ -80,17 +80,44 @@ image_des = """Choose your image.
             """
 
 
-# define CPU profile
-def cpu_profile(CONFIG):
+# define low resource CPU profile
+def low_cpu_profile(CONFIG):
     return [
         {
-            "display_name": "CPU Server",
-            "description": image_des,
+            "display_name": "Low-Resource CPU Server",
+            "description": "Use this profile to for smaller jobs and day-to-day use."
+            + image_des,
+            "profile_options": {
+                **_define_images(CONFIG["images"], "datascience"),
+            },
+            "kubespawner_override": {
+                "node_selector": {"node_profile": "low-cpu"},
+                "cpu_guarantee": 16,
+                "cpu_limit": 32,
+                "mem_guarantee": "64G",
+                "mem_limit": "128G",
+            },
+        }
+    ]
+
+
+# define high resource CPU profile
+def high_cpu_profile(CONFIG):
+    return [
+        {
+            "display_name": "High-Resource CPU Server",
+            "description": "Use this profile to for larger jobs requiring more resources."
+            + "Please remember to shut down your server after your job completes."
+            + image_des,
             "profile_options": {
                 **_define_images(CONFIG["images"], "datascience"),
             },
             "kubespawner_override": {
                 "node_selector": {"node_profile": "cpu"},
+                "cpu_guarantee": 16,
+                "cpu_limit": 128,
+                "mem_guarantee": "64G",
+                "mem_limit": "512G",
             },
         }
     ]
@@ -176,11 +203,12 @@ def dynamic_options_form_withconfig(CONFIG):
         if (
             server_type == "cpu-gpu"
         ):  # For default server -> CPU profiles, for named servers -> GPU profiles
-            self.profile_list = (
-                cpu_profile(CONFIG) if not self.name else gpu_profile(CONFIG)
-            )
+            if self.name:
+                self.profile_list = gpu_profile(CONFIG)
+            else:
+                self.profile_list = low_cpu_profile(CONFIG) + high_cpu_profile(CONFIG)
         elif server_type == "cpu-only":
-            self.profile_list = cpu_profile(CONFIG)
+            self.profile_list = low_cpu_profile(CONFIG) + high_cpu_profile(CONFIG)
         elif server_type == "gpu-only":
             self.profile_list = gpu_profile(CONFIG) + volume_profile(CONFIG)
         else:

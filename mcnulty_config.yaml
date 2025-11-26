@@ -44,14 +44,13 @@ singleuser:
   uid: 0
   fsGid: 0
 
-  # default resource limits
-  # used for cpu pods 
-  # or for pods launched w/o a profile (only happens from the admin page, I think)
+  # defaults - in case pods get launched w/o specifying profile
+  # i think this can only happen from the admin page
   memory:
-    limit: 512G
-    guarantee: 64G
+    limit: 16G
+    guarantee: 16G
   cpu:
-    limit: 128
+    limit: 16
     guarantee: 16
   extraResource:
     limits:
