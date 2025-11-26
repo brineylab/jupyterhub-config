@@ -82,7 +82,7 @@ singleuser:
 
     extraVolumes:
       # shared
-      - name:  nfs-wallace-shared
+      - name: nfs-wallace-shared
         persistentVolumeClaim:
           claimName: nfs-wallace-shared
       # references
@@ -91,7 +91,7 @@ singleuser:
           claimName: nfs-wallace-references
           readOnly: true
       # workspace (sparrow)
-      - name:  nfs-sparrow-workspace
+      - name: nfs-sparrow-workspace
         persistentVolumeClaim:
           claimName: nfs-sparrow-workspace
       # sequencing data: NovaSeq
@@ -130,7 +130,7 @@ singleuser:
 hub:
   networkPolicy:
     enabled: false
-  
+
   containerSecurityContext:
     runAsUser: 0
     runAsGroup: 0
@@ -142,7 +142,7 @@ hub:
         name: templates
     - name: extra-config
       configMap:
-        name: extra-config 
+        name: extra-config
   extraVolumeMounts:
     - mountPath: /etc/jupyterhub/templates
       name: templates
@@ -163,7 +163,7 @@ hub:
       c.KubeSpawner.environment = {'NB_UMASK': '0000'}
       c.KubeSpawner.allow_privilege_escalation = True
       c.KubeSpawner.args = ["--allow-root"]
-    
+
     # add custom templates to template path
     templates: |
       import os, nativeauthenticator
@@ -184,7 +184,7 @@ hub:
         users = yaml.safe_load(f)
 
       c.Authenticator.admin_users = users.get("admin", [])
-      c.Authenticator.allowed_users = set(users.get("admin", []) + users.get("gpu", [])) 
+      c.Authenticator.allowed_users = set(users.get("admin", []) + users.get("gpu", []))
 
     # handle custom named server limit
     # ref: https://jupyterhub.readthedocs.io/en/stable/howto/configuration/config-user-env.html#named-servers
@@ -229,7 +229,7 @@ hub:
         "node_info": node_info["blackpearl"],
         "server_type": "gpu-only" # can be: "cpu-gpu", "cpu-only", and "gpu-only"
       }
-      
+
       # options for users to select from
       c.KubeSpawner.options_form = dynamic_options_form_withconfig(CONFIG)
 

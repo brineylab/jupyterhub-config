@@ -62,7 +62,11 @@ def _define_gpu_nodes(node_info):
                     "display_name": str(node["node"]),
                     "kubespawner_override": node.get(
                         "kubespawner_override",
-                        {"node_selector": {"kubernetes.io/hostname": str(node["node"])}},
+                        {
+                            "node_selector": {
+                                "kubernetes.io/hostname": str(node["node"])
+                            }
+                        },
                     ),
                 }
                 for node in node_info
@@ -171,12 +175,12 @@ def dev_profile(CONFIG, server_type):
 
     # add CPU node with kubespawner_override
     if server_type == "cpu-gpu":
-        nodes.append({
-            "node": "CPU node",
-            "kubespawner_override": {
-                "node_selector": {"node_profile": "cpu"}
+        nodes.append(
+            {
+                "node": "CPU node",
+                "kubespawner_override": {"node_selector": {"node_profile": "cpu"}},
             }
-        })
+        )
 
     return [
         {

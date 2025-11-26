@@ -78,7 +78,7 @@ singleuser:
 
     extraVolumes:
       # shared
-      - name:  nfs-wallace-shared
+      - name: nfs-wallace-shared
         persistentVolumeClaim:
           claimName: nfs-wallace-shared
       # references
@@ -153,7 +153,7 @@ hub:
       c.KubeSpawner.environment = {'NB_UMASK': '0000'}
       c.KubeSpawner.allow_privilege_escalation = True
       c.KubeSpawner.args = ["--allow-root"]
-    
+
     # add custom templates to template path
     templates: |
       import os, nativeauthenticator
@@ -174,7 +174,7 @@ hub:
         users = yaml.safe_load(f)
 
       c.Authenticator.admin_users = users.get("admin", [])
-      c.Authenticator.allowed_users = set(users.get("admin", []) + users.get("gpu", []) + users.get("regular", [])) 
+      c.Authenticator.allowed_users = set(users.get("admin", []) + users.get("gpu", []) + users.get("regular", []))
 
     # handle custom named server limit
     # ref: https://jupyterhub.readthedocs.io/en/stable/howto/configuration/config-user-env.html#named-servers
@@ -198,7 +198,7 @@ hub:
 
     # custom profiles
     # import options form and pre-spawn hook helper fns from extra-config configmap
-    options-form: |    
+    options-form: |
       import yaml
       import sys
 
@@ -222,9 +222,9 @@ hub:
         "node_info": node_info["mcnulty"],
         "server_type": "cpu-gpu" # can be: "cpu-gpu", "cpu-only", and "gpu-only"
       }
-      
+
       # options for users to select from
       c.KubeSpawner.options_form = dynamic_options_form_withconfig(CONFIG)
 
       # pre-spawn hook to set resource limits based on user selections
-      c.KubeSpawner.pre_spawn_hook = lambda spawner: set_spawner_resources(spawner, CONFIG)      
+      c.KubeSpawner.pre_spawn_hook = lambda spawner: set_spawner_resources(spawner, CONFIG)

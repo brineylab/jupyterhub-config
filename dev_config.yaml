@@ -118,19 +118,19 @@ singleuser:
 hub:
   networkPolicy:
     enabled: false
-  
+
   # needs to be non-root user (root is 0): https://discourse.jupyter.org/t/customizing-jupyterhub-on-kubernetes/1769/39
   containerSecurityContext:
-    runAsUser: 1000 
+    runAsUser: 1000
     runAsGroup: 0
-  
+
   # change hub database to postgresql (default sqlite not compatible with NFS)
   # https://jupyterhub.readthedocs.io/en/latest/explanation/database.html#sqlite
   db:
     upgrade: true
     type: postgres
     url: "postgresql://brineylab:@192.168.1.1:5432/jupyterhub_db"
-  
+
   extraEnv:
     PGPASSWORD: # will automatically provide password when env variable is named PGPASSWORD
       valueFrom:
@@ -166,7 +166,7 @@ hub:
       c.KubeSpawner.environment = {'NB_UMASK': '0000'}
       c.KubeSpawner.allow_privilege_escalation = True
       c.KubeSpawner.args = ["--allow-root"]
-    
+
     # custom templates
     templates: |
       import os, nativeauthenticator
@@ -192,7 +192,7 @@ hub:
         users = yaml.safe_load(f)
 
       c.Authenticator.admin_users = users.get("admin", [])
-      c.Authenticator.allowed_users = set(users.get("admin", []) + users.get("gpu", []) + users.get("regular", [])) 
+      c.Authenticator.allowed_users = set(users.get("admin", []) + users.get("gpu", []) + users.get("regular", []))
 
     # custom named server limit
     # ref: https://jupyterhub.readthedocs.io/en/stable/howto/configuration/config-user-env.html#named-servers
@@ -236,7 +236,7 @@ hub:
         "node_info": node_info["dev"],
         "server_type": "gpu-only" # can be: "cpu-gpu", "cpu-only", and "gpu-only"
       }
-      
+
       # options for users to select from
       c.KubeSpawner.options_form = dynamic_options_form_withconfig(CONFIG)
 
