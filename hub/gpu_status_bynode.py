@@ -61,7 +61,7 @@ def get_node_capacity_and_profile():
 def combine_and_group(node_info, gpu_requests):
     combined_info = []
     for node, info in node_info.items():
-        if info["node_profile"] not in ["cpu", "headnode"]:
+        if info["node_profile"] not in ["cpu", "low-cpu", "headnode"]:
 
             # zero out requests if capacity is 0
             # to prevent negative GPU availability
