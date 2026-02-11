@@ -189,9 +189,9 @@ hub:
         if user in users.get("admin", []):
             return 0 # unlimited
         elif user in users.get("gpu", []):
-            return 2 # 3 servers total
+            return 3 # 4 servers total
 
-        return 1 # 2 servers total
+        return 2 # 3 servers total
 
       c.JupyterHub.allow_named_servers = True
       c.JupyterHub.named_server_limit_per_user = custom_named_server_limit
