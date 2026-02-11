@@ -89,7 +89,7 @@ def low_cpu_profile(CONFIG):
     return [
         {
             "display_name": "Low-Resource CPU Server",
-            "description": "Use this profile to for smaller jobs and day-to-day use."
+            "description": "Use this profile to for smaller jobs and day-to-day use. "
             + image_des,
             "profile_options": {
                 **_define_images(CONFIG["images"], "datascience"),
@@ -110,8 +110,8 @@ def high_cpu_profile(CONFIG):
     return [
         {
             "display_name": "High-Resource CPU Server",
-            "description": "Use this profile to for larger jobs requiring more resources."
-            + "Please remember to shut down your server after your job completes."
+            "description": "Use this profile to for larger jobs requiring more resources. "
+            + "Please remember to shut down your server after your job completes. "
             + image_des,
             "profile_options": {
                 **_define_images(CONFIG["images"], "datascience"),
@@ -214,11 +214,11 @@ def dynamic_options_form_withconfig(CONFIG):
         server_type = CONFIG["server_type"]
         if (
             server_type == "cpu-gpu"
-        ):  # For default server -> CPU profiles, for named servers -> GPU profiles
+        ):  # For default server -> low-CPU profile, for named servers -> high-CPU + GPU profiles
             if self.name:
-                self.profile_list = gpu_profile(CONFIG)
+                self.profile_list = high_cpu_profile(CONFIG) + gpu_profile(CONFIG)
             else:
-                self.profile_list = low_cpu_profile(CONFIG) + high_cpu_profile(CONFIG)
+                self.profile_list = low_cpu_profile(CONFIG)
         elif server_type == "cpu-only":
             self.profile_list = low_cpu_profile(CONFIG) + high_cpu_profile(CONFIG)
         elif server_type == "gpu-only":
