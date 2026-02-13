@@ -118,10 +118,10 @@ def high_cpu_profile(CONFIG):
             },
             "kubespawner_override": {
                 "node_selector": {"node_profile": "cpu"},
-                "cpu_guarantee": 16,
-                "cpu_limit": 128,
-                "mem_guarantee": "64G",
-                "mem_limit": "512G",
+                "cpu_guarantee": 240,
+                "cpu_limit": 240,
+                "mem_guarantee": "950G",
+                "mem_limit": "950G",
             },
         }
     ]
