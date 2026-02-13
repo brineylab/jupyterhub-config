@@ -37,8 +37,6 @@ blackpearl:
     num_gpus: 8
     cpu_threads: 384
     gb_memory: 1500
-
-cedric:
   - node: "cedric"
     gpu_type: "A100"
     num_gpus: 8
