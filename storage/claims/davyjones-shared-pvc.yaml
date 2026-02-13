@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: nfs-davyjones-shared
+  namespace: jupyterhub
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: nfs-davyjones-hdd
+  volumeName: nfs-davyjones-shared
+  resources:
+    requests:
+      storage: 500Ti

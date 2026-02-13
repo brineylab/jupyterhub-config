@@ -78,9 +78,9 @@ singleuser:
 
     extraVolumes:
       # shared
-      - name: nfs-wallace-shared
+      - name: nfs-davyjones-shared
         persistentVolumeClaim:
-          claimName: nfs-wallace-shared
+          claimName: nfs-davyjones-shared
       # references
       - name: nfs-wallace-references
         persistentVolumeClaim:
@@ -104,7 +104,7 @@ singleuser:
           medium: Memory
           sizeLimit: "10Gi"
     extraVolumeMounts:
-      - name: nfs-wallace-shared
+      - name: nfs-davyjones-shared
         mountPath: /home/jovyan/shared
       - name: nfs-wallace-references
         mountPath: /home/jovyan/references
