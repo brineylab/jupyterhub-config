@@ -13,7 +13,7 @@ cull:
   enabled: false
 
 # from https://z2jh.jupyter.org/en/stable/administrator/optimization.html
-# put users on the same node first (to leave larger groups of GPUs avaliable)
+# put users on the same node first (to leave larger groups of GPUs available)
 scheduling:
   userScheduler:
     enabled: true
