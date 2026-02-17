@@ -71,9 +71,6 @@ singleuser:
           - "-c"
           - >
             mkdir -p ${HOME}/codeserver;
-            mkdir -p ${HOME}/.local;
-            chown -R ${NB_UID:-1000}:${NB_GID:-100} ${HOME}/codeserver;
-            chown -R ${NB_UID:-1000}:${NB_GID:-100} ${HOME}/.local;
 
   storage:
     dynamic:
