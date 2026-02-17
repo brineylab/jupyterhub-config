@@ -34,50 +34,54 @@
       </div>
 
       <!-- Custom CPU availability -->
-      <div class="row col-sm-offset-2 col-sm-8" style="margin-top: 20px; align-items: center;">
-        <div class="cpu-status" style="font-size: 1.3em; text-align: center;">
-          <h3>High-Resource CPU Availability</h3>
+      {% if cpu_status_url %}
+        <div class="row col-sm-offset-2 col-sm-8" style="margin-top: 20px; align-items: center;">
+          <div class="cpu-status" style="font-size: 1.3em; text-align: center;">
+            <h3>High-Resource CPU Availability</h3>
 
-          <p class="mt-2" style="margin-top: 10px;">
-            Refer to the table below for the number of available high-resource CPU nodes. The table also lists the current users of the nodes; 
-            please coordinate with them if you need to run a job and no nodes are available.
-          </p>
+            <p class="mt-2" style="margin-top: 10px;">
+              Refer to the table below for the number of available high-resource CPU nodes. The table also lists the current users of the nodes;
+              please coordinate with them if you need to run a job and no nodes are available.
+            </p>
 
-          <div class="table-wrapper" style="width: 60%; margin: 0 auto;">
-            <table id="cpu-status-container" class="table table-bordered" style="display: none;">
-              <thead>
-                <tr>
-                  <th style="text-align: center;">Nodes Available</th>
-                  <th style="text-align: center;">Current Users</th>
-                </tr>
-              </thead>
-              <tbody><!-- dynamically updated by updateCpuStatus fn--></tbody>
-            </table>
+            <div class="table-wrapper" style="width: 60%; margin: 0 auto;">
+              <table id="cpu-status-container" class="table table-bordered" style="display: none;">
+                <thead>
+                  <tr>
+                    <th style="text-align: center;">Nodes Available</th>
+                    <th style="text-align: center;">Current Users</th>
+                  </tr>
+                </thead>
+                <tbody><!-- dynamically updated by updateCpuStatus fn--></tbody>
+              </table>
+            </div>
           </div>
         </div>
-      </div>
+      {% endif %}
 
       <!-- Custom GPU availability -->
-      <div class="row col-sm-offset-2 col-sm-8" style="margin-top: 20px; align-items: center;">
-        <div class="gpu-status" style="font-size: 1.3em; text-align: center;">
-          <h3>GPU Availability</h3>
-          
-          <p class="mt-2">Your server will fail to launch if you request more <s>cats</s> GPUs than available!</p>
-          
-          <div class="table-wrapper" style="width: 50%; margin: 0 auto;">
-            <table id="gpu-status-container" class="table table-bordered" style="display: none;">
-              <thead>
-                <tr>
-                  <th style="text-align: center;">Type</th>
-                  <th style="text-align: center;">Node</th>
-                  <th style="text-align: center;">Available</th>
-                </tr>
-              </thead>  
-              <tbody><!-- dynamically updated by updateGpuStatus fn--></tbody>
-            </table>
+      {% if gpu_status_url %}
+        <div class="row col-sm-offset-2 col-sm-8" style="margin-top: 20px; align-items: center;">
+          <div class="gpu-status" style="font-size: 1.3em; text-align: center;">
+            <h3>GPU Availability</h3>
+            
+            <p class="mt-2">Your server will fail to launch if you request more <s>cats</s> GPUs than available!</p>
+            
+            <div class="table-wrapper" style="width: 50%; margin: 0 auto;">
+              <table id="gpu-status-container" class="table table-bordered" style="display: none;">
+                <thead>
+                  <tr>
+                    <th style="text-align: center;">Type</th>
+                    <th style="text-align: center;">Node</th>
+                    <th style="text-align: center;">Available</th>
+                  </tr>
+                </thead>  
+                <tbody><!-- dynamically updated by updateGpuStatus fn--></tbody>
+              </table>
+            </div>
           </div>
         </div>
-      </div>
+      {% endif %}
   </div>
 {% endblock main %}
 
