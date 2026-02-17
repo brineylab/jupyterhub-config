@@ -98,8 +98,10 @@
     });
 
     // function to update GPU status
+    const gpuStatusUrl = "{{ gpu_status_url | default('', true) | e }}";
     function updateGpuStatus() {
-      fetch("{{ gpu_status_url }}")
+      if (!gpuStatusUrl) return;
+      fetch(gpuStatusUrl)
         .then(response => response.json())
         .then(data => {
           const container = document.getElementById('gpu-status-container');
@@ -154,8 +156,10 @@
     }
 
     //function to update CPU status
+    const cpuStatusUrl = "{{ cpu_status_url | default('', true) | e }}";
     function updateCpuStatus() {
-      fetch("{{ cpu_status_url }}")
+      if (!cpuStatusUrl) return;
+      fetch(cpuStatusUrl)
         .then(response => response.json())
         .then(data => {
           const container = document.getElementById('cpu-status-container');
