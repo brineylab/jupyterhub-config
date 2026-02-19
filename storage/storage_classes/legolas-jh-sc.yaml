@@ -1,15 +1,15 @@
-# rym-jh-sc.yaml
+# legolas-jh-sc.yaml
 ---
 apiVersion: storage.k8s.io/v1
 kind: StorageClass
 metadata:
-  name: nfs-rym-jh-sata
+  name: nfs-legolas-jh
   annotations:
     storageclass.kubernetes.io/is-default-class: "true"
 provisioner: nfs.csi.k8s.io
 parameters:
-  server: 192.168.1.7 # rym on dev cluster 
-  share: /dev_data/jupyterhub
+  server: 172.29.180.191 # legolas scripps ip
+  share: /srv/nfs/jupyterhub
 reclaimPolicy: Delete
 volumeBindingMode: Immediate
 mountOptions:
