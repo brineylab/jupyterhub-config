@@ -49,7 +49,8 @@ singleuser:
     tag: "v2024-09-12"
 
   # dummy profiles for image pre-pulling
-  # these get overwritten later by the options form
+  # these get overwritten at runtime
+  # display names are used as keys in the options form, so don't change them
   profileList:
     - display_name: "datascience"
       kubespawner_override:
