@@ -10,14 +10,12 @@
         <p>
           Create new servers with the "Add New Server" button to launch high-resource CPU or GPU instances.
           You can launch an unlimited number of servers (admin only).
-          Server names cannot contain spaces or uppercase letters.
           Please remember to shut down your servers when you are finished using them.<br><br>
         </p>
       {% else %}
         <p>
           Create new servers with the "Add New Server" button to launch high-resource CPU or GPU instances.
           You can launch a maximum of {{ named_server_limit_per_user + 1 }} server(s).
-          Server names cannot contain spaces or uppercase letters.
           Please remember to shut down your servers when you are finished using them.<br><br>
         </p>
       {% endif %}
