@@ -182,7 +182,7 @@ hub:
 
       # ref: https://github.com/jupyterhub/kubespawner/blob/main/kubespawner/spawner.py#L1699
       # bootstrap updated to v5 -> removes the 'hidden' class, need to use 'd-none' instead
-      # kubespawner hasn't updated their html template with this fix as of Feb 24th 2025
+      # kubespawner hasn't updated their html template with this fix as of Feb 20th 2026
       c.KubeSpawner.additional_profile_form_template_paths = "/etc/jupyterhub/templates"
 
     # set admin and allowed users -> allow admin and gpu users only
