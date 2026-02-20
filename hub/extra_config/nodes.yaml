@@ -43,26 +43,14 @@ blackpearl:
     cpu_threads: 256
     gb_memory: 2000
 
-kraken:
-  - node: "kraken"
-    gpu_type: "H200"
-    num_gpus: 8
-    cpu_threads: 384
-    gb_memory: 1500
-
 dev:
-  - node: "thor"
-    gpu_type: "3090"
-    num_gpus: 2
-    cpu_threads: 128
-    gb_memory: 256
-  # add fake info for testing
-  - node: "rym"
+  # fake info for testing
+  - node: "elrond"
     gpu_type: "3090"
     num_gpus: 0
     cpu_threads: 16
     gb_memory: 16
-  - node: "atli"
+  - node: "arwen"
     gpu_type: "L40S"
     num_gpus: 0
     cpu_threads: 16

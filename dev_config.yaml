@@ -25,10 +25,10 @@ prePuller:
   extraImages:
     datascience:
       name: brineylab/jupyterhub-datascience
-      tag: v2024-08-13
+      tag: v2024-09-12
     deeplearning:
       name: brineylab/jupyterhub-deeplearning
-      tag: v2024-08-13
+      tag: v2024-09-12
 
 singleuser:
   cmd: jupyterhub-singleuser
@@ -48,13 +48,18 @@ singleuser:
   # i think this can only happen from the admin page
   memory:
     limit: 16G
-    guarantee: 4G
+    guarantee: 16G
   cpu:
     limit: 16
-    guarantee: 4
+    guarantee: 16
+  extraResource:
+    limits:
+      ephemeral-storage: "200Gi"
+    guarantees:
+      ephemeral-storage: "20Gi"
   image:
     name: "brineylab/jupyterhub-datascience"
-    tag: "v2024-08-13"
+    tag: "v2024-09-12"
 
   # required for codeserver to launch
   lifecycleHooks:
@@ -65,20 +70,17 @@ singleuser:
           - "-c"
           - >
             mkdir -p ${HOME}/codeserver;
-            mkdir -p ${HOME}/.local;
-            chown -R ${NB_UID:-1000}:${NB_GID:-100} ${HOME}/codeserver;
-            chown -R ${NB_UID:-1000}:${NB_GID:-100} ${HOME}/.local;
 
   storage:
     dynamic:
-      storageClass: nfs-rym-jh-sata
-    capacity: 100Gi
+      storageClass: nfs-legolas-jh
+    capacity: 10Gi
 
     # extraVolumes:
     #   # shared
-    #   - name:  nfs-wallace-shared
+    #   - name: nfs-davyjones-shared
     #     persistentVolumeClaim:
-    #       claimName: nfs-wallace-shared
+    #       claimName: nfs-davyjones-shared
     #   # references
     #   - name: nfs-wallace-references
     #     persistentVolumeClaim:
@@ -102,7 +104,7 @@ singleuser:
     #       medium: Memory
     #       sizeLimit: "10Gi"
     # extraVolumeMounts:
-    #   - name: nfs-wallace-shared
+    #   - name: nfs-davyjones-shared
     #     mountPath: /home/jovyan/shared
     #   - name: nfs-wallace-references
     #     mountPath: /home/jovyan/references
@@ -126,17 +128,17 @@ hub:
 
   # change hub database to postgresql (default sqlite not compatible with NFS)
   # https://jupyterhub.readthedocs.io/en/latest/explanation/database.html#sqlite
-  db:
-    upgrade: true
-    type: postgres
-    url: "postgresql://brineylab:@192.168.1.1:5432/jupyterhub_db"
+  # db:
+  #   upgrade: true
+  #   type: postgres
+  #   url: "postgresql://brineylab:@192.168.1.1:5432/jupyterhub_db"
 
-  extraEnv:
-    PGPASSWORD: # will automatically provide password when env variable is named PGPASSWORD
-      valueFrom:
-        secretKeyRef:
-          name: postgres-secret
-          key: POSTGRES_PASSWORD
+  # extraEnv:
+  #   PGPASSWORD: # will automatically provide password when env variable is named PGPASSWORD
+  #     valueFrom:
+  #       secretKeyRef:
+  #         name: postgres-secret
+  #         key: POSTGRES_PASSWORD
 
   # Mount users and home page configmaps
   extraVolumes:
@@ -177,7 +179,8 @@ hub:
 
       # set url for gpu status
       c.JupyterHub.template_vars.update({
-          "gpu_status_url": "http://172.29.180.91:5000/gpu_status_bynode"
+          "gpu_status_url": "http://172.29.180.191:5000/gpu_status_bynode",
+          "cpu_status_url": "http://172.29.180.191:5001/cpu_status_bynode"
       })
 
       # ref: https://github.com/jupyterhub/kubespawner/blob/main/kubespawner/spawner.py#L1699
@@ -229,12 +232,12 @@ hub:
       # update images and options for number of GPUs here
       CONFIG = {
         "images": {
-            "datascience": "brineylab/jupyterhub-datascience:v2024-08-13",
-            "deeplearning": "brineylab/jupyterhub-deeplearning:v2024-08-13",
+            "datascience": "brineylab/jupyterhub-datascience:v2024-09-12",
+            "deeplearning": "brineylab/jupyterhub-deeplearning:v2024-09-12",
         },
         "gpu_counts": [1, 2, 4, 8],
         "node_info": node_info["dev"],
-        "server_type": "gpu-only" # can be: "cpu-gpu", "cpu-only", and "gpu-only"
+        "server_type": "cpu-gpu" # can be: "cpu-gpu", "cpu-only", and "gpu-only"
       }
 
       # options for users to select from
