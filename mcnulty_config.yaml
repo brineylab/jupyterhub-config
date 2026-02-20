@@ -17,19 +17,6 @@ scheduling:
   userScheduler:
     enabled: false
 
-# Update images here
-# NOTE: Images need to be updated in a second place in this file.
-#       This only updates the image puller, so that new images get
-#       pulled during the helm upgrade.
-prePuller:
-  extraImages:
-    datascience:
-      name: brineylab/jupyterhub-datascience
-      tag: v2024-09-12
-    deeplearning:
-      name: brineylab/jupyterhub-deeplearning
-      tag: v2024-09-12
-
 singleuser:
   cmd: jupyterhub-singleuser
   defaultUrl: lab
@@ -60,6 +47,17 @@ singleuser:
   image:
     name: "brineylab/jupyterhub-datascience"
     tag: "v2024-09-12"
+
+  # update images here!
+  # dummy profiles for image pre-pulling that get overwritten at runtime
+  # display names are used as keys in the options form, so don't change them
+  profileList:
+    - display_name: "datascience"
+      kubespawner_override:
+        image: "brineylab/jupyterhub-datascience:v2024-09-12"
+    - display_name: "deeplearning"
+      kubespawner_override:
+        image: "brineylab/jupyterhub-deeplearning:v2024-09-12"
 
   # required for codeserver to launch
   lifecycleHooks:
@@ -121,11 +119,17 @@ hub:
   networkPolicy:
     enabled: false
 
+  # needs to be non-root user (root is 0)
+  # ref: https://discourse.jupyter.org/t/customizing-jupyterhub-on-kubernetes/1769/39
   containerSecurityContext:
-    runAsUser: 0
+    runAsUser: 1000
     runAsGroup: 0
 
-  # Mount users and home page configmaps
+  extraEnv:
+    # set cluster name, as in clusters.yaml
+    JUPYTERHUB_CLUSTER: "mcnulty"
+
+  # mount users and home page configmaps
   extraVolumes:
     - name: templates
       configMap:
@@ -149,82 +153,58 @@ hub:
 
   extraConfig:
     # set env variables
-    env: |
+    00-env: |
       c.KubeSpawner.environment = {'NB_UMASK': '0000'}
       c.KubeSpawner.allow_privilege_escalation = True
       c.KubeSpawner.args = ["--allow-root"]
 
-    # add custom templates to template path
-    templates: |
+    # build config with image info
+    01-config: |
+      import sys
+      sys.path.append('/etc/jupyterhub/config')
+
+      from config_builder import update_config
+      update_config(c.KubeSpawner.profile_list)
+
+    # custom templates
+    02-templates: |
       import os, nativeauthenticator
+      from config_builder import CONFIG
 
       # inject custom templates
-      c.JupyterHub.template_paths = [f"{os.path.dirname(nativeauthenticator.__file__)}/templates/"]
-      c.JupyterHub.template_paths.insert(0, "/etc/jupyterhub/templates")
+      c.JupyterHub.template_paths = ["/etc/jupyterhub/templates", 
+                                      f"{os.path.dirname(nativeauthenticator.__file__)}/templates/"]
+
+      # ref: https://github.com/jupyterhub/kubespawner/blob/main/kubespawner/spawner.py#L1699
+      # bootstrap updated to v5 -> removes the 'hidden' class, need to use 'd-none' instead
+      # kubespawner hasn't updated their html template with this fix as of Feb 20th 2026
+      c.KubeSpawner.additional_profile_form_template_paths = "/etc/jupyterhub/templates"
 
       # set url for gpu status
-      c.JupyterHub.template_vars.update({
-          "gpu_status_url": "http://172.29.180.217:5000/gpu_status_bynode",
-          "cpu_status_url": "http://172.29.180.217:5001/cpu_status_bynode"
-      })
+      c.JupyterHub.template_vars.update(CONFIG["status_urls"])
 
-    # set admin and allowed users -> allow admin and gpu users only
-    users: |
-      import yaml
-      with open("/etc/jupyterhub/config/users.yaml") as f:
-        users = yaml.safe_load(f)
+    # setup users and named server limits
+    03-users: |
+      from config_builder import CONFIG
 
-      c.Authenticator.admin_users = users.get("admin", [])
-      c.Authenticator.allowed_users = set(users.get("admin", []) + users.get("gpu", []) + users.get("regular", []))
+      users = CONFIG["users"]
+      user_roles = CONFIG["user_roles"]
+      server_limits = CONFIG["named_server_limits"]
 
-    # handle custom named server limit
-    # ref: https://jupyterhub.readthedocs.io/en/stable/howto/configuration/config-user-env.html#named-servers
-    # src code: https://github.com/jupyterhub/jupyterhub/blob/main/jupyterhub/app.py#L1341
-    namedServers: |
-      def custom_named_server_limit(handler):
-        with open("/etc/jupyterhub/config/users.yaml") as f:
-          users = yaml.safe_load(f)
+      c.Authenticator.admin_users = set(users.get("admin", []))
+      c.Authenticator.allowed_users = set(user_roles.keys())
 
-        user = handler.current_user.name
-
-        if user in users.get("admin", []):
-            return 0 # unlimited
-        elif user in users.get("gpu", []):
-            return 3 # 4 servers total
-
-        return 2 # 3 servers total
+      def named_server_limit(handler):
+          role = user_roles.get(handler.current_user.name, "regular")
+          return server_limits.get(role, 1)
 
       c.JupyterHub.allow_named_servers = True
-      c.JupyterHub.named_server_limit_per_user = custom_named_server_limit
+      c.JupyterHub.named_server_limit_per_user = named_server_limit
 
-    # custom profiles
-    # import options form and pre-spawn hook helper fns from extra-config configmap
-    options-form: |
-      import yaml
-      import sys
+    04-profiles: |
+      from config_builder import CONFIG, dynamic_options_form_withconfig, set_spawner_resources
 
-      # import functions
-      sys.path.append('/etc/jupyterhub/config')
-      from options_form import dynamic_options_form_withconfig
-      from prespawn_hook import set_spawner_resources
-
-      # read node info
-      with open("/etc/jupyterhub/config/nodes.yaml", "r") as file:
-        node_info = yaml.safe_load(file)
-
-      # update images and options for number of GPUs here
-      # datascience is default for cpu servers, deeplearning is default for gpu servers
-      CONFIG = {
-        "images": {
-            "datascience": "brineylab/jupyterhub-datascience:v2024-09-12",
-            "deeplearning": "brineylab/jupyterhub-deeplearning:v2024-09-12",
-        },
-        "gpu_counts": [1, 2, 4],
-        "node_info": node_info["mcnulty"],
-        "server_type": "cpu-gpu" # can be: "cpu-gpu", "cpu-only", and "gpu-only"
-      }
-
-      # options for users to select from
+      # setup profiles
       c.KubeSpawner.options_form = dynamic_options_form_withconfig(CONFIG)
 
       # pre-spawn hook to set resource limits based on user selections

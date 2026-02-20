@@ -1,0 +1,88 @@
+mcnulty:
+  server_type: "cpu-gpu"
+  named_server_limits:
+    admin: 0 # unlimited
+    gpu: 3
+    regular: 2
+  status_urls:
+    gpu_status_url: "http://172.29.180.217:5000/gpu_status_bynode"
+    cpu_status_url: "http://172.29.180.217:5001/cpu_status_bynode"
+  num_gpus_allowed: [1, 2, 4]
+  gpu_nodes:
+    - node: "randy"
+      gpu_type: "A6000"
+      num_gpus: 8
+      cpu_threads: 256
+      gb_memory: 2000
+      admin_only: true
+    - node: "ellis"
+      gpu_type: "A6000"
+      num_gpus: 4
+      cpu_threads: 56
+      gb_memory: 187
+    - node: "jay"
+      gpu_type: "A6000"
+      num_gpus: 4
+      cpu_threads: 56
+      gb_memory: 384
+    - node: "michael"
+      gpu_type: "L40S"
+      num_gpus: 8
+      cpu_threads: 256
+      gb_memory: 2000
+    - node: "rawls"
+      gpu_type: "L40S"
+      num_gpus: 4
+      cpu_threads: 128
+      gb_memory: 512
+
+blackpearl:
+  server_type: "gpu-only"
+  named_server_limits:
+    admin: 0 # unlimited
+    gpu: 1
+    regular: 1
+  status_urls:
+    gpu_status_url: "http://172.29.80.65:5000/gpu_status_bynode"
+    cpu_status_url: ""
+  num_gpus_allowed: [1, 2, 4, 8]
+  gpu_nodes:
+    - node: "swann"
+      gpu_type: "L40S"
+      num_gpus: 8
+      cpu_threads: 384
+      gb_memory: 1500
+    - node: "turner"
+      gpu_type: "L40S"
+      num_gpus: 8
+      cpu_threads: 384
+      gb_memory: 1500
+    - node: "cedric"
+      gpu_type: "A100"
+      num_gpus: 8
+      cpu_threads: 256
+      gb_memory: 2000
+
+dev:
+  server_type: "cpu-gpu"
+  # total number of servers is named_server_limit + 1
+  named_server_limits:
+    admin: 0 # unlimited
+    gpu: 3
+    regular: 2
+  status_urls:
+    gpu_status_url: "http://172.29.180.191:5000/gpu_status_bynode"
+    cpu_status_url: ""
+  num_gpus_allowed: [1, 2, 4]
+  gpu_nodes:
+    # fake info for testing
+    - node: "elrond"
+      gpu_type: "3090"
+      num_gpus: 0
+      cpu_threads: 16
+      gb_memory: 16
+    - node: "arwen"
+      gpu_type: "L40S"
+      num_gpus: 0
+      cpu_threads: 16
+      gb_memory: 16
