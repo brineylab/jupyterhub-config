@@ -139,10 +139,10 @@ hub:
   db:
     upgrade: true
     type: postgres
-    url: "postgresql://brineylab:@192.168.1.1:5432/jupyterhub_db"
+    url: "postgresql://brineylab:@172.29.180.191:5432/jupyterhub_db"
 
   extraEnv:
-    # access hub db password from env variable PGPASSWORD
+    # access hub db password from the secret
     PGPASSWORD:
       valueFrom:
         secretKeyRef:
