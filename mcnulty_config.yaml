@@ -48,7 +48,7 @@ singleuser:
     name: "brineylab/jupyterhub-datascience"
     tag: "v2024-09-12"
 
-  # update images here!
+  # CONFIGURE: update images here
   # dummy profiles for image pre-pulling that get overwritten at runtime
   # display names are used as keys in the options form, so don't change them
   profileList:
@@ -69,6 +69,7 @@ singleuser:
           - >
             mkdir -p ${HOME}/codeserver;
 
+  # CONFIGURE: update storage here
   storage:
     dynamic:
       storageClass: nfs-wallace-jh-nvme
@@ -116,8 +117,12 @@ singleuser:
         mountPath: /dev/shm
 
 hub:
-  networkPolicy:
-    enabled: false
+  config:
+    JupyterHub:
+      authenticator_class: "nativeauthenticator.NativeAuthenticator"
+      default_url: "/hub/home"
+    NativeAuthenticator:
+      enable_signup: true
 
   # needs to be non-root user (root is 0)
   # ref: https://discourse.jupyter.org/t/customizing-jupyterhub-on-kubernetes/1769/39
@@ -125,8 +130,11 @@ hub:
     runAsUser: 1000
     runAsGroup: 0
 
+  networkPolicy:
+    enabled: false
+
   extraEnv:
-    # set cluster name, as in clusters.yaml
+    # CONFIGURE: set cluster name here, matching the name in clusters.yaml
     JUPYTERHUB_CLUSTER: "mcnulty"
 
   # mount users and home page configmaps
@@ -142,14 +150,6 @@ hub:
       name: templates
     - mountPath: /etc/jupyterhub/config
       name: extra-config
-
-  config:
-    JupyterHub:
-      authenticator_class: "nativeauthenticator.NativeAuthenticator"
-      default_url: "/hub/home"
-
-    NativeAuthenticator:
-      enable_signup: true
 
   extraConfig:
     # set env variables
@@ -201,6 +201,7 @@ hub:
       c.JupyterHub.allow_named_servers = True
       c.JupyterHub.named_server_limit_per_user = named_server_limit
 
+    # setup dynamic profiles
     04-profiles: |
       from config_builder import CONFIG, dynamic_options_form_withconfig, set_spawner_resources
 
