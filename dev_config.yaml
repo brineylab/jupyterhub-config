@@ -172,6 +172,7 @@ hub:
       c.KubeSpawner.environment = {'NB_UMASK': '0000'}
       c.KubeSpawner.allow_privilege_escalation = True
       c.KubeSpawner.args = ["--allow-root"]
+      c.KubeSpawner.pvc_name_template = "claim-{username}--{servername}"
 
     # build config with image info
     01-config: |
