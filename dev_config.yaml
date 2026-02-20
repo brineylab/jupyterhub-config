@@ -186,30 +186,23 @@ hub:
       # kubespawner hasn't updated their html template with this fix as of Feb 20th 2026
       c.KubeSpawner.additional_profile_form_template_paths = "/etc/jupyterhub/templates"
 
-    # set admin and allowed users -> allow admin and gpu users only
+    # setup users and named server limits
     users: |
       import yaml
+
       with open("/etc/jupyterhub/config/users.yaml") as f:
         users = yaml.safe_load(f)
 
       c.Authenticator.admin_users = users.get("admin", [])
       c.Authenticator.allowed_users = set(users.get("admin", []) + users.get("gpu", []) + users.get("regular", []))
 
-    # custom named server limit
-    # ref: https://jupyterhub.readthedocs.io/en/stable/howto/configuration/config-user-env.html#named-servers
-    namedServers: |
-      import yaml
+      # ref: https://jupyterhub.readthedocs.io/en/stable/howto/configuration/config-user-env.html#named-servers
       def custom_named_server_limit(handler):
-        with open("/etc/jupyterhub/config/users.yaml") as f:
-          users = yaml.safe_load(f)
-
         user = handler.current_user.name
-
         if user in users.get("admin", []):
             return 0 # unlimited
         elif user in users.get("gpu", []):
             return 2 # 3 servers total
-
         return 1 # 2 servers total
 
       c.JupyterHub.allow_named_servers = True
