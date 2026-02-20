@@ -17,19 +17,6 @@ scheduling:
   userScheduler:
     enabled: false
 
-# Update images here
-# NOTE: Images need to be updated in a second place in this file.
-#       This only updates the image puller, so that new images get
-#       pulled during the helm upgrade.
-prePuller:
-  extraImages:
-    datascience:
-      name: brineylab/jupyterhub-datascience
-      tag: v2024-09-12
-    deeplearning:
-      name: brineylab/jupyterhub-deeplearning
-      tag: v2024-09-12
-
 singleuser:
   cmd: jupyterhub-singleuser
   defaultUrl: lab
@@ -60,6 +47,16 @@ singleuser:
   image:
     name: "brineylab/jupyterhub-datascience"
     tag: "v2024-09-12"
+
+  # dummy profiles for image pre-pulling
+  # these get overwritten later by the options form
+  profileList:
+    - display_name: "datascience"
+      kubespawner_override:
+        image: "brineylab/jupyterhub-datascience:v2024-09-12"
+    - display_name: "deeplearning"
+      kubespawner_override:
+        image: "brineylab/jupyterhub-deeplearning:v2024-09-12"
 
   # required for codeserver to launch
   lifecycleHooks:
@@ -200,6 +197,7 @@ hub:
     # custom named server limit
     # ref: https://jupyterhub.readthedocs.io/en/stable/howto/configuration/config-user-env.html#named-servers
     namedServers: |
+      import yaml
       def custom_named_server_limit(handler):
         with open("/etc/jupyterhub/config/users.yaml") as f:
           users = yaml.safe_load(f)
@@ -232,8 +230,8 @@ hub:
       # update images and options for number of GPUs here
       CONFIG = {
         "images": {
-            "datascience": "brineylab/jupyterhub-datascience:v2024-09-12",
-            "deeplearning": "brineylab/jupyterhub-deeplearning:v2024-09-12",
+            p["display_name"]: p["kubespawner_override"]["image"]
+            for p in c.KubeSpawner.profile_list
         },
         "gpu_counts": [1, 2, 4, 8],
         "node_info": node_info["dev"],
