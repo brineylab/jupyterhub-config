@@ -75,46 +75,59 @@ singleuser:
       storageClass: nfs-legolas-jh
     capacity: 10Gi
 
-    # extraVolumes:
-    #   # shared
-    #   - name: nfs-davyjones-shared
-    #     persistentVolumeClaim:
-    #       claimName: nfs-davyjones-shared
-    #   # references
-    #   - name: nfs-wallace-references
-    #     persistentVolumeClaim:
-    #       claimName: nfs-wallace-references
-    #       readOnly: true
-    #   # sequencing data: NovaSeq
-    #   - name: nfs-avon-novaseq6k
-    #     persistentVolumeClaim:
-    #       claimName: nfs-avon-novaseq6k
-    #   # sequencing data: NextSeq
-    #   - name: nfs-avon-nextseq2k
-    #     persistentVolumeClaim:
-    #       claimName: nfs-avon-nextseq2k
-    #   # sequencing data: ONT
-    #   - name: nfs-stringer-ont
-    #     persistentVolumeClaim:
-    #       claimName: nfs-stringer-ont
-    #   # dshm - needed for training on gpu servers running jupyterhub
-    #   - name: dshm
-    #     emptyDir:
-    #       medium: Memory
-    #       sizeLimit: "10Gi"
-    # extraVolumeMounts:
-    #   - name: nfs-davyjones-shared
-    #     mountPath: /home/jovyan/shared
-    #   - name: nfs-wallace-references
-    #     mountPath: /home/jovyan/references
-    #   - name: nfs-avon-novaseq6k
-    #     mountPath: /home/jovyan/sequencing_runs/novaseq
-    #   - name: nfs-avon-nextseq2k
-    #     mountPath: /home/jovyan/sequencing_runs/nextseq
-    #   - name: nfs-stringer-ont
-    #     mountPath: /home/jovyan/sequencing_runs/ont
-    #   - name: dshm
-    #     mountPath: /dev/shm
+    extraVolumes:
+      # shared
+      nfs-davyjones-shared:
+        name: nfs-davyjones-shared
+        persistentVolumeClaim:
+          claimName: nfs-davyjones-shared
+      # references
+      nfs-wallace-references:
+        name: nfs-wallace-references
+        persistentVolumeClaim:
+          claimName: nfs-wallace-references
+          readOnly: true
+      # # sequencing data: NovaSeq
+      # nfs-avon-novaseq6k:
+      #   name: nfs-avon-novaseq6k
+      #   persistentVolumeClaim:
+      #     claimName: nfs-avon-novaseq6k
+      # # sequencing data: NextSeq
+      # nfs-avon-nextseq2k:
+      #   name: nfs-avon-nextseq2k
+      #   persistentVolumeClaim:
+      #     claimName: nfs-avon-nextseq2k
+      # # sequencing data: ONT
+      # nfs-stringer-ont:
+      #   name: nfs-stringer-ont
+      #   persistentVolumeClaim:
+      #     claimName: nfs-stringer-ont
+      # dshm - needed for training on gpu servers running jupyterhub
+      dshm:
+        name: dshm
+        emptyDir:
+          medium: Memory
+          sizeLimit: "10Gi"
+
+    extraVolumeMounts:
+      nfs-davyjones-shared:
+        name: nfs-davyjones-shared
+        mountPath: /home/jovyan/shared
+      nfs-wallace-references:
+        name: nfs-wallace-references
+        mountPath: /home/jovyan/references
+      # nfs-avon-novaseq6k:
+      #   name: nfs-avon-novaseq6k
+      #   mountPath: /home/jovyan/sequencing_runs/novaseq
+      # nfs-avon-nextseq2k:
+      #   name: nfs-avon-nextseq2k
+      #   mountPath: /home/jovyan/sequencing_runs/nextseq
+      # nfs-stringer-ont:
+      #   name: nfs-stringer-ont
+      #   mountPath: /home/jovyan/sequencing_runs/ont
+      dshm:
+        name: dshm
+        mountPath: /dev/shm
 
 hub:
   config:
