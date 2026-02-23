@@ -18,6 +18,10 @@ hub:
     # cluster name, matching the name in clusters.yaml
     JUPYTERHUB_CLUSTER: "mcnulty"
 
+  # hub postgresql database URL here
+  db:
+    url: ""
+
   # URLs for cpu / gpu availability
   templateVars:
     gpu_status_url: "http://172.29.180.217:5000/gpu_status_bynode"
