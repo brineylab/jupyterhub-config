@@ -18,7 +18,6 @@ CONFIG = {
     "named_server_limits": cluster.get("named_server_limits", {}),
     "gpu_counts": cluster.get("num_gpus_allowed", []),
     "node_info": cluster.get("gpu_nodes", []),
-    "status_urls": cluster.get("status_urls", {}),
     "users": users,
     "user_roles": {user: role for role, userlist in users.items() for user in userlist},
 }

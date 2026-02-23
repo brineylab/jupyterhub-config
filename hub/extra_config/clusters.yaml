@@ -4,9 +4,6 @@ mcnulty:
     admin: 0 # unlimited
     gpu: 3
     regular: 2
-  status_urls:
-    gpu_status_url: "http://172.29.180.217:5000/gpu_status_bynode"
-    cpu_status_url: "http://172.29.180.217:5001/cpu_status_bynode"
   num_gpus_allowed: [1, 2, 4]
   gpu_nodes:
     - node: "randy"
@@ -42,9 +39,6 @@ blackpearl:
     admin: 0 # unlimited
     gpu: 1
     regular: 1
-  status_urls:
-    gpu_status_url: "http://172.29.80.65:5000/gpu_status_bynode"
-    cpu_status_url: ""
   num_gpus_allowed: [1, 2, 4, 8]
   gpu_nodes:
     - node: "swann"
@@ -70,9 +64,6 @@ dev:
     admin: 0 # unlimited
     gpu: 3
     regular: 2
-  status_urls:
-    gpu_status_url: "http://172.29.180.191:5000/gpu_status_bynode"
-    cpu_status_url: "http://172.29.180.191:5001/cpu_status_bynode"
   num_gpus_allowed: [1, 2, 4]
   gpu_nodes:
     # fake info for testing
