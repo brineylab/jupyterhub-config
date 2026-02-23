@@ -24,7 +24,9 @@ def get_cpu_requests():
         for container in item["spec"]["containers"]:
             requests = container.get("resources", {}).get("requests", {})
             if "cpu" in requests:
-                entry = cpu_requests.setdefault(node, {"users": set(), "requested_cpu": 0})
+                entry = cpu_requests.setdefault(
+                    node, {"users": set(), "requested_cpu": 0}
+                )
                 entry["users"].add(user)
                 entry["requested_cpu"] += int(requests["cpu"])
 
@@ -42,7 +44,7 @@ def get_cpu_nodes():
     node_info = {}
     for item in nodes["items"]:
         node_name = item["metadata"]["name"]
-        
+
         node_profile = item["metadata"]["labels"].get("node_profile", "unknown")
         if node_profile != "cpu":
             continue
@@ -50,9 +52,7 @@ def get_cpu_nodes():
         # check if node is schedulable
         is_unschedulable = item.get("spec", {}).get("unschedulable", False)
         capacity = (
-            0
-            if is_unschedulable
-            else int(item["status"]["capacity"].get("cpu", 0))
+            0 if is_unschedulable else int(item["status"]["capacity"].get("cpu", 0))
         )
 
         node_info[node_name] = capacity
@@ -78,7 +78,7 @@ def combine_and_group(node_info, cpu_requests):
     return {
         "available_cpu_nodes": available_nodes,
         "used_cpu_nodes": used_nodes,
-        "users_using_nodes": sorted(users_all)
+        "users_using_nodes": sorted(users_all),
     }
 
 

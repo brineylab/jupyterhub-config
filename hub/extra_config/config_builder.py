@@ -20,11 +20,7 @@ CONFIG = {
     "node_info": cluster.get("gpu_nodes", []),
     "status_urls": cluster.get("status_urls", {}),
     "users": users,
-    "user_roles": {
-        user: role
-        for role, userlist in users.items()
-        for user in userlist
-    },
+    "user_roles": {user: role for role, userlist in users.items() for user in userlist},
 }
 
 
@@ -33,7 +29,6 @@ def update_config(profile_list=None):
     # add images if profile list is provided
     if profile_list is not None:
         CONFIG["images"] = {
-            p["display_name"]: p["kubespawner_override"]["image"]
-            for p in profile_list
+            p["display_name"]: p["kubespawner_override"]["image"] for p in profile_list
         }
     return CONFIG

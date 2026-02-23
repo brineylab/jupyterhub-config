@@ -175,20 +175,22 @@ def dev_profile(CONFIG, server_type):
 
     # add CPU node with kubespawner_override
     if server_type == "cpu-gpu":
-        nodes.extend([
-            {
-                "node": "High-CPU node",
-                "kubespawner_override": {
-                    "node_selector": {"node_profile": "cpu"},
+        nodes.extend(
+            [
+                {
+                    "node": "High-CPU node",
+                    "kubespawner_override": {
+                        "node_selector": {"node_profile": "cpu"},
+                    },
                 },
-            },
-            {
-                "node": "Low-CPU node",
-                "kubespawner_override": {
-                    "node_selector": {"node_profile": "low-cpu"},
+                {
+                    "node": "Low-CPU node",
+                    "kubespawner_override": {
+                        "node_selector": {"node_profile": "low-cpu"},
+                    },
                 },
-            },
-        ])
+            ]
+        )
 
     return [
         {
