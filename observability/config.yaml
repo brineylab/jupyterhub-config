@@ -1,0 +1,32 @@
+## observability config
+
+grafana:
+  # setup admin user
+  adminUser: brineylab
+  admin:
+    existingSecret: grafana-admin
+
+  service:
+    type: LoadBalancer
+
+    # external port used to access grafana dashboard
+    # ex. http://IP:3000
+    port: 3000
+    targetPort: 3000
+
+    # allow MetalLB to share load balancer with other services
+    annotations:
+      metallb.universe.tf/allow-shared-ip: "shared-metallb-ip"
+
+alertmanager:
+  alertmanagerSpec:
+    # point to alertmanager secret containing alertmanager.yaml
+    configSecret: alertmanager-kube-prom-stack-kube-prome-alertmanager
+
+# disable kube proxy monitoring
+kubeProxy:
+  enabled: false
+
+defaultRules:
+  rules:
+    kubeProxy: false

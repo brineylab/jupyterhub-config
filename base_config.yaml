@@ -12,6 +12,13 @@
 cull:
   enabled: false
 
+# enable sharing of load balancer IP for grafana
+proxy:
+  service:
+    type: LoadBalancer
+    annotations:
+      metallb.universe.tf/allow-shared-ip: "shared-metallb-ip"
+
 singleuser:
   cmd: jupyterhub-singleuser
   defaultUrl: lab
