@@ -1,14 +1,14 @@
-# legolas-jh-sc.yaml
+# arwen-jh-sc.yaml
 ---
 apiVersion: storage.k8s.io/v1
 kind: StorageClass
 metadata:
-  name: nfs-legolas-jh
+  name: nfs-arwen-jh
   annotations:
     storageclass.kubernetes.io/is-default-class: "true"
 provisioner: nfs.csi.k8s.io
 parameters:
-  server: 172.29.180.191 # legolas scripps ip
+  server: 172.29.180.195 # arwen scripps ip
   share: /srv/nfs/jupyterhub
 reclaimPolicy: Delete
 volumeBindingMode: Immediate

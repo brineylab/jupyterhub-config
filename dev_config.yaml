@@ -10,7 +10,7 @@ singleuser:
   # storage for jupyterhub user pvcs
   storage:
     dynamic:
-      storageClass: nfs-legolas-jh
+      storageClass: nfs-arwen-jh
     capacity: 10Gi
 
 hub:
@@ -20,9 +20,9 @@ hub:
 
   # hub postgresql database URL here
   db:
-    url: "postgresql://brineylab:@172.29.180.191:5432/jupyterhub_db"
+    url: "postgresql://brineylab:@172.29.180.195:5432/jupyterhub_db"
   
   # URLs for cpu / gpu availability
   templateVars:
-    gpu_status_url: "http://172.29.180.191:5000/gpu_status_bynode"
-    cpu_status_url: "http://172.29.180.191:5001/cpu_status_bynode"
+    gpu_status_url: "http://172.29.180.195:5000/gpu_status_bynode"
+    cpu_status_url: "http://172.29.180.195:5001/cpu_status_bynode"

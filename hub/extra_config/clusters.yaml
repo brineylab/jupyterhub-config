@@ -67,13 +67,8 @@ dev:
   num_gpus_allowed: [1, 2, 4]
   gpu_nodes:
     # fake info for testing
-    - node: "elrond"
+    - node: "galadriel"
       gpu_type: "3090"
-      num_gpus: 0
-      cpu_threads: 16
-      gb_memory: 16
-    - node: "arwen"
-      gpu_type: "L40S"
       num_gpus: 0
       cpu_threads: 16
       gb_memory: 16
