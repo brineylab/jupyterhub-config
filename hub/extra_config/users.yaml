@@ -1,27 +1,27 @@
 admin:
-  - bryan
-  - terrence
-  - sarah
+  - briney
+  - tmessmer
+  - sburbach
 gpu:
   - devgpu
-  - karenna
-  - praneeth
+  - kang
+  - pgangavarapu
   - mshafiei
-  - nitesh
-  - sean
+  - nmishra
+  - scallaghan
   - sferrier
   - cdibiase
   - sudhasinip
   - jjian
-  - jonathan
-  - benjamin
+  - jhurtado
+  - bnemoz
 regular:
   - devreg
-  - pragati
-  - morgan
+  - prsharma
+  - moharris
   - jyothi
-  - nathan
-  - daniella
+  - nliendo
+  - dmarinelli
   - nbeutler
   - jdye
   - jmagura
@@ -30,3 +30,4 @@ regular:
   - bhinnant
   - sradak
   - jcapolla
+  - mgee

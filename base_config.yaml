@@ -69,11 +69,16 @@ singleuser:
           - "sh"
           - "-c"
           - >
-            mkdir -p ${HOME}/codeserver;
+            chmod 555 ${HOME}/sequencing_runs;
 
   # CONFIGURE: update storage here
   storage:
     extraVolumes:
+      # user specific storage
+      nfs-davyjones-users:
+        name: nfs-davyjones-users
+        persistentVolumeClaim:
+          claimName: nfs-davyjones-shared
       # shared
       nfs-davyjones-shared:
         name: nfs-davyjones-shared
@@ -84,7 +89,6 @@ singleuser:
         name: nfs-wallace-references
         persistentVolumeClaim:
           claimName: nfs-wallace-references
-          readOnly: true
       # sequencing data: NovaSeq
       nfs-avon-novaseq6k:
         name: nfs-avon-novaseq6k
@@ -108,21 +112,30 @@ singleuser:
           sizeLimit: "10Gi"
 
     extraVolumeMounts:
+      nfs-davyjones-users:
+        name: nfs-davyjones-users
+        mountPath: /home/jovyan/work
+        subPath: "{username}"
       nfs-davyjones-shared:
         name: nfs-davyjones-shared
         mountPath: /home/jovyan/shared
+        readOnly: true
       nfs-wallace-references:
         name: nfs-wallace-references
         mountPath: /home/jovyan/references
+        readOnly: true
       nfs-avon-novaseq6k:
         name: nfs-avon-novaseq6k
         mountPath: /home/jovyan/sequencing_runs/novaseq
+        readOnly: true
       nfs-avon-nextseq2k:
         name: nfs-avon-nextseq2k
         mountPath: /home/jovyan/sequencing_runs/nextseq
+        readOnly: true
       nfs-stringer-ont:
         name: nfs-stringer-ont
         mountPath: /home/jovyan/sequencing_runs/ont
+        readOnly: true
       dshm:
         name: dshm
         mountPath: /dev/shm
