@@ -143,10 +143,20 @@ singleuser:
 hub:
   config:
     JupyterHub:
-      authenticator_class: "nativeauthenticator.NativeAuthenticator"
+      authenticator_class: "ldapauthenticator.LDAPAuthenticator"
       default_url: "/hub/home"
-    NativeAuthenticator:
-      enable_signup: true
+    LDAPAuthenticator:
+      server_address: "arwen.scripps.edu"
+      server_port: 636
+      bind_dn_template:
+        - "uid={username},ou=people,dc=brineylab,dc=scripps,dc=edu"
+      lookup_dn: false
+      tls_strategy: "on_connect"
+      tls_kwargs:
+        ca_certs_file: "/etc/ssl/certs/brineylab-ca.crt"
+    
+  templateVars:
+    lldap_url: "http://arwen.scripps.edu:17170"
 
   # needs to be non-root user (root is 0)
   # ref: https://discourse.jupyter.org/t/customizing-jupyterhub-on-kubernetes/1769/39
@@ -170,6 +180,11 @@ hub:
         secretKeyRef:
           name: postgres-secret
           key: POSTGRES_PASSWORD
+    LLDAP_BIND_PW:
+      valueFrom:
+        secretKeyRef:
+          name: lldap-bind-secret
+          key: password
   
   # mount users and home page configmaps
   extraVolumes:
@@ -179,11 +194,17 @@ hub:
     - name: extra-config
       configMap:
         name: extra-config
+    - name: brineylab-ca
+      configMap:
+        name: brineylab-ca
   extraVolumeMounts:
     - mountPath: /etc/jupyterhub/templates
       name: templates
     - mountPath: /etc/jupyterhub/config
       name: extra-config
+    - mountPath: /etc/ssl/certs/brineylab-ca.crt
+      name: brineylab-ca
+      subPath: ca.crt
 
   extraConfig:
     # set env variables
@@ -203,11 +224,10 @@ hub:
 
     # custom templates
     02-templates: |
-      import os, nativeauthenticator
+      import os
 
       # inject custom templates
-      c.JupyterHub.template_paths = ["/etc/jupyterhub/templates", 
-                                      f"{os.path.dirname(nativeauthenticator.__file__)}/templates/"]
+      c.JupyterHub.template_paths = ["/etc/jupyterhub/templates"]
 
       # ref: https://github.com/jupyterhub/kubespawner/blob/main/kubespawner/spawner.py#L1699
       # bootstrap updated to v5 -> removes the 'hidden' class, need to use 'd-none' instead
@@ -216,18 +236,40 @@ hub:
 
     # setup users and named server limits
     03-users: |
+      import os
+      import ldap3
       from config_builder import CONFIG
 
-      users = CONFIG["users"]
-      user_roles = CONFIG["user_roles"]
       server_limits = CONFIG["named_server_limits"]
 
-      c.Authenticator.admin_users = set(users.get("admin", []))
-      c.Authenticator.allowed_users = set(user_roles.keys())
+      LLDAP_URL = "ldaps://arwen.scripps.edu:636"
+      LLDAP_BIND_DN = "uid=sssd,ou=people,dc=brineylab,dc=scripps,dc=edu"
+      LLDAP_BIND_PW = os.environ["LLDAP_BIND_PW"]
+      LLDAP_BASE_DN = "dc=brineylab,dc=scripps,dc=edu"
+
+      def get_group_members(group):
+          tls = ldap3.Tls(ca_certs_file="/etc/ssl/certs/brineylab-ca.crt")
+          conn = ldap3.Connection(
+              ldap3.Server(LLDAP_URL, use_ssl=True, tls=tls),
+              LLDAP_BIND_DN, LLDAP_BIND_PW, auto_bind=True
+          )
+          conn.search(f"cn={group},ou=groups,{LLDAP_BASE_DN}", "(objectClass=*)", attributes=["member"])
+          members = {dn.split(",")[0].split("=")[1] for dn in conn.entries[0].member.values}
+          conn.unbind()
+          return members
+
+      admin_users = get_group_members("admin")
+      gpu_users = get_group_members("gpu")
+      regular_users = get_group_members("regular")
+
+      c.Authenticator.admin_users = admin_users
+      c.Authenticator.allowed_users = admin_users | gpu_users | regular_users
 
       def named_server_limit(handler):
-          role = user_roles.get(handler.current_user.name, "regular")
-          return server_limits.get(role, 1)
+          name = handler.current_user.name
+          if name in admin_users: return 0
+          if name in gpu_users: return server_limits.get("gpu", 3)
+          return server_limits.get("regular", 1)
 
       c.JupyterHub.allow_named_servers = True
       c.JupyterHub.named_server_limit_per_user = named_server_limit

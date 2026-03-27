@@ -9,8 +9,6 @@ CLUSTER = os.environ.get("JUPYTERHUB_CLUSTER")
 # load config yamls
 with open("/etc/jupyterhub/config/clusters.yaml") as f:
     cluster = yaml.safe_load(f)[CLUSTER]
-with open("/etc/jupyterhub/config/users.yaml") as f:
-    users = yaml.safe_load(f)
 
 # setup config
 CONFIG = {
@@ -18,8 +16,6 @@ CONFIG = {
     "named_server_limits": cluster.get("named_server_limits", {}),
     "gpu_counts": cluster.get("num_gpus_allowed", []),
     "node_info": cluster.get("gpu_nodes", []),
-    "users": users,
-    "user_roles": {user: role for role, userlist in users.items() for user in userlist},
 }
 
 
