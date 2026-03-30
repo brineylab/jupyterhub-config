@@ -146,7 +146,7 @@ hub:
       authenticator_class: "ldapauthenticator.LDAPAuthenticator"
       default_url: "/hub/home"
     LDAPAuthenticator:
-      server_address: "arwen.scripps.edu"
+      server_address: "namond.scripps.edu"
       server_port: 636
       bind_dn_template:
         - "uid={username},ou=people,dc=brineylab,dc=scripps,dc=edu"
@@ -156,7 +156,7 @@ hub:
         ca_certs_file: "/etc/ssl/certs/brineylab-ca.crt"
     
   templateVars:
-    lldap_url: "http://arwen.scripps.edu:17170"
+    lldap_url: "http://namond.scripps.edu:17170"
 
   # needs to be non-root user (root is 0)
   # ref: https://discourse.jupyter.org/t/customizing-jupyterhub-on-kubernetes/1769/39
@@ -194,16 +194,16 @@ hub:
     - name: extra-config
       configMap:
         name: extra-config
-    - name: brineylab-ca
+    - name: lldap-ca
       configMap:
-        name: brineylab-ca
+        name: lldap-ca
   extraVolumeMounts:
     - mountPath: /etc/jupyterhub/templates
       name: templates
     - mountPath: /etc/jupyterhub/config
       name: extra-config
     - mountPath: /etc/ssl/certs/brineylab-ca.crt
-      name: brineylab-ca
+      name: lldap-ca
       subPath: ca.crt
 
   extraConfig:
@@ -242,7 +242,7 @@ hub:
 
       server_limits = CONFIG["named_server_limits"]
 
-      LLDAP_URL = "ldaps://arwen.scripps.edu:636"
+      LLDAP_URL = "ldaps://namond.scripps.edu:636"
       LLDAP_BIND_DN = "uid=sssd,ou=people,dc=brineylab,dc=scripps,dc=edu"
       LLDAP_BIND_PW = os.environ["LLDAP_BIND_PW"]
       LLDAP_BASE_DN = "dc=brineylab,dc=scripps,dc=edu"
