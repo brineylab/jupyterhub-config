@@ -123,12 +123,12 @@ unset POSTGRES_PASSWORD
 echo "==> [4/4] Installing JupyterHub..."
 
 # Add the JupyterHub helm repo
-microk8s helm repo add jupyterhub https://jupyterhub.github.io/helm-chart/
-microk8s helm repo update
+microk8s helm3 repo add jupyterhub https://jupyterhub.github.io/helm-chart/
+microk8s helm3 repo update
 
 # Install JupyterHub. The initial run takes a while since it downloads
 # the containers — the deep learning container is particularly large.
-microk8s helm upgrade \
+microk8s helm3 upgrade \
   --cleanup-on-fail \
   --install jupyterhub jupyterhub/jupyterhub \
   --namespace jupyterhub \
