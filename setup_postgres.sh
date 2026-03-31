@@ -16,8 +16,9 @@
 # Preferably, the database-node-ip is the mellanox IP
 #
 # Examples:
-#   dev/mcnulty:   ./setup_postgres.sh 172.29.180.195
-#   blackpearl:    ./setup_postgres.sh 172.29.80.65
+#   dev:            ./setup_postgres.sh 172.29.180.195
+#   mcnulty:        ./setup_postgres.sh 192.168.1.7
+#   blackpearl:     ./setup_postgres.sh 192.168.1.3
 set -euo pipefail
 
 prompt_password() {
