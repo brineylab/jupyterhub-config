@@ -41,7 +41,7 @@ microk8s enable dns:172.29.40.10,172.29.40.9
 # The gpu addon is currently disabled — uncomment to enable.
 microk8s enable community
 microk8s enable metrics-server
-microk8s enable gpu
+microk8s enable nvidia --gpu-operator-version=v26.3.0
 
 # Enable metallb for the load balancer.
 # The IP range should be a single IP that resolves to the load balancer for the cluster.
