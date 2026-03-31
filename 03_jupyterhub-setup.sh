@@ -46,9 +46,13 @@ echo "==> [1/4] Applying ConfigMaps and status services..."
 # --dry-run=client -o yaml | kubectl apply -f - is needed when updating
 # the configmap from a file/directory (not required for initial creation,
 # but safe to use either way).
-kubectl create configmap templates \
+microk8s kubectl create configmap extra-config \
+  --from-file=hub/extra_config/ -n jupyterhub \
+  --dry-run=client -o yaml | microk8s kubectl apply -f -
+
+microk8s kubectl create configmap templates \
   --from-file=hub/templates/ -n jupyterhub \
-  --dry-run=client -o yaml | kubectl apply -f -
+  --dry-run=client -o yaml | microk8s kubectl apply -f -
 
 # Install required Python packages for the GPU/CPU status services,
 # which expose resource availability on the spawn page.
@@ -74,17 +78,17 @@ scp brineylab@namond.scripps.edu:/home/brineylab/lldap/certs/brineylab-ca.crt \
   ./auth/certs/brineylab-ca.crt
 
 # Create a ConfigMap with the cert
-kubectl create configmap lldap-ca \
+microk8s kubectl create configmap lldap-ca \
   --from-file=ca.crt=./auth/certs/brineylab-ca.crt \
   -n jupyterhub \
-  --dry-run=client -o yaml | kubectl apply -f -
+  --dry-run=client -o yaml | microk8s kubectl apply -f -
 
 # Create a secret with the LLDAP bind password (sssd user)
 prompt_password "Enter LLDAP bind password" LLDAP_PASSWORD
-kubectl create secret generic lldap-bind-secret \
+microk8s kubectl create secret generic lldap-bind-secret \
   --from-literal=password="${LLDAP_PASSWORD}" \
   -n jupyterhub \
-  --dry-run=client -o yaml | kubectl apply -f -
+  --dry-run=client -o yaml | microk8s kubectl apply -f -
 unset LLDAP_PASSWORD
 
 # ── 3. PostgreSQL secret ─────────────────────────────────────────────────────
@@ -109,22 +113,22 @@ fi
 prompt_password "Enter PostgreSQL password" POSTGRES_PASSWORD
 
 # Create the k8s secret with the database password (safe to re-run)
-kubectl create secret generic postgres-secret \
+microk8s kubectl create secret generic postgres-secret \
   --from-literal=POSTGRES_PASSWORD="${POSTGRES_PASSWORD}" \
   -n jupyterhub \
-  --dry-run=client -o yaml | kubectl apply -f -
+  --dry-run=client -o yaml | microk8s kubectl apply -f -
 unset POSTGRES_PASSWORD
 
 # ── 4. Install JupyterHub via Helm ───────────────────────────────────────────
 echo "==> [4/4] Installing JupyterHub..."
 
 # Add the JupyterHub helm repo
-helm repo add jupyterhub https://jupyterhub.github.io/helm-chart/
-helm repo update
+microk8s helm repo add jupyterhub https://jupyterhub.github.io/helm-chart/
+microk8s helm repo update
 
 # Install JupyterHub. The initial run takes a while since it downloads
 # the containers — the deep learning container is particularly large.
-helm upgrade \
+microk8s helm upgrade \
   --cleanup-on-fail \
   --install jupyterhub jupyterhub/jupyterhub \
   --namespace jupyterhub \
