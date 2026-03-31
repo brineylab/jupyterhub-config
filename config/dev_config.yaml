@@ -1,0 +1,28 @@
+## dev cluster config
+
+# from https://z2jh.jupyter.org/en/stable/administrator/optimization.html
+# spread users across nodes
+scheduling:
+  userScheduler:
+    enabled: false
+
+singleuser:
+  # storage for jupyterhub user pvcs
+  storage:
+    dynamic:
+      storageClass: nfs-arwen-jh
+    capacity: 10Gi
+
+hub:
+  extraEnv:
+    # cluster name, matching the name in clusters.yaml
+    JUPYTERHUB_CLUSTER: "dev"
+
+  # hub postgresql database URL here
+  db:
+    url: "postgresql://brineylab:@172.29.180.195:5432/jupyterhub_db"
+  
+  # URLs for cpu / gpu availability
+  templateVars:
+    gpu_status_url: "http://172.29.180.195:5000/gpu_status_bynode"
+    cpu_status_url: "http://172.29.180.195:5001/cpu_status_bynode"

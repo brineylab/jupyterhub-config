@@ -1,0 +1,45 @@
+# stringer.yaml
+---
+# stringer sc
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: nfs-stringer-hdd
+provisioner: nfs.csi.k8s.io
+reclaimPolicy: Delete
+volumeBindingMode: Immediate
+mountOptions:
+  - hard
+  - nfsvers=4.1
+
+---
+# ont pv
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: nfs-stringer-ont
+spec:
+  capacity:
+    storage: 100Ti
+  accessModes:
+    - ReadOnlyMany
+  storageClassName: nfs-stringer-hdd
+  nfs:
+    server: stringer.scripps.edu
+    path: /volume1/ONT
+
+---
+# ont pvc
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: nfs-stringer-ont
+  namespace: jupyterhub
+spec:
+  accessModes:
+    - ReadOnlyMany
+  storageClassName: nfs-stringer-hdd
+  volumeName: nfs-stringer-ont
+  resources:
+    requests:
+      storage: 100Ti

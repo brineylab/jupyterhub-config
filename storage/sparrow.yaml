@@ -1,0 +1,49 @@
+# sparrow.yaml
+---
+# sparrow sc (used for static workspace volume below)
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: nfs-sparrow-nvme
+provisioner: nfs.csi.k8s.io
+reclaimPolicy: Delete
+volumeBindingMode: Immediate
+mountOptions:
+  - hard
+  - proto=tcp
+
+---
+# workspace pv (mlnx)
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: nfs-sparrow-workspace
+spec:
+  capacity:
+    storage: 100Ti
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: nfs-sparrow-nvme
+  mountOptions:
+    - hard
+    - proto=tcp
+  nfs:
+    server: 192.168.1.3 # sparrow.scripps.edu over mlnx
+    path: /sparrow_data_zfspool/sparrow_workspace/
+
+---
+# workspace pvc
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: nfs-sparrow-workspace
+  namespace: jupyterhub
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: nfs-sparrow-nvme
+  volumeName: nfs-sparrow-workspace
+  resources:
+    requests:
+      storage: 100Ti

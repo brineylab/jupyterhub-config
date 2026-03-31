@@ -1,2 +1,7 @@
 *cuda_test/
 **/__pycache__/
+
+# Identity
+auth/certs/*
+!auth/certs/.gitkeep
+.env

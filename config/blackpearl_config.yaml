@@ -1,0 +1,35 @@
+## blackpearl config
+
+# from https://z2jh.jupyter.org/en/stable/administrator/optimization.html
+# put users on the same node first (to leave larger groups of GPUs available)
+scheduling:
+  userScheduler:
+    enabled: true
+
+singleuser:
+  # increase ephemeral storage limit
+  extraResource:
+    limits:
+      ephemeral-storage: "750Gi"
+    guarantees:
+      ephemeral-storage: "20Gi"
+
+  # storage for jupyterhub user pvcs
+  storage:
+    dynamic:
+      storageClass: nfs-sparrow-jh-nvme
+    capacity: 250Gi
+
+hub:
+  extraEnv:
+    # cluster name, matching the name in clusters.yaml
+    JUPYTERHUB_CLUSTER: "blackpearl"
+
+  # hub postgresql database URL here
+  db:
+    url: "postgresql://brineylab:@172.29.80.65:5432/jupyterhub_db"
+
+  # URLs for cpu / gpu availability
+  templateVars:
+    gpu_status_url: "http://172.29.80.65:5000/gpu_status_bynode"
+    cpu_status_url: ""

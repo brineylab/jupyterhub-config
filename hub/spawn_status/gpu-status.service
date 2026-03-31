@@ -1,0 +1,14 @@
+[Unit]
+Description=Gunicorn instance to serve GPU status
+After=network.target
+
+[Service]
+User=brineylab
+Group=brineylab
+WorkingDirectory=/home/brineylab/jupyterhub-config/hub/spawn_status
+Environment="PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/snap/bin"
+ExecStart=/home/brineylab/.local/bin/gunicorn -b 0.0.0.0:5000 --access-logfile '-' --error-logfile '-' gpu_status_bynode:app
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,49 @@
+# davyjones-mlnx.yaml
+---
+# davyjones sc
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: nfs-davyjones-hdd
+provisioner: nfs.csi.k8s.io
+reclaimPolicy: Delete
+volumeBindingMode: Immediate
+mountOptions:
+  - hard
+  - proto=tcp
+
+---
+# shared pv (mlnx)
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: nfs-davyjones-shared
+spec:
+  capacity:
+    storage: 500Ti
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: nfs-davyjones-hdd
+  mountOptions:
+    - hard
+    - proto=tcp
+  nfs:
+    server: 192.168.1.6 # davyjones.scripps.edu over mlnx
+    path: /davyjones_data_zfspool/brineylab_shared
+
+---
+# shared pvc
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: nfs-davyjones-shared
+  namespace: jupyterhub
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: nfs-davyjones-hdd
+  volumeName: nfs-davyjones-shared
+  resources:
+    requests:
+      storage: 500Ti

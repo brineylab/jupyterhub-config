@@ -1,0 +1,285 @@
+# This file can update the JupyterHub Helm chart's default configuration values.
+#
+# For reference see the configuration reference and default values, but make
+# sure to refer to the Helm chart version of interest to you!
+#
+# Introduction to YAML:     https://www.youtube.com/watch?v=cdLNKUoMc6c
+# Chart config reference:   https://zero-to-jupyterhub.readthedocs.io/en/stable/resources/reference.html
+# Chart default values:     https://github.com/jupyterhub/zero-to-jupyterhub-k8s/blob/HEAD/jupyterhub/values.yaml
+# Available chart versions: https://jupyterhub.github.io/helm-chart/
+
+# disable user and server culling
+cull:
+  enabled: false
+
+# enable sharing of load balancer IP for grafana
+proxy:
+  service:
+    type: LoadBalancer
+    annotations:
+      metallb.universe.tf/allow-shared-ip: "shared-metallb-ip"
+
+singleuser:
+  cmd: jupyterhub-singleuser
+  defaultUrl: lab
+
+  # networking (notebook server spawning fails if networkPolicy is set to true)
+  networkPolicy:
+    enabled: false
+
+  # set extra environmental vars
+  extraEnv:
+    GRANT_SUDO: "yes"
+  uid: 0
+  fsGid: 0
+
+  # defaults - in case pods get launched w/o specifying profile
+  # i think this can only happen from the admin page
+  memory:
+    limit: 16G
+    guarantee: 16G
+  cpu:
+    limit: 16
+    guarantee: 16
+  extraResource:
+    limits:
+      ephemeral-storage: "200Gi"
+    guarantees:
+      ephemeral-storage: "20Gi"
+  image:
+    name: "brineylab/jupyterhub-datascience"
+    tag: "v2024-09-12"
+
+  # CONFIGURE: update images here
+  # dummy profiles for image pre-pulling that get overwritten at runtime
+  # display names are used as keys in the options form, so don't change them
+  profileList:
+    - display_name: "datascience"
+      kubespawner_override:
+        image: "brineylab/jupyterhub-datascience:v2024-09-12"
+    - display_name: "deeplearning"
+      kubespawner_override:
+        image: "brineylab/jupyterhub-deeplearning:v2024-09-12"
+
+  # required for codeserver to launch
+  lifecycleHooks:
+    postStart:
+      exec:
+        command:
+          - "sh"
+          - "-c"
+          - >
+            chmod 555 ${HOME}/sequencing_runs;
+
+  # CONFIGURE: update storage here
+  storage:
+    extraVolumes:
+      # user specific storage
+      nfs-davyjones-users:
+        name: nfs-davyjones-users
+        persistentVolumeClaim:
+          claimName: nfs-davyjones-shared
+      # shared
+      nfs-davyjones-shared:
+        name: nfs-davyjones-shared
+        persistentVolumeClaim:
+          claimName: nfs-davyjones-shared
+      # references
+      nfs-wallace-references:
+        name: nfs-wallace-references
+        persistentVolumeClaim:
+          claimName: nfs-wallace-references
+      # sequencing data: NovaSeq
+      nfs-avon-novaseq6k:
+        name: nfs-avon-novaseq6k
+        persistentVolumeClaim:
+          claimName: nfs-avon-novaseq6k
+      # sequencing data: NextSeq
+      nfs-avon-nextseq2k:
+        name: nfs-avon-nextseq2k
+        persistentVolumeClaim:
+          claimName: nfs-avon-nextseq2k
+      # sequencing data: ONT
+      nfs-stringer-ont:
+        name: nfs-stringer-ont
+        persistentVolumeClaim:
+          claimName: nfs-stringer-ont
+      # dshm - needed for training on gpu servers running jupyterhub
+      dshm:
+        name: dshm
+        emptyDir:
+          medium: Memory
+          sizeLimit: "10Gi"
+
+    extraVolumeMounts:
+      nfs-davyjones-users:
+        name: nfs-davyjones-users
+        mountPath: /home/jovyan/work
+        subPath: "{username}"
+      nfs-davyjones-shared:
+        name: nfs-davyjones-shared
+        mountPath: /home/jovyan/shared
+        readOnly: true
+      nfs-wallace-references:
+        name: nfs-wallace-references
+        mountPath: /home/jovyan/references
+        readOnly: true
+      nfs-avon-novaseq6k:
+        name: nfs-avon-novaseq6k
+        mountPath: /home/jovyan/sequencing_runs/novaseq
+        readOnly: true
+      nfs-avon-nextseq2k:
+        name: nfs-avon-nextseq2k
+        mountPath: /home/jovyan/sequencing_runs/nextseq
+        readOnly: true
+      nfs-stringer-ont:
+        name: nfs-stringer-ont
+        mountPath: /home/jovyan/sequencing_runs/ont
+        readOnly: true
+      dshm:
+        name: dshm
+        mountPath: /dev/shm
+
+hub:
+  config:
+    JupyterHub:
+      authenticator_class: "ldapauthenticator.LDAPAuthenticator"
+      default_url: "/hub/home"
+    LDAPAuthenticator:
+      server_address: "namond.scripps.edu"
+      server_port: 636
+      bind_dn_template:
+        - "uid={username},ou=people,dc=brineylab,dc=scripps,dc=edu"
+      lookup_dn: false
+      tls_strategy: "on_connect"
+      tls_kwargs:
+        ca_certs_file: "/etc/ssl/certs/brineylab-ca.crt"
+    
+  templateVars:
+    lldap_url: "http://namond.scripps.edu:17170"
+
+  # needs to be non-root user (root is 0)
+  # ref: https://discourse.jupyter.org/t/customizing-jupyterhub-on-kubernetes/1769/39
+  containerSecurityContext:
+    runAsUser: 1000
+    runAsGroup: 0
+
+  networkPolicy:
+    enabled: false
+
+  # change hub database to postgresql (default sqlite not compatible with NFS)
+  # https://jupyterhub.readthedocs.io/en/latest/explanation/database.html#sqlite
+  db:
+    upgrade: true
+    type: postgres
+
+  # access hub db password from the secret
+  extraEnv:
+    PGPASSWORD:
+      valueFrom:
+        secretKeyRef:
+          name: postgres-secret
+          key: POSTGRES_PASSWORD
+    LLDAP_BIND_PW:
+      valueFrom:
+        secretKeyRef:
+          name: lldap-bind-secret
+          key: password
+  
+  # mount users and home page configmaps
+  extraVolumes:
+    - name: templates
+      configMap:
+        name: templates
+    - name: extra-config
+      configMap:
+        name: extra-config
+    - name: lldap-ca
+      configMap:
+        name: lldap-ca
+  extraVolumeMounts:
+    - mountPath: /etc/jupyterhub/templates
+      name: templates
+    - mountPath: /etc/jupyterhub/config
+      name: extra-config
+    - mountPath: /etc/ssl/certs/brineylab-ca.crt
+      name: lldap-ca
+      subPath: ca.crt
+
+  extraConfig:
+    # set env variables
+    00-env: |
+      c.KubeSpawner.environment = {'NB_UMASK': '0000'}
+      c.KubeSpawner.allow_privilege_escalation = True
+      c.KubeSpawner.args = ["--allow-root"]
+      c.KubeSpawner.pvc_name_template = "claim-{username}--{servername}"
+
+    # build config with image info
+    01-config: |
+      import sys
+      sys.path.append('/etc/jupyterhub/config')
+
+      from config_builder import update_config
+      update_config(c.KubeSpawner.profile_list)
+
+    # custom templates
+    02-templates: |
+      import os
+
+      # inject custom templates
+      c.JupyterHub.template_paths = ["/etc/jupyterhub/templates"]
+
+      # ref: https://github.com/jupyterhub/kubespawner/blob/main/kubespawner/spawner.py#L1699
+      # bootstrap updated to v5 -> removes the 'hidden' class, need to use 'd-none' instead
+      # kubespawner hasn't updated their html template with this fix as of Feb 20th 2026
+      c.KubeSpawner.additional_profile_form_template_paths = "/etc/jupyterhub/templates"
+
+    # setup users and named server limits
+    03-users: |
+      import os
+      import ldap3
+      from config_builder import CONFIG
+
+      server_limits = CONFIG["named_server_limits"]
+
+      LLDAP_URL = "ldaps://namond.scripps.edu:636"
+      LLDAP_BIND_DN = "uid=sssd,ou=people,dc=brineylab,dc=scripps,dc=edu"
+      LLDAP_BIND_PW = os.environ["LLDAP_BIND_PW"]
+      LLDAP_BASE_DN = "dc=brineylab,dc=scripps,dc=edu"
+
+      def get_group_members(group):
+          tls = ldap3.Tls(ca_certs_file="/etc/ssl/certs/brineylab-ca.crt")
+          conn = ldap3.Connection(
+              ldap3.Server(LLDAP_URL, use_ssl=True, tls=tls),
+              LLDAP_BIND_DN, LLDAP_BIND_PW, auto_bind=True
+          )
+          conn.search(f"cn={group},ou=groups,{LLDAP_BASE_DN}", "(objectClass=*)", attributes=["member"])
+          members = {dn.split(",")[0].split("=")[1] for dn in conn.entries[0].member.values}
+          conn.unbind()
+          return members
+
+      admin_users = get_group_members("admin")
+      gpu_users = get_group_members("gpu")
+      regular_users = get_group_members("regular")
+
+      c.Authenticator.admin_users = admin_users
+      c.Authenticator.allowed_users = admin_users | gpu_users | regular_users
+
+      def named_server_limit(handler):
+          name = handler.current_user.name
+          if name in admin_users: return 0
+          if name in gpu_users: return server_limits.get("gpu", 3)
+          return server_limits.get("regular", 1)
+
+      c.JupyterHub.allow_named_servers = True
+      c.JupyterHub.named_server_limit_per_user = named_server_limit
+
+    # setup dynamic profiles
+    04-profiles: |
+      from config_builder import CONFIG, dynamic_options_form_withconfig, set_spawner_resources
+
+      # setup profiles
+      c.KubeSpawner.options_form = dynamic_options_form_withconfig(CONFIG)
+
+      # pre-spawn hook to set resource limits based on user selections
+      c.KubeSpawner.pre_spawn_hook = lambda spawner: set_spawner_resources(spawner, CONFIG)

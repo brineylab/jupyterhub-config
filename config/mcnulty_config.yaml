@@ -1,0 +1,28 @@
+## mcnulty config
+
+# from https://z2jh.jupyter.org/en/stable/administrator/optimization.html
+# spread users across nodes
+scheduling:
+  userScheduler:
+    enabled: false
+
+singleuser:
+  # CONFIGURE: update storage here
+  storage:
+    dynamic:
+      storageClass: nfs-wallace-jh-nvme
+    capacity: 250Gi
+
+hub:
+  extraEnv:
+    # cluster name, matching the name in clusters.yaml
+    JUPYTERHUB_CLUSTER: "mcnulty"
+
+  # hub postgresql database URL here
+  db:
+    url: "postgresql://brineylab:@172.29.180.217:5432/jupyterhub_db"
+
+  # URLs for cpu / gpu availability
+  templateVars:
+    gpu_status_url: "http://172.29.180.217:5000/gpu_status_bynode"
+    cpu_status_url: "http://172.29.180.217:5001/cpu_status_bynode"

@@ -1,0 +1,42 @@
+# cedric.yaml
+---
+# cedric workspace sc
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: cedric-workspace
+provisioner: microk8s.io/hostpath
+volumeBindingMode: Immediate
+
+---
+# workspace pv
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: cedric-workspace
+  labels:
+    type: local
+spec:
+  storageClassName: cedric-workspace
+  capacity:
+    storage: 10000Gi
+  accessModes:
+    - ReadWriteMany
+  hostPath:
+    path: /data/shared_data
+
+---
+# workspace pvc
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: cedric-workspace
+  namespace: jupyterhub
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: cedric-workspace
+  volumeName: cedric-workspace
+  resources:
+    requests:
+      storage: 10000Gi
