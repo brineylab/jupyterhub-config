@@ -40,7 +40,6 @@ microk8s enable dns:172.29.40.10,172.29.40.9
 # NOTE: make sure nvidia drivers are installed on all GPU servers before enabling gpu!
 # The gpu addon is currently disabled — uncomment to enable.
 microk8s enable community
-microk8s enable ingress
 microk8s enable metrics-server
 microk8s enable gpu
 
