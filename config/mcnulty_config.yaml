@@ -20,7 +20,7 @@ hub:
 
   # hub postgresql database URL here
   db:
-    url: "postgresql://brineylab:@172.29.180.217:5432/jupyterhub_db"
+    url: "postgresql://brineylab:@192.168.1.7:5432/jupyterhub_db"
 
   # URLs for cpu / gpu availability
   templateVars:
