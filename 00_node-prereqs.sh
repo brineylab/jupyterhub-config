@@ -6,7 +6,7 @@
 # NOTE: This script requires one manual step — you must disconnect and
 # reconnect your SSH session after the microk8s group is configured,
 # then re-run this script with the --post-reconnect flag:
-#   ./00_node-init.sh --post-reconnect
+#   ./00_node-prereqs.sh --post-reconnect
 set -euo pipefail
 
 POST_RECONNECT="${1:-}"
@@ -54,6 +54,6 @@ else
   echo ""
   echo "✓ System dependencies and microk8s installed."
   echo "  ACTION REQUIRED: disconnect and reconnect your SSH session, then re-run:"
-  echo "    ./00_node-init.sh --post-reconnect"
+  echo "    ./00_node-prereqs.sh --post-reconnect"
 
 fi
