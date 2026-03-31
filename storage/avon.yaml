@@ -1,0 +1,77 @@
+# avon.yaml
+---
+# avon sc
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: nfs-avon-hdd
+provisioner: nfs.csi.k8s.io
+reclaimPolicy: Delete
+volumeBindingMode: Immediate
+mountOptions:
+  - hard
+  - nfsvers=4.1
+
+---
+# nextseq pv
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: nfs-avon-nextseq2k
+spec:
+  capacity:
+    storage: 200Ti
+  accessModes:
+    - ReadOnlyMany
+  storageClassName: nfs-avon-hdd
+  nfs:
+    server: avon.scripps.edu
+    path: /volume1/VH00124/runs/run_data
+
+---
+# nextseq pvc
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: nfs-avon-nextseq2k
+  namespace: jupyterhub
+spec:
+  accessModes:
+    - ReadOnlyMany
+  storageClassName: nfs-avon-hdd
+  volumeName: nfs-avon-nextseq2k
+  resources:
+    requests:
+      storage: 100Ti
+
+---
+# novaseq pv
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: nfs-avon-novaseq6k
+spec:
+  capacity:
+    storage: 200Ti
+  accessModes:
+    - ReadOnlyMany
+  storageClassName: nfs-avon-hdd
+  nfs:
+    server: avon.scripps.edu
+    path: /volume1/A01255/runs/run_data
+
+---
+# novaseq pvc
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: nfs-avon-novaseq6k
+  namespace: jupyterhub
+spec:
+  accessModes:
+    - ReadOnlyMany
+  storageClassName: nfs-avon-hdd
+  volumeName: nfs-avon-novaseq6k
+  resources:
+    requests:
+      storage: 100Ti
