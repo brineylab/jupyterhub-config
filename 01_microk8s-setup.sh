@@ -17,10 +17,10 @@ case "$CLUSTER" in
     METALLB_IP="172.29.180.116-172.29.180.116"
     ;;
   mcnulty)
-    METALLB_IP="172.29.180.119-172.29.180.119"
+    METALLB_IP="172.29.180.55-172.29.180.55"
     ;;
   blackpearl)
-    METALLB_IP="172.29.80.65-172.29.80.65"   # update if different
+    METALLB_IP="172.29.80.50-172.29.80.50"
     ;;
   *)
     echo "Unknown cluster: $CLUSTER"
