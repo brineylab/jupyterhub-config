@@ -83,21 +83,23 @@ microk8s kubectl apply -f hub/jupyterhub_namespace.yaml
 # Apply storage resources common to all clusters
 microk8s kubectl apply -f storage/avon.yaml # novaseq & nextseq
 microk8s kubectl apply -f storage/stringer.yaml # ont
-microk8s kubectl apply -f storage/wallace.yaml # references
 
 # Apply cluster-specific storage resources
 case "$CLUSTER" in
   dev)
     microk8s kubectl apply -f storage/davyjones.yaml # shared drive
     microk8s kubectl apply -f storage/arwen_jh.yaml # user pvcs
+    microk8s kubectl apply -f storage/wallace.yaml # references
     ;;
   mcnulty)
-    microk8s kubectl apply -f storage/davyjones-mlnx.yaml # shared drive
+    microk8s kubectl apply -f storage/davyjones_mlnx.yaml # shared drive
     microk8s kubectl apply -f storage/wallace_jh.yaml # user pvcs
+    microk8s kubectl apply -f storage/wallace_mlnx.yaml # references
     ;;
   blackpearl)
     microk8s kubectl apply -f storage/davyjones.yaml # shared drive
     microk8s kubectl apply -f storage/sparrow_jh.yaml # user pvcs
+    microk8s kubectl apply -f storage/wallace.yaml # references
     microk8s kubectl apply -f storage/sparrow.yaml # sparrow workspace
     microk8s kubectl apply -f storage/cedric.yaml # cedric workspace
     ;;
