@@ -136,7 +136,7 @@ microk8s helm upgrade \
   -f config/base_config.yaml \
   -f "config/${CONFIG_FILE}" \
   --timeout 30m0s \
-  --version 4.3.2
+  --version 4.3.3
 
 echo ""
 echo "✓ JupyterHub setup complete for cluster: $CLUSTER"
