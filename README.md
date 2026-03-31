@@ -113,8 +113,8 @@ helm upgrade \
   --install jupyterhub jupyterhub/jupyterhub \
   --namespace jupyterhub \
   --create-namespace \
-  -f base_config.yaml \
-  -f "${CONFIG_FILE}" \
+  -f config/base_config.yaml \
+  -f "config/${CONFIG_FILE}" \
   --timeout 30m0s \
   --version 4.3.2
 ```
