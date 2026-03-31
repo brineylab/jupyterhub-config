@@ -1,5 +1,5 @@
 #!/bin/bash
-# 00_node-init.sh
+# 00_node-prereqs.sh
 # Installs and configures system dependencies and microk8s.
 # Run on ALL nodes in the cluster (head and workers).
 #
