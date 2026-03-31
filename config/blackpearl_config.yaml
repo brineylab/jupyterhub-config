@@ -26,19 +26,11 @@ singleuser:
         name: nfs-sparrow-workspace
         persistentVolumeClaim:
           claimName: nfs-sparrow-workspace
-      # cedric workspace
-      nfs-cedric-workspace:
-        name: nfs-cedric-workspace
-        persistentVolumeClaim:
-          claimName: nfs-cedric-workspace
 
     extraVolumeMounts:
       nfs-sparrow-workspace:
         name: nfs-sparrow-workspace
         mountPath: /home/jovyan/workspace
-      nfs-cedric-workspace:
-        name: nfs-cedric-workspace
-        mountPath: /home/jovyan/cedric-workspace
 
 hub:
   extraEnv:
