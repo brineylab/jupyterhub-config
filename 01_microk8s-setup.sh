@@ -74,9 +74,10 @@ microk8s helm3 install csi-driver-nfs csi-driver-nfs/csi-driver-nfs \
 # ── 3. Storage classes, PVs, PVCs ────────────────────────────────────────────
 echo "==> [3/3] Applying storage resources..."
 
-# Clone the GitHub repo that has all of the custom resource definitions (CRDs) we need
+# Make sure we're in the jupyterhub-config directory
 if [[ ! -d jupyterhub-config ]]; then
-  git clone https://github.com/brineylab/jupyterhub-config
+  echo "Error: jupyterhub-config directory not found."
+  exit 1
 fi
 cd jupyterhub-config
 

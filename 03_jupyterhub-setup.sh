@@ -38,7 +38,7 @@ CONFIG_FILE="${CLUSTER}_config.yaml"
 
 # Make sure we're in the jupyterhub-config directory
 if [[ ! -d jupyterhub-config ]]; then
-  echo "Error: jupyterhub-config directory not found. Has 01_microk8s-setup.sh been run?"
+  echo "Error: jupyterhub-config directory not found."
   exit 1
 fi
 cd jupyterhub-config
