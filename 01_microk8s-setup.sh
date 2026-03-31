@@ -74,13 +74,6 @@ microk8s helm3 install csi-driver-nfs csi-driver-nfs/csi-driver-nfs \
 # ── 3. Storage classes, PVs, PVCs ────────────────────────────────────────────
 echo "==> [3/3] Applying storage resources..."
 
-# Make sure we're in the jupyterhub-config directory
-if [[ ! -d jupyterhub-config ]]; then
-  echo "Error: jupyterhub-config directory not found."
-  exit 1
-fi
-cd jupyterhub-config
-
 # Create the jupyterhub namespace
 kubectl apply -f hub/jupyterhub_namespace.yaml
 

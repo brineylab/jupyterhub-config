@@ -36,13 +36,6 @@ fi
 
 CONFIG_FILE="${CLUSTER}_config.yaml"
 
-# Make sure we're in the jupyterhub-config directory
-if [[ ! -d jupyterhub-config ]]; then
-  echo "Error: jupyterhub-config directory not found."
-  exit 1
-fi
-cd jupyterhub-config
-
 echo "==> Setting up JupyterHub for cluster: $CLUSTER"
 
 # ── 1. ConfigMaps & status services ─────────────────────────────────────────
