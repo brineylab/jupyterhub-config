@@ -12,13 +12,13 @@
 # is set.
 #
 # Run on the HEAD NODE only.
-# Usage: ./setup_postgres.sh <database-node-ip>
-# Preferably, the database-node-ip is the mellanox IP
+# Usage: ./setup_postgres.sh <database-node-ip> <ip-range>
+# Preferably, the <ip-range> is the mellanox IP range
 #
 # Examples:
-#   dev:            ./setup_postgres.sh 172.29.180.195
-#   mcnulty:        ./setup_postgres.sh 192.168.1.7
-#   blackpearl:     ./setup_postgres.sh 192.168.1.3
+#   dev:            ./setup_postgres.sh 172.29.180.195 172.29.180.0/24
+#   mcnulty:        ./setup_postgres.sh 192.168.1.7 192.168.1.1/24
+#   blackpearl:     ./setup_postgres.sh 192.168.1.3 192.168.1.1/24
 set -euo pipefail
 
 prompt_password() {
@@ -35,9 +35,10 @@ prompt_password() {
 }
 
 HEAD_IP="${1:-}"
+IP_RANGE="${2:-}"
 
-if [[ -z "$HEAD_IP" ]]; then
-  echo "Usage: $0 <database-node-ip>"
+if [[ -z "$HEAD_IP" || -z "$IP_RANGE" ]]; then
+  echo "Usage: $0 <database-node-ip> <ip-range>"
   exit 1
 fi
 
@@ -70,13 +71,11 @@ sudo sed -i "s/^#*listen_addresses\s*=.*/listen_addresses = '${HEAD_IP}'/" \
   "${PG_CONF_DIR}/postgresql.conf"
 
 # Modify pg_hba.conf to add access rules.
-# The first line (192.168.1.1/24) is not technically necessary for jupyterhub,
-# but helps with debugging — uncomment if needed.
 echo "==> Adding access rules to pg_hba.conf..."
 cat <<EOF | sudo tee -a "${PG_CONF_DIR}/pg_hba.conf"
 
 # JupyterHub access rules
-# host    jupyterhub_db   brineylab       192.168.1.1/24        md5
+host    jupyterhub_db   brineylab       ${IP_RANGE}             md5
 host    jupyterhub_db   brineylab       ${HEAD_IP}/32           md5
 host    jupyterhub_db   brineylab       10.1.0.0/16             md5
 EOF
