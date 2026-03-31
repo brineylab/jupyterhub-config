@@ -67,7 +67,7 @@ microk8s helm3 repo add csi-driver-nfs \
   https://raw.githubusercontent.com/kubernetes-csi/csi-driver-nfs/master/charts
 microk8s helm3 repo update
 
-microk8s helm3 install csi-driver-nfs csi-driver-nfs/csi-driver-nfs \
+microk8s helm3 upgrade --install csi-driver-nfs csi-driver-nfs/csi-driver-nfs \
   --namespace kube-system \
   --set kubeletDir=/var/snap/microk8s/common/var/lib/kubelet
 
@@ -75,32 +75,32 @@ microk8s helm3 install csi-driver-nfs csi-driver-nfs/csi-driver-nfs \
 echo "==> [3/3] Applying storage resources..."
 
 # Create the jupyterhub namespace
-kubectl apply -f hub/jupyterhub_namespace.yaml
+microk8s kubectl apply -f hub/jupyterhub_namespace.yaml
 
 # In addition to the default NFS volume JupyterHub uses for dynamic volumes,
 # we set up storage classes (SCs), persistent volumes (PVs), and persistent
 # volume claims (PVCs) for other data volumes (sequencing runs, shared storage, etc).
 
 # Apply storage resources common to all clusters
-kubectl apply -f storage/avon.yaml # novaseq & nextseq
-kubectl apply -f storage/stringer.yaml # ont
-kubectl apply -f storage/wallace.yaml # references
+microk8s kubectl apply -f storage/avon.yaml # novaseq & nextseq
+microk8s kubectl apply -f storage/stringer.yaml # ont
+microk8s kubectl apply -f storage/wallace.yaml # references
 
 # Apply cluster-specific storage resources
 case "$CLUSTER" in
   dev)
-    kubectl apply -f storage/davyjones.yaml # shared drive
-    kubectl apply -f storage/arwen-jh.yaml # user pvcs
+    microk8s kubectl apply -f storage/davyjones.yaml # shared drive
+    microk8s kubectl apply -f storage/arwen_jh.yaml # user pvcs
     ;;
   mcnulty)
-    kubectl apply -f storage/davyjones-mlnx.yaml # shared drive
-    kubectl apply -f storage/wallace-jh.yaml # user pvcs
+    microk8s kubectl apply -f storage/davyjones-mlnx.yaml # shared drive
+    microk8s kubectl apply -f storage/wallace_jh.yaml # user pvcs
     ;;
   blackpearl)
-    kubectl apply -f storage/davyjones.yaml # shared drive
-    kubectl apply -f storage/sparrow-jh.yaml # user pvcs
-    kubectl apply -f storage/sparrow.yaml # sparrow workspace
-    kubectl apply -f storage/cedric.yaml # cedric workspace
+    microk8s kubectl apply -f storage/davyjones.yaml # shared drive
+    microk8s kubectl apply -f storage/sparrow_jh.yaml # user pvcs
+    microk8s kubectl apply -f storage/sparrow.yaml # sparrow workspace
+    microk8s kubectl apply -f storage/cedric.yaml # cedric workspace
     ;;
 esac
 
