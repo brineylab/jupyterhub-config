@@ -37,7 +37,6 @@ else
   echo "==> [1/2] Installing system dependencies..."
 
   sudo apt update \
-    && sudo apt upgrade -y \
     && sudo apt install -y openssh-server tmux git nfs-common vim btop htop
 
   # Allow SSH through the firewall
