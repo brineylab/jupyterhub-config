@@ -79,8 +79,8 @@ kubectl get nodes -L node_profile
 > Skip this step if PostgreSQL has been set up before — just make sure the service is running (`sudo systemctl start postgresql`).
 
 ```bash
-./setup_postgres.sh <mellanox-head-ip>
-# e.g. ./setup_postgres.sh 172.29.180.195
+./setup_postgres.sh <mellanox-head-ip> <ip-range>
+# e.g. on mcnulty: ./setup_postgres.sh 192.168.1.7 192.168.1.1/24
 ```
 
 ---
@@ -116,7 +116,7 @@ helm upgrade \
   -f config/base_config.yaml \
   -f "config/${CONFIG_FILE}" \
   --timeout 30m0s \
-  --version 4.3.2
+  --version 4.3.3
 ```
 
 To update only the hub templates ConfigMap:
