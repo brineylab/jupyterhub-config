@@ -20,6 +20,26 @@ singleuser:
       storageClass: nfs-sparrow-jh-nvme
     capacity: 250Gi
 
+    extraVolumes:
+      # sparrow workspace
+      nfs-sparrow-workspace:
+        name: nfs-sparrow-workspace
+        persistentVolumeClaim:
+          claimName: nfs-sparrow-workspace
+      # cedric workspace
+      nfs-cedric-workspace:
+        name: nfs-cedric-workspace
+        persistentVolumeClaim:
+          claimName: nfs-cedric-workspace
+
+    extraVolumeMounts:
+      nfs-sparrow-workspace:
+        name: nfs-sparrow-workspace
+        mountPath: /home/jovyan/workspace
+      nfs-cedric-workspace:
+        name: nfs-cedric-workspace
+        mountPath: /home/jovyan/cedric-workspace
+
 hub:
   extraEnv:
     # cluster name, matching the name in clusters.yaml
