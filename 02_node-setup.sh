@@ -45,20 +45,20 @@ echo "==> [1/1] Labeling nodes..."
 
 case "$CLUSTER" in
   dev)
-    kubectl label nodes arwen node_profile="low-cpu" --overwrite
-    kubectl label nodes galadriel node_profile="3090" --overwrite
+    microk8s kubectl label nodes arwen node_profile="low-cpu" --overwrite
+    microk8s kubectl label nodes galadriel node_profile="3090" --overwrite
     ;;
   mcnulty)
-    kubectl label nodes ellis jay node_profile="A6000" --overwrite
-    kubectl label nodes michael rawls node_profile="L40S" --overwrite
-    kubectl label nodes bunk lester kima beadie node_profile="cpu" --overwrite
-    kubectl label nodes carcetti slim cutty partlow bubbles frank bodie ziggy node_profile="low-cpu" --overwrite
-    kubectl label nodes namond node_profile="headnode" --overwrite
+    microk8s kubectl label nodes ellis jay node_profile="A6000" --overwrite
+    microk8s kubectl label nodes michael rawls node_profile="L40S" --overwrite
+    microk8s kubectl label nodes bunk lester kima beadie node_profile="cpu" --overwrite
+    microk8s kubectl label nodes carcetti slim cutty partlow bubbles frank bodie ziggy node_profile="low-cpu" --overwrite
+    microk8s kubectl label nodes namond node_profile="headnode" --overwrite
     ;;
   blackpearl)
-    kubectl label nodes sparrow node_profile="headnode" --overwrite
-    kubectl label nodes swann turner node_profile="L40S" --overwrite
-    kubectl label nodes cedric node_profile="A100" --overwrite
+    microk8s kubectl label nodes sparrow node_profile="headnode" --overwrite
+    microk8s kubectl label nodes swann turner node_profile="L40S" --overwrite
+    microk8s kubectl label nodes cedric node_profile="A100" --overwrite
     ;;
   *)
     echo "Unknown cluster: $CLUSTER"
