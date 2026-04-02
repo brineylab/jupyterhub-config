@@ -26,7 +26,7 @@ mcnulty:
       gpu_type: "L40S"
       num_gpus: 8
       cpu_threads: 256
-      gb_memory: 2000
+      gb_memory: 1000
     - node: "rawls"
       gpu_type: "L40S"
       num_gpus: 4
