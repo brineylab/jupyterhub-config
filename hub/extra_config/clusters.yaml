@@ -64,7 +64,7 @@ dev:
     admin: 0 # unlimited
     gpu: 3
     regular: 2
-  num_gpus_allowed: [1, 2, 4]
+  num_gpus_allowed: [1, 2]
   gpu_nodes:
     # fake info for testing
     - node: "galadriel"
@@ -72,3 +72,8 @@ dev:
       num_gpus: 0
       cpu_threads: 16
       gb_memory: 16
+    - node: "lambda10900x"
+      gpu_type: "3090"
+      num_gpus: 2
+      cpu_threads: 20
+      gb_memory: 64

@@ -14,6 +14,11 @@ singleuser:
     capacity: 10Gi
 
 hub:
+  services:
+    model-hub:
+      url: "http://172.29.180.81:8080"
+      display: true
+
   extraEnv:
     # cluster name, matching the name in clusters.yaml
     JUPYTERHUB_CLUSTER: "dev"
